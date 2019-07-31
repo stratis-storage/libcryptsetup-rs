@@ -3,12 +3,14 @@ use std::{
     ffi::NulError,
     fmt::{self, Display},
     io,
+    str::Utf8Error,
 };
 
 #[derive(Debug)]
 pub enum CryptSetupErr {
     IOError(io::Error),
     StrError(NulError),
+    Utf8Error(Utf8Error),
 }
 
 impl Display for CryptSetupErr {
@@ -16,6 +18,7 @@ impl Display for CryptSetupErr {
         match *self {
             CryptSetupErr::IOError(ref e) => write!(f, "{}", e),
             CryptSetupErr::StrError(ref e) => write!(f, "{}", e),
+            CryptSetupErr::Utf8Error(ref e) => write!(f, "{}", e),
         }
     }
 }
