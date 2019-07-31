@@ -3,12 +3,12 @@ macro_rules! errno {
     ( $func:expr ) => {
         match $func {
             i if i < 0 => {
-                return Err($crate::err::CryptSetupErr::IOError(
+                return Err($crate::err::LibcryptErr::IOError(
                     io::Error::from_raw_os_error(i * -1),
                 ))
             }
             i if i > 0 => panic!("Unexpected return value {}", i),
-            _ => Result::<(), $crate::err::CryptSetupErr>::Ok(()),
+            _ => Result::<(), $crate::err::LibcryptErr>::Ok(()),
         }
     };
 }
@@ -18,7 +18,7 @@ macro_rules! to_str_ptr {
     ( $str:expr ) => {
         match std::ffi::CString::new($str.as_bytes()) {
             Ok(s) => Ok(s.as_ptr()),
-            Err(e) => Err($crate::err::CryptSetupErr::StrError(e)),
+            Err(e) => Err($crate::err::LibcryptErr::StrError(e)),
         }
     };
 }
@@ -27,7 +27,7 @@ macro_rules! to_str_ptr {
 macro_rules! from_str_ptr {
     ( $str_ptr:expr ) => {
         unsafe { ::std::ffi::CStr::from_ptr($str_ptr) }.to_str().map_err(|e| {
-            $crate::err::CryptSetupErr::Utf8Error(e)
+            $crate::err::LibcryptErr::Utf8Error(e)
         })
     };
 }
@@ -35,19 +35,19 @@ macro_rules! from_str_ptr {
 #[macro_export]
 macro_rules! c_confirm_callback {
     ( $fn_name:ident, $type:ty, $safe_fn_name:ident ) => {
-        extern "C" fn $fn_name(msg: *const ::std::os::raw::c_char, usrptr: *mut ::std::os::raw::c_void) -> std::os::raw::c_int {
+        extern "C" fn $fn_name(msg: *const std::os::raw::c_char, usrptr: *mut std::os::raw::c_void) -> std::os::raw::c_int {
             let msg_str = from_str_ptr!(msg).expect("Invalid confirm string passed to cryptsetup-rs");
             let generic_ptr = usrptr as *mut $type;
             let generic_ref = unsafe { generic_ptr.as_mut() };
 
-            $safe_fn_name(msg_str, generic_ref).into()
+            $safe_fn_name(msg_str, generic_ref) as std::os::raw::c_int
         }
     }
 }
 
 #[cfg(test)]
 mod test {
-    use crate::Accepted;
+    use crate::device::Accepted;
 
     fn safe_callback(_msg: &str, usrdata: Option<&mut u64>) -> Accepted {
         Accepted::from(*usrdata.unwrap() as i32)
