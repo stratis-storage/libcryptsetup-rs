@@ -20,7 +20,9 @@ impl Display for LibcryptErr {
             LibcryptErr::IOError(ref e) => write!(f, "{}", e),
             LibcryptErr::StrError(ref e) => write!(f, "{}", e),
             LibcryptErr::Utf8Error(ref e) => write!(f, "{}", e),
-            LibcryptErr::InvalidConversion => write!(f, "Failed to perform the specified conversion"),
+            LibcryptErr::InvalidConversion => {
+                write!(f, "Failed to perform the specified conversion")
+            }
         }
     }
 }

@@ -4,6 +4,6 @@ extern crate cryptsetup_sys;
 mod macros;
 
 mod device;
-pub use device::{Accepted,CryptDevice,CryptInit,CryptLog,CryptLogLevel};
+pub use device::{Accepted, CryptDevice, CryptInit, CryptLog, CryptLogLevel};
 
 mod err;

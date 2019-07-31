@@ -2,8 +2,8 @@ use std::{convert::TryFrom, io, ptr};
 
 use crate::err::LibcryptErr;
 
+pub use cryptsetup_sys::crypt_set_log_callback;
 use cryptsetup_sys::*;
-pub use cryptsetup_sys::{crypt_set_log_callback};
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Accepted {
@@ -31,7 +31,9 @@ pub enum CryptLogLevel {
 impl TryFrom<std::os::raw::c_int> for CryptLogLevel {
     type Error = LibcryptErr;
 
-    fn try_from(v: std::os::raw::c_int) -> Result<Self, <Self as TryFrom<std::os::raw::c_int>>::Error> {
+    fn try_from(
+        v: std::os::raw::c_int,
+    ) -> Result<Self, <Self as TryFrom<std::os::raw::c_int>>::Error> {
         let level = match v {
             i if i == cryptsetup_sys::CRYPT_LOG_NORMAL as i32 => CryptLogLevel::Normal,
             i if i == cryptsetup_sys::CRYPT_LOG_ERROR as i32 => CryptLogLevel::Error,
@@ -47,7 +49,11 @@ impl TryFrom<std::os::raw::c_int> for CryptLogLevel {
 pub struct CryptLog;
 
 impl CryptLog {
-    pub fn log(device: &mut CryptDevice, level: CryptLogLevel, msg: &str) -> Result<(), LibcryptErr> {
+    pub fn log(
+        device: &mut CryptDevice,
+        level: CryptLogLevel,
+        msg: &str,
+    ) -> Result<(), LibcryptErr> {
         let msg_ptr = to_str_ptr!(msg)?;
         unsafe { crypt_log(device.as_ptr(), level as std::os::raw::c_int, msg_ptr) };
         Ok(())
@@ -104,21 +110,33 @@ impl CryptInit {
         errno!(unsafe { crypt_init_by_name(&mut cdevice as *mut *mut crypt_device, name_cstr) })?;
         Ok(CryptDevice { ptr: cdevice })
     }
-
 }
 
 pub struct CryptDevice {
     ptr: *mut crypt_device,
 }
 
-type ConfirmCallback = unsafe extern "C" fn(msg: *const std::os::raw::c_char, usrptr: *mut std::ffi::c_void) -> std::os::raw::c_int;
+type ConfirmCallback = unsafe extern "C" fn(
+    msg: *const std::os::raw::c_char,
+    usrptr: *mut std::ffi::c_void,
+) -> std::os::raw::c_int;
 
 impl CryptDevice {
-    pub fn set_confirm_callback<T>(&mut self, confirm: Option<ConfirmCallback>, usrdata: Option<&mut T>) {
-        unsafe { crypt_set_confirm_callback(self.ptr, confirm, match usrdata {
-            Some(ud) => ud as *mut _ as *mut std::ffi::c_void,
-            None => ptr::null_mut(),
-        }) }
+    pub fn set_confirm_callback<T>(
+        &mut self,
+        confirm: Option<ConfirmCallback>,
+        usrdata: Option<&mut T>,
+    ) {
+        unsafe {
+            crypt_set_confirm_callback(
+                self.ptr,
+                confirm,
+                match usrdata {
+                    Some(ud) => ud as *mut _ as *mut std::ffi::c_void,
+                    None => ptr::null_mut(),
+                },
+            )
+        }
     }
 
     pub fn set_data_device(&mut self, device_path: &str) -> Result<(), LibcryptErr> {

@@ -26,23 +26,27 @@ macro_rules! to_str_ptr {
 #[macro_export]
 macro_rules! from_str_ptr {
     ( $str_ptr:expr ) => {
-        unsafe { ::std::ffi::CStr::from_ptr($str_ptr) }.to_str().map_err(|e| {
-            $crate::err::LibcryptErr::Utf8Error(e)
-        })
+        unsafe { ::std::ffi::CStr::from_ptr($str_ptr) }
+            .to_str()
+            .map_err(|e| $crate::err::LibcryptErr::Utf8Error(e))
     };
 }
 
 #[macro_export]
 macro_rules! c_confirm_callback {
     ( $fn_name:ident, $type:ty, $safe_fn_name:ident ) => {
-        extern "C" fn $fn_name(msg: *const std::os::raw::c_char, usrptr: *mut std::os::raw::c_void) -> std::os::raw::c_int {
-            let msg_str = from_str_ptr!(msg).expect("Invalid confirm string passed to cryptsetup-rs");
+        extern "C" fn $fn_name(
+            msg: *const std::os::raw::c_char,
+            usrptr: *mut std::os::raw::c_void,
+        ) -> std::os::raw::c_int {
+            let msg_str =
+                from_str_ptr!(msg).expect("Invalid confirm string passed to cryptsetup-rs");
             let generic_ptr = usrptr as *mut $type;
             let generic_ref = unsafe { generic_ptr.as_mut() };
 
             $safe_fn_name(msg_str, generic_ref) as std::os::raw::c_int
         }
-    }
+    };
 }
 
 #[cfg(test)]
@@ -59,11 +63,17 @@ mod test {
     #[test]
     #[ignore]
     fn test_safe_callback() {
-        let ret = callback("".as_ptr() as *const std::os::raw::c_char, &mut 1 as *mut _ as *mut std::ffi::c_void);
+        let ret = callback(
+            "".as_ptr() as *const std::os::raw::c_char,
+            &mut 1 as *mut _ as *mut std::ffi::c_void,
+        );
         assert_eq!(1, ret);
         assert_eq!(Accepted::Yes, Accepted::from(ret));
 
-        let ret = callback("".as_ptr() as *const std::os::raw::c_char, &mut 0 as *mut _ as *mut std::ffi::c_void);
+        let ret = callback(
+            "".as_ptr() as *const std::os::raw::c_char,
+            &mut 0 as *mut _ as *mut std::ffi::c_void,
+        );
         assert_eq!(0, ret);
         assert_eq!(Accepted::No, Accepted::from(ret));
     }
