@@ -1,6 +1,6 @@
-use std::{convert::TryFrom, io, ptr};
+use std::{io, ptr};
 
-use crate::err::LibcryptErr;
+use crate::{err::LibcryptErr, log::CryptLog};
 
 pub use cryptsetup_sys::crypt_set_log_callback;
 use cryptsetup_sys::*;
@@ -17,46 +17,6 @@ impl From<std::os::raw::c_int> for Accepted {
             i if i == 0 => Accepted::No,
             _ => Accepted::Yes,
         }
-    }
-}
-
-pub enum CryptLogLevel {
-    Normal = 0,
-    Error = 1,
-    Verbose = 2,
-    Debug = -1,
-    DebugJson = -2,
-}
-
-impl TryFrom<std::os::raw::c_int> for CryptLogLevel {
-    type Error = LibcryptErr;
-
-    fn try_from(
-        v: std::os::raw::c_int,
-    ) -> Result<Self, <Self as TryFrom<std::os::raw::c_int>>::Error> {
-        let level = match v {
-            i if i == cryptsetup_sys::CRYPT_LOG_NORMAL as i32 => CryptLogLevel::Normal,
-            i if i == cryptsetup_sys::CRYPT_LOG_ERROR as i32 => CryptLogLevel::Error,
-            i if i == cryptsetup_sys::CRYPT_LOG_VERBOSE as i32 => CryptLogLevel::Verbose,
-            i if i == cryptsetup_sys::CRYPT_LOG_DEBUG => CryptLogLevel::Debug,
-            i if i == cryptsetup_sys::CRYPT_LOG_DEBUG_JSON => CryptLogLevel::DebugJson,
-            _ => return Err(LibcryptErr::InvalidConversion),
-        };
-        Ok(level)
-    }
-}
-
-pub struct CryptLog;
-
-impl CryptLog {
-    pub fn log(
-        device: &mut CryptDevice,
-        level: CryptLogLevel,
-        msg: &str,
-    ) -> Result<(), LibcryptErr> {
-        let msg_ptr = to_str_ptr!(msg)?;
-        unsafe { crypt_log(device.as_ptr(), level as std::os::raw::c_int, msg_ptr) };
-        Ok(())
     }
 }
 
@@ -122,6 +82,10 @@ type ConfirmCallback = unsafe extern "C" fn(
 ) -> std::os::raw::c_int;
 
 impl CryptDevice {
+    pub fn logging_handle(&mut self) -> CryptLog {
+        CryptLog::new(self)
+    }
+
     pub fn set_confirm_callback<T>(
         &mut self,
         confirm: Option<ConfirmCallback>,
@@ -148,7 +112,7 @@ impl CryptDevice {
         errno!(unsafe { crypt_set_data_offset(self.ptr, offset) })
     }
 
-    fn as_ptr(&mut self) -> *mut crypt_device {
+    pub(crate) fn as_ptr(&mut self) -> *mut crypt_device {
         self.ptr
     }
 }
