@@ -11,6 +11,32 @@ type LoggingCallback = unsafe extern "C" fn(
     usrptr: *mut std::ffi::c_void,
 );
 
+pub enum CryptLogLevel {
+    Normal = cryptsetup_sys::CRYPT_LOG_NORMAL as isize,
+    Error = cryptsetup_sys::CRYPT_LOG_ERROR as isize,
+    Verbose = cryptsetup_sys::CRYPT_LOG_VERBOSE as isize,
+    Debug = cryptsetup_sys::CRYPT_LOG_DEBUG as isize,
+    DebugJson = cryptsetup_sys::CRYPT_LOG_DEBUG_JSON as isize,
+}
+
+impl TryFrom<std::os::raw::c_int> for CryptLogLevel {
+    type Error = LibcryptErr;
+
+    fn try_from(
+        v: std::os::raw::c_int,
+    ) -> Result<Self, <Self as TryFrom<std::os::raw::c_int>>::Error> {
+        let level = match v {
+            i if i == CryptLogLevel::Normal as std::os::raw::c_int => CryptLogLevel::Normal,
+            i if i == CryptLogLevel::Error as std::os::raw::c_int => CryptLogLevel::Error,
+            i if i == CryptLogLevel::Verbose as std::os::raw::c_int => CryptLogLevel::Verbose,
+            i if i == CryptLogLevel::Debug as std::os::raw::c_int => CryptLogLevel::Debug,
+            i if i == CryptLogLevel::DebugJson as std::os::raw::c_int => CryptLogLevel::DebugJson,
+            _ => return Err(LibcryptErr::InvalidConversion),
+        };
+        Ok(level)
+    }
+}
+
 pub struct CryptLog<'a> {
     reference: &'a mut CryptDevice,
 }
@@ -47,31 +73,5 @@ impl<'a> CryptLog<'a> {
                 },
             )
         }
-    }
-}
-
-pub enum CryptLogLevel {
-    Normal = 0,
-    Error = 1,
-    Verbose = 2,
-    Debug = -1,
-    DebugJson = -2,
-}
-
-impl TryFrom<std::os::raw::c_int> for CryptLogLevel {
-    type Error = LibcryptErr;
-
-    fn try_from(
-        v: std::os::raw::c_int,
-    ) -> Result<Self, <Self as TryFrom<std::os::raw::c_int>>::Error> {
-        let level = match v {
-            i if i == cryptsetup_sys::CRYPT_LOG_NORMAL as i32 => CryptLogLevel::Normal,
-            i if i == cryptsetup_sys::CRYPT_LOG_ERROR as i32 => CryptLogLevel::Error,
-            i if i == cryptsetup_sys::CRYPT_LOG_VERBOSE as i32 => CryptLogLevel::Verbose,
-            i if i == cryptsetup_sys::CRYPT_LOG_DEBUG => CryptLogLevel::Debug,
-            i if i == cryptsetup_sys::CRYPT_LOG_DEBUG_JSON => CryptLogLevel::DebugJson,
-            _ => return Err(LibcryptErr::InvalidConversion),
-        };
-        Ok(level)
     }
 }

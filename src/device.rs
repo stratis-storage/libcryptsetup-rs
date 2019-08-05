@@ -1,9 +1,13 @@
-use std::{io, ptr};
+use std::ptr;
 
-use crate::{err::LibcryptErr, log::CryptLog};
+use crate::{err::LibcryptErr, log::CryptLog, settings::CryptSettings};
 
-pub use cryptsetup_sys::crypt_set_log_callback;
 use cryptsetup_sys::*;
+
+type ConfirmCallback = unsafe extern "C" fn(
+    msg: *const std::os::raw::c_char,
+    usrptr: *mut std::ffi::c_void,
+) -> std::os::raw::c_int;
 
 #[derive(Debug, Eq, PartialEq)]
 pub enum Accepted {
@@ -76,14 +80,13 @@ pub struct CryptDevice {
     ptr: *mut crypt_device,
 }
 
-type ConfirmCallback = unsafe extern "C" fn(
-    msg: *const std::os::raw::c_char,
-    usrptr: *mut std::ffi::c_void,
-) -> std::os::raw::c_int;
-
 impl CryptDevice {
     pub fn logging_handle(&mut self) -> CryptLog {
         CryptLog::new(self)
+    }
+
+    pub fn settings_handle(&mut self) -> CryptSettings {
+        CryptSettings::new(self)
     }
 
     pub fn set_confirm_callback<T>(

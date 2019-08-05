@@ -4,7 +4,7 @@ macro_rules! errno {
         match $func {
             i if i < 0 => {
                 return Err($crate::err::LibcryptErr::IOError(
-                    io::Error::from_raw_os_error(i * -1),
+                    std::io::Error::from_raw_os_error(i * -1),
                 ))
             }
             i if i > 0 => panic!("Unexpected return value {}", i),
