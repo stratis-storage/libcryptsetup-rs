@@ -1,7 +1,7 @@
 #[macro_export]
 macro_rules! errno {
-    ( $func:expr ) => {
-        match $func {
+    ( $rc:expr ) => {
+        match $rc {
             i if i < 0 => {
                 return Err($crate::err::LibcryptErr::IOError(
                     std::io::Error::from_raw_os_error(i * -1),
@@ -11,6 +11,21 @@ macro_rules! errno {
             _ => Result::<(), $crate::err::LibcryptErr>::Ok(()),
         }
     };
+}
+
+#[macro_export]
+macro_rules! int_to_return {
+    ( $rc:expr, $type:ty ) => {
+        <$type>::from($rc)
+    };
+}
+
+#[macro_export]
+macro_rules! ptr_to_option {
+    ( $ptr:expr ) => {{
+        let p = $ptr;
+        unsafe { p.as_ref() }.ok_or($crate::err::LibcryptErr::NullPtr)
+    }};
 }
 
 #[macro_export]
@@ -74,10 +89,10 @@ macro_rules! c_logging_callback {
 
 #[cfg(test)]
 mod test {
-    use crate::{Accepted, CryptLogLevel};
+    use crate::{log::CryptLogLevel, Bool};
 
-    fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u64>) -> Accepted {
-        Accepted::from(*usrdata.unwrap() as i32)
+    fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u64>) -> Bool {
+        Bool::from(*usrdata.unwrap() as i32)
     }
 
     c_confirm_callback!(confirm_callback, u64, safe_confirm_callback);
@@ -93,14 +108,14 @@ mod test {
             &mut 1 as *mut _ as *mut std::ffi::c_void,
         );
         assert_eq!(1, ret);
-        assert_eq!(Accepted::Yes, Accepted::from(ret));
+        assert_eq!(Bool::Yes, Bool::from(ret));
 
         let ret = confirm_callback(
             "".as_ptr() as *const std::os::raw::c_char,
             &mut 0 as *mut _ as *mut std::ffi::c_void,
         );
         assert_eq!(0, ret);
-        assert_eq!(Accepted::No, Accepted::from(ret));
+        assert_eq!(Bool::No, Bool::from(ret));
     }
 
     #[test]

@@ -12,6 +12,7 @@ pub enum LibcryptErr {
     StrError(NulError),
     Utf8Error(Utf8Error),
     InvalidConversion,
+    NullPtr,
 }
 
 impl Display for LibcryptErr {
@@ -23,6 +24,7 @@ impl Display for LibcryptErr {
             LibcryptErr::InvalidConversion => {
                 write!(f, "Failed to perform the specified conversion")
             }
+            LibcryptErr::NullPtr => write!(f, "Cryptsetup returned a null pointer"),
         }
     }
 }

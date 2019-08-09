@@ -9,21 +9,6 @@ type ConfirmCallback = unsafe extern "C" fn(
     usrptr: *mut std::ffi::c_void,
 ) -> std::os::raw::c_int;
 
-#[derive(Debug, Eq, PartialEq)]
-pub enum Accepted {
-    No = 0,
-    Yes = 1,
-}
-
-impl From<std::os::raw::c_int> for Accepted {
-    fn from(v: std::os::raw::c_int) -> Self {
-        match v {
-            i if i == 0 => Accepted::No,
-            _ => Accepted::Yes,
-        }
-    }
-}
-
 pub struct CryptInit;
 
 impl CryptInit {
