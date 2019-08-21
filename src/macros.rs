@@ -4,7 +4,7 @@ macro_rules! errno {
         match $rc {
             i if i < 0 => {
                 return Err($crate::err::LibcryptErr::IOError(
-                    std::io::Error::from_raw_os_error(i * -1),
+                    std::io::Error::from_raw_os_error(-i),
                 ))
             }
             i if i > 0 => panic!("Unexpected return value {}", i),
@@ -43,7 +43,7 @@ macro_rules! from_str_ptr {
     ( $str_ptr:expr ) => {
         unsafe { ::std::ffi::CStr::from_ptr($str_ptr) }
             .to_str()
-            .map_err(|e| $crate::err::LibcryptErr::Utf8Error(e))
+            .map_err($crate::err::LibcryptErr::Utf8Error)
     };
 }
 

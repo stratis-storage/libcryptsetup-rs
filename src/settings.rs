@@ -103,15 +103,15 @@ impl From<std::os::raw::c_int> for LockState {
 
 #[derive(Debug, PartialEq, Eq)]
 pub enum MetadataSize {
-    Kb16 = 0x4000,
-    Kb32 = 0x8000,
-    Kb64 = 0x10000,
-    Kb128 = 0x20000,
-    Kb256 = 0x40000,
-    Kb512 = 0x80000,
-    Kb1024 = 0x100000,
-    Kb2048 = 0x200000,
-    Kb4096 = 0x400000,
+    Kb16 = 0x4_000,
+    Kb32 = 0x8_000,
+    Kb64 = 0x10_000,
+    Kb128 = 0x20_000,
+    Kb256 = 0x40_000,
+    Kb512 = 0x80_000,
+    Kb1024 = 0x100_000,
+    Kb2048 = 0x200_000,
+    Kb4096 = 0x400_000,
 }
 
 impl TryFrom<u64> for MetadataSize {
@@ -140,11 +140,26 @@ impl TryInto<u64> for KeyslotsSize {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<u64, Self::Error> {
+        if self.0 < 1 {
+            return Err(LibcryptErr::InvalidConversion);
+        }
         let converted = self.0 * (2 << 21);
         if converted > (2 << 26) {
             return Err(LibcryptErr::InvalidConversion);
         }
-        return Ok(converted);
+        Ok(converted)
+    }
+}
+
+impl TryFrom<u64> for KeyslotsSize {
+    type Error = LibcryptErr;
+
+    fn try_from(v: u64) -> Result<Self, Self::Error> {
+        let kbs = v / (2 << 21);
+        if kbs > (2 << 26) || kbs < 1 {
+            return Err(LibcryptErr::InvalidConversion);
+        }
+        Ok(KeyslotsSize(kbs))
     }
 }
 
@@ -221,9 +236,7 @@ impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
             type_: self.type_.as_ptr(),
             hash: {
                 let bytes = self.hash.as_bytes();
-                CString::new(bytes)
-                    .map_err(|e| LibcryptErr::StrError(e))?
-                    .as_ptr()
+                CString::new(bytes).map_err(LibcryptErr::StrError)?.as_ptr()
             },
             time_ms: self.time_ms,
             iterations: self.iterations,
@@ -330,6 +343,21 @@ impl<'a> CryptSettings<'a> {
                 keyslots_size.try_into()?,
             )
         })
+    }
+
+    pub fn get_metadata_size(&mut self) -> Result<(MetadataSize, KeyslotsSize), LibcryptErr> {
+        let mut metadata_size = 0u64;
+        let mut keyslots_size = 0u64;
+        errno!(unsafe {
+            crypt_get_metadata_size(
+                self.reference.as_ptr(),
+                &mut metadata_size as *mut u64,
+                &mut keyslots_size as *mut u64,
+            )
+        })?;
+        let msize = MetadataSize::try_from(metadata_size)?;
+        let ksize = KeyslotsSize::try_from(keyslots_size)?;
+        Ok((msize, ksize))
     }
 }
 
