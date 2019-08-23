@@ -15,6 +15,21 @@ macro_rules! errno {
 }
 
 #[macro_export]
+/// Convert an errno-positive-int-success return pattern into a `Result<std::os::raw::c_int, LibcryptErr>`
+macro_rules! errno_int_success {
+    ( $rc:expr ) => {
+        match $rc {
+            i if i < 0 => {
+                return Err($crate::err::LibcryptErr::IOError(
+                    std::io::Error::from_raw_os_error(-i),
+                ))
+            }
+            i => Result::<_, $crate::err::LibcryptErr>::Ok(i),
+        }
+    };
+}
+
+#[macro_export]
 /// Convert an integer return value into specified type
 macro_rules! int_to_return {
     ( $rc:expr, $type:ty ) => {
@@ -29,6 +44,21 @@ macro_rules! ptr_to_option {
         let p = $ptr;
         unsafe { p.as_ref() }.ok_or($crate::err::LibcryptErr::NullPtr)
     }};
+}
+
+#[macro_export]
+/// Convert a `Path` type into `*const c_char`
+macro_rules! path_to_str_ptr {
+    ( $path:expr ) => {
+        match $path
+            .to_str()
+            .ok_or_else(|| LibcryptErr::InvalidConversion)
+            .and_then(|s| std::ffi::CString::new(s).map_err(LibcryptErr::StrError))
+        {
+            Ok(s) => Ok(s.as_ptr()),
+            Err(e) => Err(e),
+        }
+    };
 }
 
 #[macro_export]

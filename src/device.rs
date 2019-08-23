@@ -1,6 +1,9 @@
-use std::ptr;
+use std::{path::Path, ptr};
 
-use crate::{err::LibcryptErr, format::CryptFormat, log::CryptLog, settings::CryptSettings};
+use crate::{
+    context::CryptContext, err::LibcryptErr, format::CryptFormat, log::CryptLog,
+    settings::CryptSettings,
+};
 
 use cryptsetup_sys::*;
 
@@ -14,21 +17,21 @@ pub struct CryptInit;
 
 impl CryptInit {
     /// Initialize by device path
-    pub fn init(device_path: &str) -> Result<CryptDevice, LibcryptErr> {
+    pub fn init(device_path: &Path) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
-        let cstr = to_str_ptr!(device_path)?;
+        let cstr = path_to_str_ptr!(device_path)?;
         errno!(unsafe { crypt_init(&mut cdevice as *mut *mut crypt_device, cstr) })?;
         Ok(CryptDevice { ptr: cdevice })
     }
 
     /// Initialize by device path and data device path
     pub fn init_with_data_device(
-        device_path: &str,
-        data_device_path: &str,
+        device_path: &Path,
+        data_device_path: &Path,
     ) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
-        let device_path_cstr = to_str_ptr!(device_path)?;
-        let data_device_path_cstr = to_str_ptr!(data_device_path)?;
+        let device_path_cstr = path_to_str_ptr!(device_path)?;
+        let data_device_path_cstr = path_to_str_ptr!(data_device_path)?;
         errno!(unsafe {
             crypt_init_data_device(
                 &mut cdevice as *mut *mut crypt_device,
@@ -42,11 +45,11 @@ impl CryptInit {
     /// Initialize by name and header device path
     pub fn init_by_name_and_header(
         name: &str,
-        header_device_path: &str,
+        header_device_path: &Path,
     ) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
         let name_cstr = to_str_ptr!(name)?;
-        let header_device_path_cstr = to_str_ptr!(header_device_path)?;
+        let header_device_path_cstr = path_to_str_ptr!(header_device_path)?;
         errno!(unsafe {
             crypt_init_by_name_and_header(
                 &mut cdevice as *mut *mut crypt_device,
@@ -87,6 +90,11 @@ impl CryptDevice {
         CryptFormat::new(self)
     }
 
+    /// Get a context option handle
+    pub fn context_handle(&mut self) -> CryptContext {
+        CryptContext::new(self)
+    }
+
     /// Set the callback that prompts the user to confirm an action
     pub fn set_confirm_callback<T>(
         &mut self,
@@ -106,8 +114,8 @@ impl CryptDevice {
     }
 
     /// Set the device path for a data device
-    pub fn set_data_device(&mut self, device_path: &str) -> Result<(), LibcryptErr> {
-        let device_path_cstr = to_str_ptr!(device_path)?;
+    pub fn set_data_device(&mut self, device_path: &Path) -> Result<(), LibcryptErr> {
+        let device_path_cstr = path_to_str_ptr!(device_path)?;
         errno!(unsafe { crypt_set_data_device(self.ptr, device_path_cstr) })
     }
 
