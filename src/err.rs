@@ -7,11 +7,17 @@ use std::{
 };
 
 #[derive(Debug)]
+/// Error returned from any libcryptsetup-rs function
 pub enum LibcryptErr {
+    /// Wrapper for `io::Error`
     IOError(io::Error),
+    /// Wrapper for `ffi::NulError`
     StrError(NulError),
+    /// Wrapper for `str::Utf8Error`
     Utf8Error(Utf8Error),
+    /// Indicates that a Rust/C conversion was unsuccessful
     InvalidConversion,
+    /// Indicates that a pointer returned was null signifying an error
     NullPtr,
 }
 

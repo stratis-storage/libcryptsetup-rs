@@ -2,7 +2,6 @@ use std::{convert::TryFrom, ptr};
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
-pub use cryptsetup_sys::crypt_set_log_callback;
 use cryptsetup_sys::*;
 
 type LoggingCallback = unsafe extern "C" fn(
@@ -11,11 +10,17 @@ type LoggingCallback = unsafe extern "C" fn(
     usrptr: *mut std::ffi::c_void,
 );
 
+/// Logging levels
 pub enum CryptLogLevel {
+    #[allow(missing_docs)]
     Normal = cryptsetup_sys::CRYPT_LOG_NORMAL as isize,
+    #[allow(missing_docs)]
     Error = cryptsetup_sys::CRYPT_LOG_ERROR as isize,
+    #[allow(missing_docs)]
     Verbose = cryptsetup_sys::CRYPT_LOG_VERBOSE as isize,
+    #[allow(missing_docs)]
     Debug = cryptsetup_sys::CRYPT_LOG_DEBUG as isize,
+    #[allow(missing_docs)]
     DebugJson = cryptsetup_sys::CRYPT_LOG_DEBUG_JSON as isize,
 }
 
@@ -37,6 +42,7 @@ impl TryFrom<std::os::raw::c_int> for CryptLogLevel {
     }
 }
 
+/// Handle for logging operations
 pub struct CryptLog<'a> {
     reference: &'a mut CryptDevice,
 }
@@ -46,6 +52,7 @@ impl<'a> CryptLog<'a> {
         CryptLog { reference }
     }
 
+    /// Generate a log entry
     pub fn log(&mut self, level: CryptLogLevel, msg: &str) -> Result<(), LibcryptErr> {
         let msg_ptr = to_str_ptr!(msg)?;
         unsafe {
@@ -58,6 +65,7 @@ impl<'a> CryptLog<'a> {
         Ok(())
     }
 
+    /// Set the callback to be executed on logging events
     pub fn set_log_callback<T>(
         &mut self,
         callback: Option<LoggingCallback>,

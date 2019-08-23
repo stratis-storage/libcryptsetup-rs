@@ -1,6 +1,6 @@
 use std::ptr;
 
-use crate::{err::LibcryptErr, log::CryptLog, settings::CryptSettings};
+use crate::{err::LibcryptErr, format::CryptFormat, log::CryptLog, settings::CryptSettings};
 
 use cryptsetup_sys::*;
 
@@ -9,9 +9,11 @@ type ConfirmCallback = unsafe extern "C" fn(
     usrptr: *mut std::ffi::c_void,
 ) -> std::os::raw::c_int;
 
+/// Initialization handle for devices
 pub struct CryptInit;
 
 impl CryptInit {
+    /// Initialize by device path
     pub fn init(device_path: &str) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
         let cstr = to_str_ptr!(device_path)?;
@@ -19,6 +21,7 @@ impl CryptInit {
         Ok(CryptDevice { ptr: cdevice })
     }
 
+    /// Initialize by device path and data device path
     pub fn init_with_data_device(
         device_path: &str,
         data_device_path: &str,
@@ -36,6 +39,7 @@ impl CryptInit {
         Ok(CryptDevice { ptr: cdevice })
     }
 
+    /// Initialize by name and header device path
     pub fn init_by_name_and_header(
         name: &str,
         header_device_path: &str,
@@ -53,6 +57,7 @@ impl CryptInit {
         Ok(CryptDevice { ptr: cdevice })
     }
 
+    /// Initialize by name
     pub fn init_by_name(name: &str) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
         let name_cstr = to_str_ptr!(name)?;
@@ -61,19 +66,28 @@ impl CryptInit {
     }
 }
 
+/// Data type that is a handle for a crypt device
 pub struct CryptDevice {
     ptr: *mut crypt_device,
 }
 
 impl CryptDevice {
+    /// Get a logging option handle
     pub fn logging_handle(&mut self) -> CryptLog {
         CryptLog::new(self)
     }
 
+    /// Get a settings option handle
     pub fn settings_handle(&mut self) -> CryptSettings {
         CryptSettings::new(self)
     }
 
+    /// Get a format option handle
+    pub fn format_handle(&mut self) -> CryptFormat {
+        CryptFormat::new(self)
+    }
+
+    /// Set the callback that prompts the user to confirm an action
     pub fn set_confirm_callback<T>(
         &mut self,
         confirm: Option<ConfirmCallback>,
@@ -91,11 +105,13 @@ impl CryptDevice {
         }
     }
 
+    /// Set the device path for a data device
     pub fn set_data_device(&mut self, device_path: &str) -> Result<(), LibcryptErr> {
         let device_path_cstr = to_str_ptr!(device_path)?;
         errno!(unsafe { crypt_set_data_device(self.ptr, device_path_cstr) })
     }
 
+    /// Set the offset for the data section on a device
     pub fn set_data_offset(&mut self, offset: u64) -> Result<(), LibcryptErr> {
         errno!(unsafe { crypt_set_data_offset(self.ptr, offset) })
     }

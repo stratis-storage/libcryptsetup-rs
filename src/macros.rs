@@ -1,4 +1,5 @@
 #[macro_export]
+/// Convert an errno-zero-success return pattern into a `Result<(), LibcryptErr>`
 macro_rules! errno {
     ( $rc:expr ) => {
         match $rc {
@@ -14,6 +15,7 @@ macro_rules! errno {
 }
 
 #[macro_export]
+/// Convert an integer return value into specified type
 macro_rules! int_to_return {
     ( $rc:expr, $type:ty ) => {
         <$type>::from($rc)
@@ -21,6 +23,7 @@ macro_rules! int_to_return {
 }
 
 #[macro_export]
+/// Convert a pointer to an `Option` containing a reference
 macro_rules! ptr_to_option {
     ( $ptr:expr ) => {{
         let p = $ptr;
@@ -29,6 +32,7 @@ macro_rules! ptr_to_option {
 }
 
 #[macro_export]
+/// Convert a string type into `*const c_char`
 macro_rules! to_str_ptr {
     ( $str:expr ) => {
         match std::ffi::CString::new($str.as_bytes()) {
@@ -39,6 +43,7 @@ macro_rules! to_str_ptr {
 }
 
 #[macro_export]
+/// Convert a `*const c_char` into a `&str` type
 macro_rules! from_str_ptr {
     ( $str_ptr:expr ) => {
         unsafe { ::std::ffi::CStr::from_ptr($str_ptr) }
@@ -48,6 +53,7 @@ macro_rules! from_str_ptr {
 }
 
 #[macro_export]
+/// Create a C-compatible callback to determine user confirmation which wraps safe Rust code
 macro_rules! c_confirm_callback {
     ( $fn_name:ident, $type:ty, $safe_fn_name:ident ) => {
         extern "C" fn $fn_name(
@@ -65,6 +71,7 @@ macro_rules! c_confirm_callback {
 }
 
 #[macro_export]
+/// Create a C-compatible logging callback which wraps safe Rust code
 macro_rules! c_logging_callback {
     ( $fn_name:ident, $type:ty, $safe_fn_name:ident ) => {
         extern "C" fn $fn_name(
