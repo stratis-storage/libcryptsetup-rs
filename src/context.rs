@@ -27,11 +27,11 @@ impl<'a> CryptContext<'a> {
         errno!(unsafe {
             crypt_format(
                 self.reference.as_ptr(),
-                type_.as_ptr() as *const std::os::raw::c_char,
-                cipher_and_mode.0.as_ptr() as *const std::os::raw::c_char,
-                cipher_and_mode.1.as_ptr() as *const std::os::raw::c_char,
+                type_.as_ptr(),
+                to_str_ptr!(cipher_and_mode.0)?,
+                to_str_ptr!(cipher_and_mode.1)?,
                 uuid.as_bytes().as_ptr() as *const std::os::raw::c_char,
-                volume_key.as_ptr() as *const std::os::raw::c_char,
+                to_str_ptr!(volume_key)?,
                 volume_key.len() as libc::size_t,
                 params as *mut _ as *mut std::os::raw::c_void,
             )
@@ -64,8 +64,8 @@ impl<'a> CryptContext<'a> {
         errno!(unsafe {
             crypt_set_label(
                 self.reference.as_ptr(),
-                label.as_ptr() as *const std::os::raw::c_char,
-                subsystem_label.as_ptr() as *const std::os::raw::c_char,
+                to_str_ptr!(label)?,
+                to_str_ptr!(subsystem_label)?,
             )
         })
     }
@@ -101,23 +101,12 @@ impl<'a> CryptContext<'a> {
 
     /// Resize crypt device
     pub fn resize(&mut self, name: &str, new_size: u64) -> Result<(), LibcryptErr> {
-        errno!(unsafe {
-            crypt_resize(
-                self.reference.as_ptr(),
-                name.as_ptr() as *const std::os::raw::c_char,
-                new_size,
-            )
-        })
+        errno!(unsafe { crypt_resize(self.reference.as_ptr(), to_str_ptr!(name)?, new_size,) })
     }
 
     /// Suspend crypt device
     pub fn suspend(&mut self, name: &str) -> Result<(), LibcryptErr> {
-        errno!(unsafe {
-            crypt_suspend(
-                self.reference.as_ptr(),
-                name.as_ptr() as *const std::os::raw::c_char,
-            )
-        })
+        errno!(unsafe { crypt_suspend(self.reference.as_ptr(), to_str_ptr!(name)?,) })
     }
 
     /// Resume crypt device using a passphrase
@@ -130,9 +119,9 @@ impl<'a> CryptContext<'a> {
         errno_int_success!(unsafe {
             crypt_resume_by_passphrase(
                 self.reference.as_ptr(),
-                name.as_ptr() as *const std::os::raw::c_char,
+                to_str_ptr!(name)?,
                 keyslot,
-                passphrase.as_ptr() as *const std::os::raw::c_char,
+                to_str_ptr!(passphrase)?,
                 passphrase.len() as libc::size_t,
             )
         })
@@ -150,7 +139,7 @@ impl<'a> CryptContext<'a> {
         errno_int_success!(unsafe {
             crypt_resume_by_keyfile_device_offset(
                 self.reference.as_ptr(),
-                name.as_ptr() as *const std::os::raw::c_char,
+                to_str_ptr!(name)?,
                 keyslot,
                 path_to_str_ptr!(keyfile)?,
                 keyfile_size,

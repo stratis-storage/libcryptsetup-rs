@@ -1,8 +1,8 @@
 use std::{path::Path, ptr};
 
 use crate::{
-    context::CryptContext, err::LibcryptErr, format::CryptFormat, log::CryptLog,
-    settings::CryptSettings,
+    context::CryptContext, err::LibcryptErr, format::CryptFormat, keyslot::CryptKeyslot,
+    log::CryptLog, settings::CryptSettings,
 };
 
 use cryptsetup_sys::*;
@@ -93,6 +93,11 @@ impl CryptDevice {
     /// Get a context option handle
     pub fn context_handle(&mut self) -> CryptContext {
         CryptContext::new(self)
+    }
+
+    /// Get a keyslot option handle
+    pub fn keyslot_handle(&mut self) -> CryptKeyslot {
+        CryptKeyslot::new(self)
     }
 
     /// Set the callback that prompts the user to confirm an action

@@ -26,6 +26,9 @@ pub use err::LibcryptErr;
 mod format;
 pub use format::CryptFormat;
 
+mod keyslot;
+pub use keyslot::CryptKeyslot;
+
 mod log;
 pub use log::{CryptLog, CryptLogLevel};
 
