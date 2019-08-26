@@ -32,7 +32,7 @@ impl<'a> CryptContext<'a> {
                 to_str_ptr!(cipher_and_mode.1)?,
                 uuid.as_bytes().as_ptr() as *const std::os::raw::c_char,
                 to_str_ptr!(volume_key)?,
-                volume_key.len() as libc::size_t,
+                volume_key.len() as crate::SizeT,
                 params as *mut _ as *mut std::os::raw::c_void,
             )
         })
@@ -122,7 +122,7 @@ impl<'a> CryptContext<'a> {
                 to_str_ptr!(name)?,
                 keyslot,
                 to_str_ptr!(passphrase)?,
-                passphrase.len() as libc::size_t,
+                passphrase.len() as crate::SizeT,
             )
         })
     }
@@ -133,7 +133,7 @@ impl<'a> CryptContext<'a> {
         name: &str,
         keyslot: std::os::raw::c_int,
         keyfile: &Path,
-        keyfile_size: libc::size_t,
+        keyfile_size: crate::SizeT,
         keyfile_offset: u64,
     ) -> Result<std::os::raw::c_int, LibcryptErr> {
         errno_int_success!(unsafe {
