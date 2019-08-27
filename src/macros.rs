@@ -38,6 +38,14 @@ macro_rules! int_to_return {
 }
 
 #[macro_export]
+/// Try converting an integer return value into specified type
+macro_rules! try_int_to_return {
+    ( $rc:expr, $type:ty ) => {
+        <$type>::try_from($rc)
+    };
+}
+
+#[macro_export]
 /// Convert a pointer to an `Option` containing a reference
 macro_rules! ptr_to_option {
     ( $ptr:expr ) => {{
