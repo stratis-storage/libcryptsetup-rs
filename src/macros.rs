@@ -46,8 +46,38 @@ macro_rules! try_int_to_return {
 }
 
 #[macro_export]
-/// Convert a pointer to an `Option` containing a reference
+/// Convert a pointer to an `Option` containing a pointer
 macro_rules! ptr_to_option {
+    ( $ptr:expr ) => {{
+        let p = $ptr;
+        if p.is_null() {
+            None
+        } else {
+            Some(p)
+        }
+    }};
+}
+
+#[macro_export]
+/// Convert a pointer to an `Result` containing a pointer
+macro_rules! ptr_to_result {
+    ( $ptr:expr ) => {{
+        ptr_to_option!($ptr).ok_or($crate::err::LibcryptErr::NullPtr)
+    }};
+}
+
+#[macro_export]
+/// Convert a pointer to a `Option` containing a reference
+macro_rules! ptr_to_option_with_reference {
+    ( $ptr:expr ) => {{
+        let p = $ptr;
+        unsafe { p.as_ref() }
+    }};
+}
+
+#[macro_export]
+/// Convert a pointer to a `Result` containing a reference
+macro_rules! ptr_to_result_with_reference {
     ( $ptr:expr ) => {{
         let p = $ptr;
         unsafe { p.as_ref() }.ok_or($crate::err::LibcryptErr::NullPtr)
@@ -115,7 +145,7 @@ macro_rules! c_logging_callback {
         extern "C" fn $fn_name(
             level: std::os::raw::c_int,
             msg: *const std::os::raw::c_char,
-            usrptr: *mut std::ffi::c_void,
+            usrptr: *mut std::os::raw::c_void,
         ) {
             let level =
                 <$crate::CryptLogLevel as std::convert::TryFrom<std::os::raw::c_int>>::try_from(
@@ -150,14 +180,14 @@ mod test {
     fn test_c_confirm_callback() {
         let ret = confirm_callback(
             "".as_ptr() as *const std::os::raw::c_char,
-            &mut 1 as *mut _ as *mut std::ffi::c_void,
+            &mut 1 as *mut _ as *mut std::os::raw::c_void,
         );
         assert_eq!(1, ret);
         assert_eq!(Bool::Yes, Bool::from(ret));
 
         let ret = confirm_callback(
             "".as_ptr() as *const std::os::raw::c_char,
-            &mut 0 as *mut _ as *mut std::ffi::c_void,
+            &mut 0 as *mut _ as *mut std::os::raw::c_void,
         );
         assert_eq!(0, ret);
         assert_eq!(Bool::No, Bool::from(ret));
@@ -168,13 +198,13 @@ mod test {
         logging_callback(
             crate::cryptsetup_sys::CRYPT_LOG_ERROR as i32,
             "".as_ptr() as *const std::os::raw::c_char,
-            &mut 1 as *mut _ as *mut std::ffi::c_void,
+            &mut 1 as *mut _ as *mut std::os::raw::c_void,
         );
 
         logging_callback(
             crate::cryptsetup_sys::CRYPT_LOG_DEBUG as i32,
             "".as_ptr() as *const std::os::raw::c_char,
-            &mut 0 as *mut _ as *mut std::ffi::c_void,
+            &mut 0 as *mut _ as *mut std::os::raw::c_void,
         );
     }
 }

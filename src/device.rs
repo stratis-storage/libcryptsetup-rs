@@ -1,4 +1,8 @@
-use std::{path::Path, ptr};
+use std::{
+    os::raw::{c_char, c_int, c_void},
+    path::Path,
+    ptr,
+};
 
 use crate::{
     context::CryptContext, err::LibcryptErr, format::CryptFormat, keyslot::CryptKeyslot,
@@ -7,10 +11,7 @@ use crate::{
 
 use cryptsetup_sys::*;
 
-type ConfirmCallback = unsafe extern "C" fn(
-    msg: *const std::os::raw::c_char,
-    usrptr: *mut std::ffi::c_void,
-) -> std::os::raw::c_int;
+type ConfirmCallback = unsafe extern "C" fn(msg: *const c_char, usrptr: *mut c_void) -> c_int;
 
 /// Initialization handle for devices
 pub struct CryptInit;
@@ -96,8 +97,8 @@ impl CryptDevice {
     }
 
     /// Get a keyslot option handle
-    pub fn keyslot_handle(&mut self) -> CryptKeyslot {
-        CryptKeyslot::new(self)
+    pub fn keyslot_handle(&mut self, keyslot: c_int) -> CryptKeyslot {
+        CryptKeyslot::new(self, keyslot)
     }
 
     /// Set the callback that prompts the user to confirm an action
@@ -111,7 +112,7 @@ impl CryptDevice {
                 self.ptr,
                 confirm,
                 match usrdata {
-                    Some(ud) => ud as *mut _ as *mut std::ffi::c_void,
+                    Some(ud) => ud as *mut _ as *mut c_void,
                     None => ptr::null_mut(),
                 },
             )

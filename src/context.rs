@@ -1,4 +1,7 @@
-use std::path::Path;
+use std::{
+    os::raw::{c_char, c_int, c_void},
+    path::Path,
+};
 
 use crate::{device::CryptDevice, err::LibcryptErr, Bool, Format};
 
@@ -30,10 +33,10 @@ impl<'a> CryptContext<'a> {
                 type_.as_ptr(),
                 to_str_ptr!(cipher_and_mode.0)?,
                 to_str_ptr!(cipher_and_mode.1)?,
-                uuid.as_bytes().as_ptr() as *const std::os::raw::c_char,
+                uuid.as_bytes().as_ptr() as *const c_char,
                 to_str_ptr!(volume_key)?,
                 volume_key.len() as crate::SizeT,
-                params as *mut _ as *mut std::os::raw::c_void,
+                params as *mut _ as *mut c_void,
             )
         })
     }
@@ -44,7 +47,7 @@ impl<'a> CryptContext<'a> {
             crypt_convert(
                 self.reference.as_ptr(),
                 type_.as_ptr(),
-                params as *mut _ as *mut std::os::raw::c_void,
+                params as *mut _ as *mut c_void,
             )
         })
     }
@@ -54,7 +57,7 @@ impl<'a> CryptContext<'a> {
         errno!(unsafe {
             crypt_set_uuid(
                 self.reference.as_ptr(),
-                uuid.as_bytes().as_ptr() as *const std::os::raw::c_char,
+                uuid.as_bytes().as_ptr() as *const c_char,
             )
         })
     }
@@ -72,9 +75,7 @@ impl<'a> CryptContext<'a> {
 
     /// Set policty on loading volume keys via kernel keyring
     pub fn volume_key_keyring(&mut self, enable: Bool) -> Result<(), LibcryptErr> {
-        errno!(unsafe {
-            crypt_volume_key_keyring(self.reference.as_ptr(), enable as std::os::raw::c_int)
-        })
+        errno!(unsafe { crypt_volume_key_keyring(self.reference.as_ptr(), enable as c_int) })
     }
 
     /// Load on-disk header parameters based on provided type
@@ -83,7 +84,7 @@ impl<'a> CryptContext<'a> {
             crypt_load(
                 self.reference.as_ptr(),
                 type_.as_ptr(),
-                params as *mut _ as *mut std::os::raw::c_void,
+                params as *mut _ as *mut c_void,
             )
         })
     }
@@ -94,7 +95,7 @@ impl<'a> CryptContext<'a> {
             crypt_repair(
                 self.reference.as_ptr(),
                 type_.as_ptr(),
-                params as *mut _ as *mut std::os::raw::c_void,
+                params as *mut _ as *mut c_void,
             )
         })
     }
@@ -113,9 +114,9 @@ impl<'a> CryptContext<'a> {
     pub fn resume_by_passphrase(
         &mut self,
         name: &str,
-        keyslot: std::os::raw::c_int,
+        keyslot: c_int,
         passphrase: &str,
-    ) -> Result<std::os::raw::c_int, LibcryptErr> {
+    ) -> Result<c_int, LibcryptErr> {
         errno_int_success!(unsafe {
             crypt_resume_by_passphrase(
                 self.reference.as_ptr(),
@@ -131,11 +132,11 @@ impl<'a> CryptContext<'a> {
     pub fn resume_by_keyfile_device_offset(
         &mut self,
         name: &str,
-        keyslot: std::os::raw::c_int,
+        keyslot: c_int,
         keyfile: &Path,
         keyfile_size: crate::SizeT,
         keyfile_offset: u64,
-    ) -> Result<std::os::raw::c_int, LibcryptErr> {
+    ) -> Result<c_int, LibcryptErr> {
         errno_int_success!(unsafe {
             crypt_resume_by_keyfile_device_offset(
                 self.reference.as_ptr(),
