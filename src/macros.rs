@@ -121,6 +121,17 @@ macro_rules! from_str_ptr {
 }
 
 #[macro_export]
+/// Convert a `*const c_char` into a `String` type
+macro_rules! from_str_ptr_to_owned {
+    ( $str_ptr:expr ) => {
+        unsafe { ::std::ffi::CStr::from_ptr($str_ptr) }
+            .to_str()
+            .map_err($crate::err::LibcryptErr::Utf8Error)
+            .map(|s| s.to_string())
+    };
+}
+
+#[macro_export]
 /// Create a C-compatible callback to determine user confirmation which wraps safe Rust code
 macro_rules! c_confirm_callback {
     ( $fn_name:ident, $type:ty, $safe_fn_name:ident ) => {

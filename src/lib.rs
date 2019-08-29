@@ -37,6 +37,9 @@ pub use keyslot::CryptKeyslot;
 mod log;
 pub use log::{CryptLog, CryptLogLevel};
 
+mod runtime;
+pub use runtime::CryptRuntime;
+
 mod settings;
 pub use settings::CryptSettings;
 

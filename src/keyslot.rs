@@ -1,34 +1,29 @@
-use std::{convert::TryFrom, os::raw::c_int, path::Path, ptr};
+use std::{
+    convert::TryFrom,
+    os::raw::c_int,
+    path::{Path, PathBuf},
+    ptr,
+};
 
 use crate::{device::CryptDevice, err::LibcryptErr, CryptPbkdfType, Format};
 
 use cryptsetup_sys::*;
 
-pub enum CryptVolumeKeyFlag {
+pub enum CryptVolumeKey {
     NoSegment = cryptsetup_sys::CRYPT_VOLUME_KEY_NO_SEGMENT as isize,
     Set = cryptsetup_sys::CRYPT_VOLUME_KEY_SET as isize,
     DigestReuse = cryptsetup_sys::CRYPT_VOLUME_KEY_DIGEST_REUSE as isize,
 }
 
-pub struct KeyFlags(Vec<CryptVolumeKeyFlag>);
+pub struct CryptVolumeKeyFlags(Vec<CryptVolumeKey>);
 
-impl KeyFlags {
-    pub fn new(no_segment: bool, set: bool, digest_reuse: bool) -> Self {
-        let mut vec = vec![];
-        if no_segment {
-            vec.push(CryptVolumeKeyFlag::NoSegment);
-        }
-        if set {
-            vec.push(CryptVolumeKeyFlag::Set);
-        }
-        if digest_reuse {
-            vec.push(CryptVolumeKeyFlag::DigestReuse);
-        }
-        KeyFlags(vec)
+impl CryptVolumeKeyFlags {
+    pub fn new(vec: Vec<CryptVolumeKey>) -> Self {
+        CryptVolumeKeyFlags(vec)
     }
 }
 
-impl Into<u32> for KeyFlags {
+impl Into<u32> for CryptVolumeKeyFlags {
     fn into(self) -> u32 {
         self.0.into_iter().fold(0, |acc, flag| acc | flag as u32)
     }
@@ -181,7 +176,7 @@ impl<'a> CryptKeyslot<'a> {
         &mut self,
         volume_key: Option<&str>,
         passphrase: &str,
-        flags: KeyFlags,
+        flags: CryptVolumeKeyFlags,
     ) -> Result<c_int, LibcryptErr> {
         let (vk_ptr, vk_len) = match volume_key {
             Some(vk) => (to_str_ptr!(vk)?, vk.len()),
@@ -296,5 +291,13 @@ impl<'a> CryptKeyslot<'a> {
         errno!(unsafe {
             crypt_keyslot_set_encryption(self.reference.as_ptr(), to_str_ptr!(cipher)?, key_size)
         })
+    }
+
+    /// Get directory where crypt devices are mapped
+    pub fn get_dir() -> Result<Box<Path>, LibcryptErr> {
+        ptr_to_result!(unsafe { cryptsetup_sys::crypt_get_dir() })
+            .and_then(|s| from_str_ptr_to_owned!(s))
+            .map(PathBuf::from)
+            .map(|b| b.into_boxed_path())
     }
 }
