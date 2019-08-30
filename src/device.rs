@@ -6,7 +6,7 @@ use std::{
 
 use crate::{
     context::CryptContext, err::LibcryptErr, format::CryptFormat, keyslot::CryptKeyslot,
-    log::CryptLog, runtime::CryptRuntime, settings::CryptSettings,
+    log::CryptLog, luks2_flags::CryptLuks2Flags, runtime::CryptRuntime, settings::CryptSettings,
 };
 
 use cryptsetup_sys::*;
@@ -104,6 +104,11 @@ impl CryptDevice {
     /// Get a runtime attribute option handle
     pub fn runtime_handle<'a>(&'a mut self, name: &'a str) -> CryptRuntime<'a> {
         CryptRuntime::new(self, name)
+    }
+
+    /// Get LUKS2 flags option handle
+    pub fn luks2_flag_handle<T>(&mut self) -> CryptLuks2Flags<T> {
+        CryptLuks2Flags::new(self)
     }
 
     /// Set the callback that prompts the user to confirm an action

@@ -3,7 +3,7 @@ use std::{
     path::Path,
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr, Bool, Format};
+use crate::{device::CryptDevice, err::LibcryptErr, format::Format, Bool};
 
 use cryptsetup_sys::*;
 use uuid::Uuid;

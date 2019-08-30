@@ -72,18 +72,11 @@ impl CryptActivateFlags {
     }
 }
 
-impl From<u32> for CryptActivateFlags {
-    fn from(v: u32) -> Self {
-        let mut vec = vec![];
-        for i in 0..std::mem::size_of::<u32>() * 8 {
-            if (v & (1 << i)) == (1 << i) {
-                vec.push(match CryptActivate::try_from(1 << i) {
-                    Ok(ca) => ca,
-                    _ => unreachable!("Single bit flags must succeed in CryptActivate::try_from"),
-                });
-            }
-        }
-        CryptActivateFlags(vec)
+bitflags_to_enum!(CryptActivateFlags, CryptActivate, u32);
+
+impl Into<u32> for CryptActivateFlags {
+    fn into(self) -> u32 {
+        self.0.into_iter().fold(0, |acc, flag| acc | flag as u32)
     }
 }
 
@@ -94,14 +87,16 @@ pub struct ActiveDevice {
     pub flags: CryptActivateFlags,
 }
 
-impl<'a> From<&'a cryptsetup_sys::crypt_active_device> for ActiveDevice {
-    fn from(v: &'a cryptsetup_sys::crypt_active_device) -> Self {
-        ActiveDevice {
+impl<'a> TryFrom<&'a cryptsetup_sys::crypt_active_device> for ActiveDevice {
+    type Error = LibcryptErr;
+
+    fn try_from(v: &'a cryptsetup_sys::crypt_active_device) -> Result<Self, Self::Error> {
+        Ok(ActiveDevice {
             offset: v.offset,
             iv_offset: v.iv_offset,
             size: v.size,
-            flags: CryptActivateFlags::from(v.flags),
-        }
+            flags: CryptActivateFlags::try_from(v.flags)?,
+        })
     }
 }
 
@@ -131,6 +126,16 @@ impl<'a> CryptRuntime<'a> {
                 &mut cad as *mut _,
             )
         })
-        .map(|_| ActiveDevice::from(&cad))
+        .and_then(|_| ActiveDevice::try_from(&cad))
+    }
+
+    /// Get detected number of integrity failures
+    pub fn get_active_integrity_failures(&mut self) -> Result<u64, LibcryptErr> {
+        Ok(unsafe {
+            cryptsetup_sys::crypt_get_active_integrity_failures(
+                self.reference.as_ptr(),
+                to_str_ptr!(self.name)?,
+            )
+        } as u64)
     }
 }

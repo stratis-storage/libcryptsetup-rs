@@ -132,6 +132,26 @@ macro_rules! from_str_ptr_to_owned {
 }
 
 #[macro_export]
+/// Convert bit flags to enum
+macro_rules! bitflags_to_enum {
+    ( $flags_type:ty, $flag_type:ty, $bitflags_type:ty ) => {
+        impl TryFrom<$bitflags_type> for $flags_type {
+            type Error = LibcryptErr;
+
+            fn try_from(v: $bitflags_type) -> Result<Self, Self::Error> {
+                let mut vec = vec![];
+                for i in 0..std::mem::size_of::<$bitflags_type>() * 8 {
+                    if (v & (1 << i)) == (1 << i) {
+                        vec.push(<$flag_type>::try_from(1 << i)?);
+                    }
+                }
+                Ok(<$flags_type>::new(vec))
+            }
+        }
+    };
+}
+
+#[macro_export]
 /// Create a C-compatible callback to determine user confirmation which wraps safe Rust code
 macro_rules! c_confirm_callback {
     ( $fn_name:ident, $type:ty, $safe_fn_name:ident ) => {

@@ -5,7 +5,7 @@ use std::{
     ptr,
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr, CryptPbkdfType, Format};
+use crate::{device::CryptDevice, err::LibcryptErr, format::Format, settings::CryptPbkdfType};
 
 use cryptsetup_sys::*;
 
