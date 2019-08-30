@@ -6,8 +6,8 @@ use std::{
 
 use crate::{
     activate::CryptActivation, context::CryptContext, err::LibcryptErr, format::CryptFormat,
-    keyslot::CryptKeyslot, log::CryptLog, luks2_flags::CryptLuks2Flags, runtime::CryptRuntime,
-    settings::CryptSettings,
+    key::CryptVolumeKey, keyslot::CryptKeyslot, log::CryptLog, luks2_flags::CryptLuks2Flags,
+    runtime::CryptRuntime, settings::CryptSettings,
 };
 
 use cryptsetup_sys::*;
@@ -115,6 +115,11 @@ impl CryptDevice {
     /// Get activation option handle
     pub fn activate_handle<'a>(&'a mut self, name: &'a str) -> CryptActivation<'a> {
         CryptActivation::new(self, name)
+    }
+
+    /// Get volume key option handle
+    pub fn volume_key_handle(&mut self) -> CryptVolumeKey {
+        CryptVolumeKey::new(self)
     }
 
     /// Set the callback that prompts the user to confirm an action

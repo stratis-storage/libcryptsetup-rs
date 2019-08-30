@@ -29,6 +29,9 @@ pub use err::LibcryptErr;
 mod format;
 pub use format::CryptFormat;
 
+mod key;
+pub use key::CryptVolumeKey;
+
 mod keyslot;
 pub use keyslot::CryptKeyslot;
 

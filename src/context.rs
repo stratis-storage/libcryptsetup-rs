@@ -1,6 +1,7 @@
 use std::{
     os::raw::{c_char, c_int, c_void},
     path::Path,
+    ptr,
 };
 
 use crate::{device::CryptDevice, err::LibcryptErr, format::Format, Bool};
@@ -24,9 +25,13 @@ impl<'a> CryptContext<'a> {
         type_: Format,
         cipher_and_mode: (&str, &str),
         uuid: Uuid,
-        volume_key: &str,
+        volume_key: Option<&[u8]>,
         params: &mut T,
     ) -> Result<(), LibcryptErr> {
+        let (volume_key_ptr, volume_key_len) = match volume_key {
+            Some(vk) => (to_byte_ptr!(vk), vk.len()),
+            None => (ptr::null(), 0),
+        };
         errno!(unsafe {
             crypt_format(
                 self.reference.as_ptr(),
@@ -34,8 +39,8 @@ impl<'a> CryptContext<'a> {
                 to_str_ptr!(cipher_and_mode.0)?,
                 to_str_ptr!(cipher_and_mode.1)?,
                 uuid.as_bytes().as_ptr() as *const c_char,
-                to_str_ptr!(volume_key)?,
-                volume_key.len() as crate::SizeT,
+                volume_key_ptr,
+                volume_key_len,
                 params as *mut _ as *mut c_void,
             )
         })

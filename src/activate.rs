@@ -1,4 +1,4 @@
-use std::{convert::TryFrom, os::raw::c_int, path::Path};
+use std::{convert::TryFrom, os::raw::c_int, path::Path, ptr};
 
 use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags};
 
@@ -84,15 +84,19 @@ impl<'a> CryptActivation<'a> {
     /// Activate device by volume key
     pub fn activate_by_volume_key(
         &mut self,
-        volume_key: &str,
+        volume_key: Option<&[u8]>,
         flags: CryptActivateFlags,
     ) -> Result<(), LibcryptErr> {
+        let (volume_key_ptr, volume_key_len) = match volume_key {
+            Some(vk) => (to_byte_ptr!(vk), vk.len()),
+            None => (ptr::null(), 0),
+        };
         errno!(unsafe {
             cryptsetup_sys::crypt_activate_by_volume_key(
                 self.reference.as_ptr(),
                 to_str_ptr!(self.name)?,
-                to_str_ptr!(volume_key)?,
-                volume_key.len(),
+                volume_key_ptr,
+                volume_key_len,
                 flags.into(),
             )
         })

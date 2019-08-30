@@ -111,6 +111,22 @@ macro_rules! to_str_ptr {
 }
 
 #[macro_export]
+/// Convert a byte slice into `*const c_char`
+macro_rules! to_byte_ptr {
+    ( $bytes:expr ) => {
+        $bytes.as_ptr() as *const std::os::raw::c_char
+    };
+}
+
+#[macro_export]
+/// Convert a byte slice into `*mut c_char`
+macro_rules! to_mut_byte_ptr {
+    ( $bytes:expr ) => {
+        $bytes.as_mut_ptr() as *mut std::os::raw::c_char
+    };
+}
+
+#[macro_export]
 /// Convert a `*const c_char` into a `&str` type
 macro_rules! from_str_ptr {
     ( $str_ptr:expr ) => {

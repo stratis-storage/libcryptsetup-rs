@@ -152,11 +152,11 @@ impl<'a> CryptKeyslot<'a> {
     /// Add key slot with volume key
     pub fn add_by_volume_key(
         &mut self,
-        volume_key: Option<&str>,
+        volume_key: Option<&[u8]>,
         passphrase: &str,
     ) -> Result<c_int, LibcryptErr> {
         let (vk_ptr, vk_len) = match volume_key {
-            Some(vk) => (to_str_ptr!(vk)?, vk.len()),
+            Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (std::ptr::null(), 0),
         };
         errno_int_success!(unsafe {
@@ -174,12 +174,12 @@ impl<'a> CryptKeyslot<'a> {
     /// Add key slot with a key
     pub fn add_by_key(
         &mut self,
-        volume_key: Option<&str>,
+        volume_key: Option<&[u8]>,
         passphrase: &str,
         flags: CryptVolumeKeyFlags,
     ) -> Result<c_int, LibcryptErr> {
         let (vk_ptr, vk_len) = match volume_key {
-            Some(vk) => (to_str_ptr!(vk)?, vk.len()),
+            Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (std::ptr::null(), 0),
         };
         errno_int_success!(unsafe {

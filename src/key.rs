@@ -1,0 +1,47 @@
+use std::os::raw::c_int;
+
+use crate::{device::CryptDevice, err::LibcryptErr};
+
+/// Handle for volume key operations
+pub struct CryptVolumeKey<'a> {
+    reference: &'a mut CryptDevice,
+}
+
+impl<'a> CryptVolumeKey<'a> {
+    pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
+        CryptVolumeKey { reference }
+    }
+
+    /// Get volume key from crypt device - first tuple element is key slot, second is volume key
+    /// size
+    pub fn get(
+        &mut self,
+        keyslot: c_int,
+        volume_key: &mut [u8],
+        passphrase: &str,
+    ) -> Result<(c_int, crate::SizeT), LibcryptErr> {
+        let mut volume_key_size_t = volume_key.len();
+        errno_int_success!(unsafe {
+            cryptsetup_sys::crypt_volume_key_get(
+                self.reference.as_ptr(),
+                keyslot,
+                to_mut_byte_ptr!(volume_key),
+                &mut volume_key_size_t as *mut _,
+                to_str_ptr!(passphrase)?,
+                passphrase.len(),
+            )
+        })
+        .map(|i| (i, volume_key_size_t))
+    }
+
+    /// Verify that volume key is valid for crypt device
+    pub fn verify(&mut self, volume_key: &[u8]) -> Result<(), LibcryptErr> {
+        errno!(unsafe {
+            cryptsetup_sys::crypt_volume_key_verify(
+                self.reference.as_ptr(),
+                to_byte_ptr!(volume_key),
+                volume_key.len(),
+            )
+        })
+    }
+}
