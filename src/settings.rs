@@ -85,12 +85,6 @@ impl TryFrom<u32> for CryptPbkdf {
 /// Rust representation of key generator flags
 pub struct CryptPbkdfFlags(Vec<CryptPbkdf>);
 
-impl CryptPbkdfFlags {
-    fn new(vec: Vec<CryptPbkdf>) -> Self {
-        CryptPbkdfFlags(vec)
-    }
-}
-
 impl<'a> Into<u32> for &'a CryptPbkdfFlags {
     fn into(self) -> u32 {
         self.0.iter().fold(0, |acc, flag| acc | *flag as u32)

@@ -66,12 +66,6 @@ impl TryFrom<u32> for CryptActivate {
 
 pub struct CryptActivateFlags(Vec<CryptActivate>);
 
-impl CryptActivateFlags {
-    pub fn new(flags: Vec<CryptActivate>) -> Self {
-        CryptActivateFlags(flags)
-    }
-}
-
 bitflags_to_enum!(CryptActivateFlags, CryptActivate, u32);
 
 impl Into<u32> for CryptActivateFlags {

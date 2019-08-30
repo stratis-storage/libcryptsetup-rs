@@ -44,12 +44,6 @@ impl TryFrom<u32> for CryptRequirement {
 /// Set of `CryptRequirement` flags
 pub struct CryptRequirementFlags(Vec<CryptRequirement>);
 
-impl CryptRequirementFlags {
-    fn new(vec: Vec<CryptRequirement>) -> Self {
-        CryptRequirementFlags(vec)
-    }
-}
-
 impl Into<u32> for CryptRequirementFlags {
     fn into(self) -> u32 {
         self.0.into_iter().fold(0, |acc, flag| {

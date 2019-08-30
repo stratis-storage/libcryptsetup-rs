@@ -14,6 +14,9 @@ pub use cryptsetup_sys::*;
 #[macro_use]
 mod macros;
 
+mod activate;
+pub use activate::CryptActivation;
+
 mod context;
 pub use context::CryptContext;
 

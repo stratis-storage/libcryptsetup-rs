@@ -134,7 +134,14 @@ macro_rules! from_str_ptr_to_owned {
 #[macro_export]
 /// Convert bit flags to enum
 macro_rules! bitflags_to_enum {
-    ( $flags_type:ty, $flag_type:ty, $bitflags_type:ty ) => {
+    ( $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
+        impl $flags_type {
+            /// Create a new set of flags
+            pub fn new(vec: Vec<$flag_type>) -> Self {
+                $flags_type(vec)
+            }
+        }
+
         impl std::convert::TryFrom<$bitflags_type> for $flags_type {
             type Error = LibcryptErr;
 

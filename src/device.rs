@@ -5,8 +5,9 @@ use std::{
 };
 
 use crate::{
-    context::CryptContext, err::LibcryptErr, format::CryptFormat, keyslot::CryptKeyslot,
-    log::CryptLog, luks2_flags::CryptLuks2Flags, runtime::CryptRuntime, settings::CryptSettings,
+    activate::CryptActivation, context::CryptContext, err::LibcryptErr, format::CryptFormat,
+    keyslot::CryptKeyslot, log::CryptLog, luks2_flags::CryptLuks2Flags, runtime::CryptRuntime,
+    settings::CryptSettings,
 };
 
 use cryptsetup_sys::*;
@@ -109,6 +110,11 @@ impl CryptDevice {
     /// Get LUKS2 flags option handle
     pub fn luks2_flag_handle<T>(&mut self) -> CryptLuks2Flags<T> {
         CryptLuks2Flags::new(self)
+    }
+
+    /// Get activation option handle
+    pub fn activate_handle<'a>(&'a mut self, name: &'a str) -> CryptActivation<'a> {
+        CryptActivation::new(self, name)
     }
 
     /// Set the callback that prompts the user to confirm an action
