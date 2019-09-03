@@ -47,6 +47,9 @@ pub use runtime::CryptRuntime;
 mod settings;
 pub use settings::CryptSettings;
 
+mod status;
+pub use status::CryptDeviceStatus;
+
 /// Re-export of `libc::size_t`
 pub type SizeT = libc::size_t;
 

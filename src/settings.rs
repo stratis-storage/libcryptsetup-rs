@@ -170,7 +170,9 @@ impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
             type_: self.type_.as_ptr(),
             hash: {
                 let bytes = self.hash.as_bytes();
-                CString::new(bytes).map_err(LibcryptErr::StrError)?.as_ptr()
+                CString::new(bytes)
+                    .map_err(LibcryptErr::NullError)?
+                    .as_ptr()
             },
             time_ms: self.time_ms,
             iterations: self.iterations,

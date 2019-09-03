@@ -91,7 +91,7 @@ macro_rules! path_to_str_ptr {
         match $path
             .to_str()
             .ok_or_else(|| LibcryptErr::InvalidConversion)
-            .and_then(|s| std::ffi::CString::new(s).map_err(LibcryptErr::StrError))
+            .and_then(|s| std::ffi::CString::new(s).map_err(LibcryptErr::NullError))
         {
             Ok(s) => Ok(s.as_ptr()),
             Err(e) => Err(e),
@@ -105,7 +105,7 @@ macro_rules! to_str_ptr {
     ( $str:expr ) => {
         match std::ffi::CString::new($str.as_bytes()) {
             Ok(s) => Ok(s.as_ptr()),
-            Err(e) => Err($crate::err::LibcryptErr::StrError(e)),
+            Err(e) => Err($crate::err::LibcryptErr::NullError(e)),
         }
     };
 }
