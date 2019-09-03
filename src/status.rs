@@ -1,6 +1,10 @@
 use std::{convert::TryFrom, os::raw::c_int, path::Path, str::FromStr};
 
-use crate::{device::CryptDevice, err::LibcryptErr};
+use crate::{
+    device::CryptDevice,
+    err::LibcryptErr,
+    format::{CryptParamsIntegrity, CryptParamsVerity},
+};
 
 use uuid::Uuid;
 
@@ -102,5 +106,57 @@ impl<'a> CryptDeviceStatus<'a> {
     /// Get size of encryption sectors in bytes
     pub fn get_sector_size(&mut self) -> c_int {
         unsafe { cryptsetup_sys::crypt_get_sector_size(self.reference.as_ptr()) }
+    }
+
+    /// Get Verity device parameters
+    pub fn get_verity_info(&mut self) -> Result<CryptParamsVerity, LibcryptErr> {
+        let mut verity = cryptsetup_sys::crypt_params_verity {
+            hash_name: std::ptr::null(),
+            data_device: std::ptr::null(),
+            hash_device: std::ptr::null(),
+            fec_device: std::ptr::null(),
+            salt: std::ptr::null(),
+            salt_size: 0,
+            hash_type: 0,
+            data_block_size: 0,
+            hash_block_size: 0,
+            data_size: 0,
+            hash_area_offset: 0,
+            fec_area_offset: 0,
+            fec_roots: 0,
+            flags: 0,
+        };
+        errno!(unsafe {
+            cryptsetup_sys::crypt_get_verity_info(self.reference.as_ptr(), &mut verity as *mut _)
+        })
+        .and_then(|_| CryptParamsVerity::try_from(&verity))
+    }
+
+    /// Get Integrity device parameters
+    pub fn get_integrity_info(&mut self) -> Result<CryptParamsIntegrity, LibcryptErr> {
+        let mut integrity = cryptsetup_sys::crypt_params_integrity {
+            journal_size: 0,
+            journal_watermark: 0,
+            journal_commit_time: 0,
+            interleave_sectors: 0,
+            tag_size: 0,
+            sector_size: 0,
+            buffer_sectors: 0,
+            integrity: std::ptr::null(),
+            integrity_key_size: 0,
+            journal_integrity: std::ptr::null(),
+            journal_integrity_key: std::ptr::null(),
+            journal_integrity_key_size: 0,
+            journal_crypt: std::ptr::null(),
+            journal_crypt_key: std::ptr::null(),
+            journal_crypt_key_size: 0,
+        };
+        errno!(unsafe {
+            cryptsetup_sys::crypt_get_integrity_info(
+                self.reference.as_ptr(),
+                &mut integrity as *mut _,
+            )
+        })
+        .and_then(|_| CryptParamsIntegrity::try_from(&integrity))
     }
 }
