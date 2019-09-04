@@ -9,16 +9,20 @@ extern crate uuid;
 
 use std::os::raw::c_int;
 
-pub use cryptsetup_sys::*;
-
 #[macro_use]
 mod macros;
 
 mod activate;
 pub use activate::CryptActivation;
 
+mod backup;
+pub use backup::CryptBackup;
+
 mod context;
 pub use context::CryptContext;
+
+mod debug;
+pub use debug::CryptDebug;
 
 mod device;
 pub use device::{CryptDevice, CryptInit};
@@ -41,6 +45,12 @@ pub use log::{CryptLog, CryptLogLevel};
 mod luks2_flags;
 pub use luks2_flags::{CryptLuks2Flags, CryptRequirement, CryptRequirementFlags};
 
+// Keyfile reading functions are not supported in these bindings due
+// to how memory is handled in these functions - memory for keys is allocated
+// and the corresponding free functions are not part of the public API.
+// This means that the memory cannot be safe scrubbed and freed in longer running
+// processes that invoke this function. For now, this is disabled.
+
 mod runtime;
 pub use runtime::CryptRuntime;
 
@@ -49,6 +59,9 @@ pub use settings::CryptSettings;
 
 mod status;
 pub use status::CryptDeviceStatus;
+
+mod wipe;
+pub use wipe::CryptWipe;
 
 /// Re-export of `libc::size_t`
 pub type SizeT = libc::size_t;
@@ -67,6 +80,24 @@ impl From<c_int> for Bool {
         match v {
             i if i == 0 => Bool::No,
             _ => Bool::Yes,
+        }
+    }
+}
+
+/// Boolean specifying yes or no
+#[derive(Debug, Eq, PartialEq)]
+pub enum Interrupt {
+    /// False
+    No = Bool::No as isize,
+    /// True
+    Yes = Bool::Yes as isize,
+}
+
+impl From<c_int> for Interrupt {
+    fn from(v: c_int) -> Self {
+        match v {
+            i if i == 0 => Interrupt::No,
+            _ => Interrupt::Yes,
         }
     }
 }

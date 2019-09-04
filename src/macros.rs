@@ -216,9 +216,26 @@ macro_rules! c_logging_callback {
     };
 }
 
+#[macro_export]
+/// Create a C-compatible progress callback for wiping a device which wraps safe Rust code
+macro_rules! c_wipe_progress_callback {
+    ( $fn_name:ident, $type:ty, $safe_fn_name:ident ) => {
+        extern "C" fn $fn_name(
+            size: u64,
+            offset: u64,
+            usrptr: *mut std::os::raw::c_void,
+        ) -> std::os::raw::c_int {
+            let generic_ptr = usrptr as *mut $type;
+            let generic_ref = unsafe { generic_ptr.as_mut() };
+
+            $safe_fn_name(size, offset, generic_ref) as std::os::raw::c_int
+        }
+    };
+}
+
 #[cfg(test)]
 mod test {
-    use crate::{log::CryptLogLevel, Bool};
+    use crate::{log::CryptLogLevel, Bool, Interrupt};
 
     fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u64>) -> Bool {
         Bool::from(*usrdata.unwrap() as i32)
@@ -229,6 +246,12 @@ mod test {
     fn safe_logging_callback(_level: CryptLogLevel, _msg: &str, _usrdata: Option<&mut u64>) {}
 
     c_logging_callback!(logging_callback, u64, safe_logging_callback);
+
+    fn safe_wipe_callback(_size: u64, _offset: u64, usrdata: Option<&mut u64>) -> Interrupt {
+        Interrupt::from(*usrdata.unwrap() as i32)
+    }
+
+    c_wipe_progress_callback!(wipe_callback, u64, safe_wipe_callback);
 
     #[test]
     fn test_c_confirm_callback() {
@@ -260,5 +283,16 @@ mod test {
             "".as_ptr() as *const std::os::raw::c_char,
             &mut 0 as *mut _ as *mut std::os::raw::c_void,
         );
+    }
+
+    #[test]
+    fn test_c_wipe_callback() {
+        let ret = wipe_callback(0, 0, &mut 1 as *mut _ as *mut std::os::raw::c_void);
+        assert_eq!(1, ret);
+        assert_eq!(Interrupt::Yes, Interrupt::from(ret));
+
+        let ret = wipe_callback(0, 0, &mut 0 as *mut _ as *mut std::os::raw::c_void);
+        assert_eq!(0, ret);
+        assert_eq!(Interrupt::No, Interrupt::from(ret));
     }
 }

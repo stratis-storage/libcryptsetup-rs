@@ -5,9 +5,10 @@ use std::{
 };
 
 use crate::{
-    activate::CryptActivation, context::CryptContext, err::LibcryptErr, format::CryptFormat,
-    key::CryptVolumeKey, keyslot::CryptKeyslot, log::CryptLog, luks2_flags::CryptLuks2Flags,
-    runtime::CryptRuntime, settings::CryptSettings, status::CryptDeviceStatus,
+    activate::CryptActivation, backup::CryptBackup, context::CryptContext, debug::CryptDebug,
+    err::LibcryptErr, format::CryptFormat, key::CryptVolumeKey, keyslot::CryptKeyslot,
+    log::CryptLog, luks2_flags::CryptLuks2Flags, runtime::CryptRuntime, settings::CryptSettings,
+    status::CryptDeviceStatus, wipe::CryptWipe,
 };
 
 use cryptsetup_sys::*;
@@ -125,6 +126,21 @@ impl CryptDevice {
     /// Get crypt device status option handle
     pub fn status_handle(&mut self) -> CryptDeviceStatus {
         CryptDeviceStatus::new(self)
+    }
+
+    /// Get crypt device backup option handle
+    pub fn backup_handle(&mut self) -> CryptBackup {
+        CryptBackup::new(self)
+    }
+
+    /// Get crypt debug option handle
+    pub fn debug_handle() -> CryptDebug {
+        CryptDebug
+    }
+
+    /// Get crypt device wipe option handle
+    pub fn wipe_handle(&mut self) -> CryptWipe {
+        CryptWipe::new(self)
     }
 
     /// Set the callback that prompts the user to confirm an action
