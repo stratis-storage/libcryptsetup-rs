@@ -8,12 +8,10 @@
 // and the corresponding free functions are not part of the public API.
 // This means that the memory cannot be safe scrubbed and freed in longer running
 // processes that invoke this function. For now, this is disabled.
-//
-// LUKS2 token reading functions are not supported in these bindings for the same
-// reasons.
 
 extern crate cryptsetup_sys;
 extern crate libc;
+extern crate serde_json;
 extern crate uuid;
 
 use std::os::raw::c_int;
@@ -59,6 +57,9 @@ pub use luks2_reencrypt::{
     CryptLuks2Reencrypt, CryptReencryptDirectionInfo, CryptReencryptFlag, CryptReencryptFlags,
     CryptReencryptModeInfo,
 };
+
+mod luks2_token;
+pub use luks2_token::CryptLuks2Token;
 
 mod runtime;
 pub use runtime::CryptRuntime;

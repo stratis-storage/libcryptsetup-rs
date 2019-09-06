@@ -8,7 +8,8 @@ use crate::{
     activate::CryptActivation, backup::CryptBackup, context::CryptContext, debug::CryptDebug,
     err::LibcryptErr, format::CryptFormat, key::CryptVolumeKey, keyslot::CryptKeyslot,
     log::CryptLog, luks2_flags::CryptLuks2Flags, luks2_reencrypt::CryptLuks2Reencrypt,
-    runtime::CryptRuntime, settings::CryptSettings, status::CryptDeviceStatus, wipe::CryptWipe,
+    luks2_token::CryptLuks2Token, runtime::CryptRuntime, settings::CryptSettings,
+    status::CryptDeviceStatus, wipe::CryptWipe,
 };
 
 use cryptsetup_sys::*;
@@ -141,6 +142,11 @@ impl CryptDevice {
     /// Get crypt device wipe option handle
     pub fn wipe_handle(&mut self) -> CryptWipe {
         CryptWipe::new(self)
+    }
+
+    /// Get crypt device LUKS2 token option handle
+    pub fn token_handle(&mut self, token: c_int) -> CryptLuks2Token {
+        CryptLuks2Token::new(self, token)
     }
 
     /// Get crypt device reencryption option handle

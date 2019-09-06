@@ -19,6 +19,8 @@ pub enum LibcryptErr {
     NullError(NulError),
     /// Wrapper for `str::Utf8Error`
     Utf8Error(Utf8Error),
+    /// Wrapper for `serde_json::Error`
+    JsonError(serde_json::Error),
     /// Indicates that a Rust/C conversion was unsuccessful
     InvalidConversion,
     /// Indicates that a pointer returned was null signifying an error
@@ -40,6 +42,9 @@ impl Display for LibcryptErr {
                 "UTF8 error occurred when handling &str conversion: {}",
                 e
             ),
+            LibcryptErr::JsonError(ref e) => {
+                write!(f, "Failed to parse the provided string into JSON: {}", e)
+            }
             LibcryptErr::InvalidConversion => {
                 write!(f, "Failed to perform the specified conversion")
             }
