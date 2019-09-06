@@ -9,26 +9,13 @@ use crate::{device::CryptDevice, err::LibcryptErr, Bool};
 
 use cryptsetup_sys::*;
 
-/// Rust representation of random number generator enum
-pub enum CryptRng {
-    #[allow(missing_docs)]
-    Urandom = cryptsetup_sys::CRYPT_RNG_URANDOM as isize,
-    #[allow(missing_docs)]
-    Random = cryptsetup_sys::CRYPT_RNG_RANDOM as isize,
-}
-
-impl TryFrom<c_int> for CryptRng {
-    type Error = LibcryptErr;
-
-    fn try_from(v: c_int) -> Result<Self, Self::Error> {
-        let rng_type = match v {
-            i if i == CryptRng::Urandom as c_int => CryptRng::Urandom,
-            i if i == CryptRng::Random as c_int => CryptRng::Random,
-            _ => return Err(LibcryptErr::InvalidConversion),
-        };
-        Ok(rng_type)
-    }
-}
+consts_to_from_enum!(
+    /// Rust representation of random number generator enum
+    CryptRngFlag,
+    u32,
+    Urandom => cryptsetup_sys::CRYPT_RNG_URANDOM,
+    Random => cryptsetup_sys::CRYPT_RNG_RANDOM
+);
 
 /// Rust representation of key generator enum
 pub enum CryptKdf {
@@ -64,34 +51,22 @@ impl CryptKdf {
     }
 }
 
-#[derive(Copy, Clone)]
-pub enum CryptPbkdf {
-    IterTimeSet = cryptsetup_sys::CRYPT_PBKDF_ITER_TIME_SET as isize,
-    NoBenchmark = cryptsetup_sys::CRYPT_PBKDF_NO_BENCHMARK as isize,
-}
+consts_to_from_enum!(
+    /// Enum wrapping `CRYPT_PBKDF_*` flags
+    CryptPbkdfFlag,
+    u32,
+    IterTimeSet => cryptsetup_sys::CRYPT_PBKDF_ITER_TIME_SET,
+    NoBenchmark => cryptsetup_sys::CRYPT_PBKDF_NO_BENCHMARK
+);
 
-impl TryFrom<u32> for CryptPbkdf {
-    type Error = LibcryptErr;
+bitflags_to_from_struct!(
+    /// Wrapper for a set of CryptPbkdfFlag
+    CryptPbkdfFlags,
+    CryptPbkdfFlag,
+    u32
+);
 
-    fn try_from(v: u32) -> Result<Self, Self::Error> {
-        Ok(match v {
-            i if i == CryptPbkdf::IterTimeSet as u32 => CryptPbkdf::IterTimeSet,
-            i if i == CryptPbkdf::NoBenchmark as u32 => CryptPbkdf::NoBenchmark,
-            _ => return Err(LibcryptErr::InvalidConversion),
-        })
-    }
-}
-
-/// Rust representation of key generator flags
-pub struct CryptPbkdfFlags(Vec<CryptPbkdf>);
-
-impl<'a> Into<u32> for &'a CryptPbkdfFlags {
-    fn into(self) -> u32 {
-        self.0.iter().fold(0, |acc, flag| acc | *flag as u32)
-    }
-}
-
-bitflags_to_enum!(CryptPbkdfFlags, CryptPbkdf, u32);
+struct_ref_to_bitflags!(CryptPbkdfFlags, CryptPbkdfFlag, u32);
 
 /// Rust representation of `crypt_pbkdf_type`
 pub struct CryptPbkdfType {
@@ -288,15 +263,14 @@ impl<'a> CryptSettings<'a> {
     }
 
     /// Set random number generator type
-    pub fn set_rng_type(&mut self, rng_type: CryptRng) {
-        unsafe { crypt_set_rng_type(self.reference.as_ptr(), rng_type as c_int) }
+    pub fn set_rng_type(&mut self, rng_type: CryptRngFlag) {
+        let rng_u32: u32 = rng_type.into();
+        unsafe { crypt_set_rng_type(self.reference.as_ptr(), rng_u32 as c_int) }
     }
 
     /// Get random number generator type
-    pub fn get_rng_type(&mut self) -> CryptRng {
-        CryptRng::try_from(unsafe { crypt_get_rng_type(self.reference.as_ptr()) }).expect(
-            "The only allowed values to set should be able to be converted back to CryptRng",
-        )
+    pub fn get_rng_type(&mut self) -> Result<CryptRngFlag, LibcryptErr> {
+        CryptRngFlag::try_from(unsafe { crypt_get_rng_type(self.reference.as_ptr()) } as u32)
     }
 
     /// Set PBKDF type

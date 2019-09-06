@@ -1,38 +1,34 @@
 use std::{
-    convert::TryFrom,
+    convert::{TryFrom, TryInto},
     ffi::CStr,
+    marker::PhantomData,
     os::raw::{c_char, c_uint},
     path::PathBuf,
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr};
+use crate::{
+    device::CryptDevice,
+    err::LibcryptErr,
+    settings::{CryptPbkdfType, CryptPbkdfTypeRef},
+};
 
 use cryptsetup_sys::*;
 
-/// Verity format flags
-pub enum CryptVerity {
-    NoHeader = cryptsetup_sys::CRYPT_VERITY_NO_HEADER as isize,
-    CheckHash = cryptsetup_sys::CRYPT_VERITY_CHECK_HASH as isize,
-    CreateHash = cryptsetup_sys::CRYPT_VERITY_CREATE_HASH as isize,
-}
+consts_to_from_enum!(
+    /// Verity format flags
+    CryptVerityFlag,
+    u32,
+    NoHeader => cryptsetup_sys::CRYPT_VERITY_NO_HEADER,
+    CheckHash => cryptsetup_sys::CRYPT_VERITY_CHECK_HASH,
+    CreateHash => cryptsetup_sys::CRYPT_VERITY_CREATE_HASH
+);
 
-impl TryFrom<u32> for CryptVerity {
-    type Error = LibcryptErr;
-
-    fn try_from(v: u32) -> Result<Self, Self::Error> {
-        Ok(match v {
-            i if i == CryptVerity::NoHeader as u32 => CryptVerity::NoHeader,
-            i if i == CryptVerity::CheckHash as u32 => CryptVerity::CheckHash,
-            i if i == CryptVerity::CreateHash as u32 => CryptVerity::CreateHash,
-            _ => return Err(LibcryptErr::InvalidConversion),
-        })
-    }
-}
-
-/// Wrapper for multiple `CRYPT_VERITY_*` flags
-pub struct CryptVerityFlags(Vec<CryptVerity>);
-
-bitflags_to_enum!(CryptVerityFlags, CryptVerity, u32);
+bitflags_to_from_struct!(
+    /// Set of flags for Verity format
+    CryptVerityFlags,
+    CryptVerityFlag,
+    u32
+);
 
 /// Device formatting type options
 pub enum Format {
@@ -50,6 +46,50 @@ pub enum Format {
     Tcrypt,
     #[allow(missing_docs)]
     Integrity,
+}
+
+pub struct CryptParamsLuks2Ref<'a> {
+    pub inner: cryptsetup_sys::crypt_params_luks2,
+    #[allow(dead_code)]
+    data: &'a PhantomData<()>,
+}
+
+pub struct CryptParamsLuks2 {
+    pub pbkdf: CryptPbkdfType,
+    pub integrity: Option<String>,
+    pub integrity_params: CryptParamsIntegrity,
+    pub data_alignment: crate::SizeT,
+    pub data_device: PathBuf,
+    pub sector_size: u32,
+    pub label: String,
+    pub subsystem: String,
+}
+
+impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
+    type Error = LibcryptErr;
+
+    fn try_into(self) -> Result<CryptParamsLuks2Ref<'a>, Self::Error> {
+        let integrity = match self.integrity {
+            Some(ref int) => to_str_ptr!(int)?,
+            None => std::ptr::null(),
+        };
+        let pbkdf: CryptPbkdfTypeRef<'a> = (&self.pbkdf).try_into()?;
+        let integrity_params: CryptParamsIntegrityRef<'a> = (&self.integrity_params).try_into()?;
+        let inner = cryptsetup_sys::crypt_params_luks2 {
+            pbkdf: &pbkdf.inner as *const _,
+            integrity,
+            integrity_params: &integrity_params.inner as *const _,
+            data_alignment: self.data_alignment,
+            data_device: path_to_str_ptr!(self.data_device.as_path())?,
+            sector_size: self.sector_size,
+            label: to_str_ptr!(self.label)?,
+            subsystem: to_str_ptr!(self.subsystem)?,
+        };
+        Ok(CryptParamsLuks2Ref {
+            inner,
+            data: &PhantomData,
+        })
+    }
 }
 
 pub struct CryptParamsVerity {
@@ -92,6 +132,12 @@ impl<'a> TryFrom<&'a cryptsetup_sys::crypt_params_verity> for CryptParamsVerity 
     }
 }
 
+pub struct CryptParamsIntegrityRef<'a> {
+    inner: cryptsetup_sys::crypt_params_integrity,
+    #[allow(dead_code)]
+    data: &'a PhantomData<()>,
+}
+
 pub struct CryptParamsIntegrity {
     pub journal_size: u64,
     pub journal_watermark: c_uint,
@@ -106,6 +152,34 @@ pub struct CryptParamsIntegrity {
     pub journal_integrity_key: Vec<u8>,
     pub journal_crypt: String,
     pub journal_crypt_key: Vec<u8>,
+}
+
+impl<'a> TryInto<CryptParamsIntegrityRef<'a>> for &'a CryptParamsIntegrity {
+    type Error = LibcryptErr;
+
+    fn try_into(self) -> Result<CryptParamsIntegrityRef<'a>, Self::Error> {
+        let inner = cryptsetup_sys::crypt_params_integrity {
+            journal_size: self.journal_size,
+            journal_watermark: self.journal_watermark,
+            journal_commit_time: self.journal_commit_time,
+            interleave_sectors: self.interleave_sectors,
+            tag_size: self.tag_size,
+            sector_size: self.sector_size,
+            buffer_sectors: self.buffer_sectors,
+            integrity: to_str_ptr!(self.integrity)?,
+            integrity_key_size: self.integrity_key_size,
+            journal_integrity: to_str_ptr!(self.journal_integrity)?,
+            journal_integrity_key: to_byte_ptr!(self.journal_integrity_key),
+            journal_integrity_key_size: self.journal_integrity_key.len() as u32,
+            journal_crypt: to_str_ptr!(self.journal_crypt)?,
+            journal_crypt_key: to_byte_ptr!(self.journal_crypt_key),
+            journal_crypt_key_size: self.journal_crypt_key.len() as u32,
+        };
+        Ok(CryptParamsIntegrityRef {
+            inner,
+            data: &PhantomData,
+        })
+    }
 }
 
 impl<'a> TryFrom<&'a cryptsetup_sys::crypt_params_integrity> for CryptParamsIntegrity {

@@ -1,33 +1,21 @@
-use std::{convert::TryFrom, os::raw::c_int, path::Path, ptr};
+use std::{os::raw::c_int, path::Path, ptr};
 
 use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags};
 
-pub enum CryptDeactivate {
-    Deferred = cryptsetup_sys::CRYPT_DEACTIVATE_DEFERRED as isize,
-    Force = cryptsetup_sys::CRYPT_DEACTIVATE_FORCE as isize,
-}
+consts_to_from_enum!(
+    /// Flags for crypt deactivate operations
+    CryptDeactivateFlag,
+    u32,
+    Deferred => cryptsetup_sys::CRYPT_DEACTIVATE_DEFERRED,
+    Force => cryptsetup_sys::CRYPT_DEACTIVATE_FORCE
+);
 
-impl TryFrom<u32> for CryptDeactivate {
-    type Error = LibcryptErr;
-
-    fn try_from(v: u32) -> Result<Self, Self::Error> {
-        Ok(match v {
-            i if i == CryptDeactivate::Deferred as u32 => CryptDeactivate::Deferred,
-            i if i == CryptDeactivate::Force as u32 => CryptDeactivate::Force,
-            _ => return Err(LibcryptErr::InvalidConversion),
-        })
-    }
-}
-
-pub struct CryptDeactivateFlags(Vec<CryptDeactivate>);
-
-impl Into<u32> for CryptDeactivateFlags {
-    fn into(self) -> u32 {
-        self.0.into_iter().fold(0, |acc, flag| acc | flag as u32)
-    }
-}
-
-bitflags_to_enum!(CryptDeactivateFlags, CryptDeactivate, u32);
+bitflags_to_from_struct!(
+    /// Set of flags for crypt deactivate operations
+    CryptDeactivateFlags,
+    CryptDeactivateFlag,
+    u32
+);
 
 /// Handle for activation options
 pub struct CryptActivation<'a> {

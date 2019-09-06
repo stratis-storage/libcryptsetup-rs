@@ -7,8 +7,8 @@ use std::{
 use crate::{
     activate::CryptActivation, backup::CryptBackup, context::CryptContext, debug::CryptDebug,
     err::LibcryptErr, format::CryptFormat, key::CryptVolumeKey, keyslot::CryptKeyslot,
-    log::CryptLog, luks2_flags::CryptLuks2Flags, runtime::CryptRuntime, settings::CryptSettings,
-    status::CryptDeviceStatus, wipe::CryptWipe,
+    log::CryptLog, luks2_flags::CryptLuks2Flags, luks2_reencrypt::CryptLuks2Reencrypt,
+    runtime::CryptRuntime, settings::CryptSettings, status::CryptDeviceStatus, wipe::CryptWipe,
 };
 
 use cryptsetup_sys::*;
@@ -141,6 +141,11 @@ impl CryptDevice {
     /// Get crypt device wipe option handle
     pub fn wipe_handle(&mut self) -> CryptWipe {
         CryptWipe::new(self)
+    }
+
+    /// Get crypt device reencryption option handle
+    pub fn reencrypt_handle(&mut self) -> CryptLuks2Reencrypt {
+        CryptLuks2Reencrypt::new(self)
     }
 
     /// Set the callback that prompts the user to confirm an action

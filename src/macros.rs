@@ -148,13 +148,63 @@ macro_rules! from_str_ptr_to_owned {
 }
 
 #[macro_export]
-/// Convert bit flags to enum
-macro_rules! bitflags_to_enum {
-    ( $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
+/// Convert constants to and from a flag enum
+macro_rules! consts_to_from_enum {
+    ( #[$meta:meta] $flag_enum:ident, $flag_type:ty, $( $name:ident => $constant:expr ),* ) => {
+        #[$meta]
+        #[derive(Copy, Clone)]
+        pub enum $flag_enum {
+            $(
+                #[allow(missing_docs)]
+                $name,
+            )*
+        }
+
+        impl std::convert::Into<$flag_type> for $flag_enum {
+            fn into(self) -> $flag_type {
+                match self {
+                    $(
+                        $flag_enum::$name => $constant,
+                    )*
+                }
+            }
+        }
+
+        impl std::convert::TryFrom<$flag_type> for $flag_enum {
+            type Error = LibcryptErr;
+
+            fn try_from(v: $flag_type) -> Result<Self, Self::Error> {
+                Ok(match v {
+                    $(
+                        i if i == $constant => $flag_enum::$name,
+                    )*
+                    _ => return Err(LibcryptErr::InvalidConversion),
+                })
+            }
+        }
+    };
+}
+
+#[macro_export]
+/// Convert bit flags to and from a struct
+macro_rules! bitflags_to_from_struct {
+    ( #[$meta:meta] $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
+        #[$meta]
+        pub struct $flags_type(Vec<$flag_type>);
+
         impl $flags_type {
             /// Create a new set of flags
             pub fn new(vec: Vec<$flag_type>) -> Self {
                 $flags_type(vec)
+            }
+        }
+
+        impl std::convert::Into<$bitflags_type> for $flags_type {
+            fn into(self) -> $bitflags_type {
+                self.0.into_iter().fold(0, |acc, flag| {
+                    let flag: $bitflags_type = flag.into();
+                    acc | flag
+                })
             }
         }
 
@@ -169,6 +219,21 @@ macro_rules! bitflags_to_enum {
                     }
                 }
                 Ok(<$flags_type>::new(vec))
+            }
+        }
+    };
+}
+
+#[macro_export]
+/// Convert bit a struct reference to bitflags
+macro_rules! struct_ref_to_bitflags {
+    ( $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
+        impl<'a> std::convert::Into<$bitflags_type> for &'a $flags_type {
+            fn into(self) -> $bitflags_type {
+                self.0.iter().fold(0, |acc, flag| {
+                    let flag: $bitflags_type = (*flag).into();
+                    acc | flag
+                })
             }
         }
     };

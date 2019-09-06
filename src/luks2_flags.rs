@@ -2,58 +2,25 @@ use std::{convert::TryFrom, marker::PhantomData};
 
 use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags};
 
-pub enum CryptFlagsType {
+enum CryptFlagsType {
     Activation = cryptsetup_sys::crypt_flags_type_CRYPT_FLAGS_ACTIVATION as isize,
     Requirements = cryptsetup_sys::crypt_flags_type_CRYPT_FLAGS_REQUIREMENTS as isize,
 }
 
-/// Wrapper enum for `CRYPT_REQUIREMENT_*` flags
-pub enum CryptRequirement {
-    #[allow(missing_docs)]
-    OfflineReencrypt = cryptsetup_sys::CRYPT_REQUIREMENT_OFFLINE_REENCRYPT as isize,
-    #[allow(missing_docs)]
-    OnlineReencrypt = cryptsetup_sys::CRYPT_REQUIREMENT_ONLINE_REENCRYPT as isize,
-    #[allow(missing_docs)]
-    Unknown,
-}
+consts_to_from_enum!(
+    /// Wrapper enum for `CRYPT_REQUIREMENT_*` flags
+    CryptRequirementFlag, u32,
+    OfflineReencrypt => cryptsetup_sys::CRYPT_REQUIREMENT_OFFLINE_REENCRYPT,
+    OnlineReencrypt => cryptsetup_sys::CRYPT_REQUIREMENT_ONLINE_REENCRYPT,
+    Unknown => cryptsetup_sys::CRYPT_REQUIREMENT_UNKNOWN
+);
 
-impl Into<u32> for CryptRequirement {
-    fn into(self) -> u32 {
-        match self {
-            CryptRequirement::Unknown => cryptsetup_sys::CRYPT_REQUIREMENT_UNKNOWN,
-            any_else => any_else as u32,
-        }
-    }
-}
-
-impl TryFrom<u32> for CryptRequirement {
-    type Error = LibcryptErr;
-
-    fn try_from(v: u32) -> Result<Self, Self::Error> {
-        Ok(match v {
-            i if i == CryptRequirement::OfflineReencrypt as u32 => {
-                CryptRequirement::OfflineReencrypt
-            }
-            i if i == CryptRequirement::OnlineReencrypt as u32 => CryptRequirement::OnlineReencrypt,
-            i if i == cryptsetup_sys::CRYPT_REQUIREMENT_UNKNOWN => CryptRequirement::Unknown,
-            _ => return Err(LibcryptErr::InvalidConversion),
-        })
-    }
-}
-
-/// Set of `CryptRequirement` flags
-pub struct CryptRequirementFlags(Vec<CryptRequirement>);
-
-impl Into<u32> for CryptRequirementFlags {
-    fn into(self) -> u32 {
-        self.0.into_iter().fold(0, |acc, flag| {
-            let flags_u32: u32 = flag.into();
-            acc | flags_u32
-        })
-    }
-}
-
-bitflags_to_enum!(CryptRequirementFlags, CryptRequirement, u32);
+bitflags_to_from_struct!(
+    /// Set of `CryptRequirementFlag`s
+    CryptRequirementFlags,
+    CryptRequirementFlag,
+    u32
+);
 
 /// Handle for LUKS2 persistent flag operations
 pub struct CryptLuks2Flags<'a, T> {

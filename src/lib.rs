@@ -43,7 +43,12 @@ mod log;
 pub use log::{CryptLog, CryptLogLevel};
 
 mod luks2_flags;
-pub use luks2_flags::{CryptLuks2Flags, CryptRequirement, CryptRequirementFlags};
+pub use luks2_flags::{CryptLuks2Flags, CryptRequirementFlag, CryptRequirementFlags};
+
+mod luks2_reencrypt;
+pub use luks2_reencrypt::{
+    CryptReencryptDirectionInfo, CryptReencryptFlag, CryptReencryptFlags, CryptReencryptModeInfo,
+};
 
 // Keyfile reading functions are not supported in these bindings due
 // to how memory is handled in these functions - memory for keys is allocated
