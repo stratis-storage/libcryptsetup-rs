@@ -1,10 +1,26 @@
-use std::{convert::TryInto, marker::PhantomData, os::raw::c_int};
+use std::{
+    convert::{TryFrom, TryInto},
+    marker::PhantomData,
+    os::raw::{c_int, c_void},
+};
 
 use crate::{
     device::CryptDevice,
     err::LibcryptErr,
     format::{CryptParamsLuks2, CryptParamsLuks2Ref},
 };
+
+type ReencryptProgress = unsafe extern "C" fn(size: u64, offset: u64, *mut c_void) -> c_int;
+
+consts_to_from_enum!(
+    /// Encryption mode flags
+    CryptReencryptInfo,
+    u32,
+    None => cryptsetup_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_NONE,
+    Clean => cryptsetup_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_CLEAN,
+    Crash => cryptsetup_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_CRASH,
+    Invalid => cryptsetup_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_INVALID
+);
 
 consts_to_from_enum!(
     /// Encryption mode flags
@@ -93,6 +109,7 @@ impl<'a> CryptLuks2Reencrypt<'a> {
         CryptLuks2Reencrypt { reference }
     }
 
+    /// Initialize reencryption metadata on a device by passphrase
     pub fn reencrypt_init_by_passphrase(
         &mut self,
         name: Option<&str>,
@@ -121,5 +138,57 @@ impl<'a> CryptLuks2Reencrypt<'a> {
                 &params_reencrypt.inner as *const _,
             )
         })
+    }
+
+    /// Initialize reencryption metadata on a device by passphrase in a keyring
+    pub fn reecrypt_init_by_keyring(
+        &mut self,
+        name: Option<&str>,
+        key_description: &str,
+        keyslot_old: c_int,
+        keyslot_new: c_int,
+        cipher_and_mode: (&str, &str),
+        params: CryptParamsReencrypt,
+    ) -> Result<c_int, LibcryptErr> {
+        let name_ptr = match name {
+            Some(n) => to_str_ptr!(n)?,
+            None => std::ptr::null(),
+        };
+        let (cipher, cipher_mode) = cipher_and_mode;
+        let params_reencrypt: CryptParamsReencryptRef<'_> = (&params).try_into()?;
+        errno_int_success!(unsafe {
+            cryptsetup_sys::crypt_reencrypt_init_by_keyring(
+                self.reference.as_ptr(),
+                name_ptr,
+                to_str_ptr!(key_description)?,
+                keyslot_old,
+                keyslot_new,
+                to_str_ptr!(cipher)?,
+                to_str_ptr!(cipher_mode)?,
+                &params_reencrypt.inner as *const _,
+            )
+        })
+    }
+
+    /// Run data reencryption
+    pub fn reencrypt(&mut self, progress: Option<ReencryptProgress>) -> Result<(), LibcryptErr> {
+        errno!(unsafe { cryptsetup_sys::crypt_reencrypt(self.reference.as_ptr(), progress) })
+    }
+
+    /// LUKS2 reencryption status
+    pub fn status(
+        &mut self,
+        params: CryptParamsReencrypt,
+    ) -> Result<CryptReencryptInfo, LibcryptErr> {
+        let mut params_reencrypt: CryptParamsReencryptRef<'_> = (&params).try_into()?;
+        try_int_to_return!(
+            unsafe {
+                cryptsetup_sys::crypt_reencrypt_status(
+                    self.reference.as_ptr(),
+                    &mut params_reencrypt.inner as *mut _,
+                )
+            },
+            CryptReencryptInfo
+        )
     }
 }

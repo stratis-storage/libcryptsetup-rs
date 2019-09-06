@@ -47,7 +47,8 @@ pub use luks2_flags::{CryptLuks2Flags, CryptRequirementFlag, CryptRequirementFla
 
 mod luks2_reencrypt;
 pub use luks2_reencrypt::{
-    CryptReencryptDirectionInfo, CryptReencryptFlag, CryptReencryptFlags, CryptReencryptModeInfo,
+    CryptLuks2Reencrypt, CryptReencryptDirectionInfo, CryptReencryptFlag, CryptReencryptFlags,
+    CryptReencryptModeInfo,
 };
 
 // Keyfile reading functions are not supported in these bindings due
