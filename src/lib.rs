@@ -3,6 +3,15 @@
 //! This is a wrapper library for libcryptsetup. The intension is to provide as much safety as
 //! possible when crossing FFI boundaries to the crypsetup C library.
 
+// Keyfile reading functions are not supported in these bindings due
+// to how memory is handled in these functions - memory for keys is allocated
+// and the corresponding free functions are not part of the public API.
+// This means that the memory cannot be safe scrubbed and freed in longer running
+// processes that invoke this function. For now, this is disabled.
+//
+// LUKS2 token reading functions are not supported in these bindings for the same
+// reasons.
+
 extern crate cryptsetup_sys;
 extern crate libc;
 extern crate uuid;
@@ -50,12 +59,6 @@ pub use luks2_reencrypt::{
     CryptLuks2Reencrypt, CryptReencryptDirectionInfo, CryptReencryptFlag, CryptReencryptFlags,
     CryptReencryptModeInfo,
 };
-
-// Keyfile reading functions are not supported in these bindings due
-// to how memory is handled in these functions - memory for keys is allocated
-// and the corresponding free functions are not part of the public API.
-// This means that the memory cannot be safe scrubbed and freed in longer running
-// processes that invoke this function. For now, this is disabled.
 
 mod runtime;
 pub use runtime::CryptRuntime;
