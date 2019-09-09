@@ -1,4 +1,3 @@
-#[macro_export]
 /// Convert an errno-zero-success return pattern into a `Result<(), LibcryptErr>`
 macro_rules! errno {
     ( $rc:expr ) => {
@@ -14,7 +13,6 @@ macro_rules! errno {
     };
 }
 
-#[macro_export]
 /// Convert an errno-positive-int-success return pattern into a `Result<std::os::raw::c_int, LibcryptErr>`
 macro_rules! errno_int_success {
     ( $rc:expr ) => {
@@ -29,7 +27,6 @@ macro_rules! errno_int_success {
     };
 }
 
-#[macro_export]
 /// Convert an integer return value into specified type
 macro_rules! int_to_return {
     ( $rc:expr, $type:ty ) => {
@@ -37,7 +34,6 @@ macro_rules! int_to_return {
     };
 }
 
-#[macro_export]
 /// Try converting an integer return value into specified type
 macro_rules! try_int_to_return {
     ( $rc:expr, $type:ty ) => {
@@ -45,7 +41,6 @@ macro_rules! try_int_to_return {
     };
 }
 
-#[macro_export]
 /// Convert a pointer to an `Option` containing a pointer
 macro_rules! ptr_to_option {
     ( $ptr:expr ) => {{
@@ -58,7 +53,6 @@ macro_rules! ptr_to_option {
     }};
 }
 
-#[macro_export]
 /// Convert a pointer to an `Result` containing a pointer
 macro_rules! ptr_to_result {
     ( $ptr:expr ) => {{
@@ -66,16 +60,6 @@ macro_rules! ptr_to_result {
     }};
 }
 
-#[macro_export]
-/// Convert a pointer to a `Option` containing a reference
-macro_rules! ptr_to_option_with_reference {
-    ( $ptr:expr ) => {{
-        let p = $ptr;
-        unsafe { p.as_ref() }
-    }};
-}
-
-#[macro_export]
 /// Convert a pointer to a `Result` containing a reference
 macro_rules! ptr_to_result_with_reference {
     ( $ptr:expr ) => {{
@@ -84,7 +68,6 @@ macro_rules! ptr_to_result_with_reference {
     }};
 }
 
-#[macro_export]
 /// Convert a `Path` type into `*const c_char`
 macro_rules! path_to_str_ptr {
     ( $path:expr ) => {
@@ -99,7 +82,6 @@ macro_rules! path_to_str_ptr {
     };
 }
 
-#[macro_export]
 /// Convert a string type into `*const c_char`
 macro_rules! to_str_ptr {
     ( $str:expr ) => {
@@ -110,7 +92,6 @@ macro_rules! to_str_ptr {
     };
 }
 
-#[macro_export]
 /// Convert a byte slice into `*const c_char`
 macro_rules! to_byte_ptr {
     ( $bytes:expr ) => {
@@ -118,7 +99,6 @@ macro_rules! to_byte_ptr {
     };
 }
 
-#[macro_export]
 /// Convert a byte slice into `*mut c_char`
 macro_rules! to_mut_byte_ptr {
     ( $bytes:expr ) => {
@@ -126,7 +106,6 @@ macro_rules! to_mut_byte_ptr {
     };
 }
 
-#[macro_export]
 /// Convert a `*const c_char` into a `&str` type
 macro_rules! from_str_ptr {
     ( $str_ptr:expr ) => {
@@ -136,7 +115,6 @@ macro_rules! from_str_ptr {
     };
 }
 
-#[macro_export]
 /// Convert a `*const c_char` into a `String` type
 macro_rules! from_str_ptr_to_owned {
     ( $str_ptr:expr ) => {
@@ -147,7 +125,6 @@ macro_rules! from_str_ptr_to_owned {
     };
 }
 
-#[macro_export]
 /// Convert constants to and from a flag enum
 macro_rules! consts_to_from_enum {
     ( #[$meta:meta] $flag_enum:ident, $flag_type:ty, $( $name:ident => $constant:expr ),* ) => {
@@ -185,7 +162,6 @@ macro_rules! consts_to_from_enum {
     };
 }
 
-#[macro_export]
 /// Convert bit flags to and from a struct
 macro_rules! bitflags_to_from_struct {
     ( #[$meta:meta] $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
@@ -224,7 +200,6 @@ macro_rules! bitflags_to_from_struct {
     };
 }
 
-#[macro_export]
 /// Convert bit a struct reference to bitflags
 macro_rules! struct_ref_to_bitflags {
     ( $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
@@ -294,6 +269,101 @@ macro_rules! c_progress_callback {
             let generic_ref = unsafe { generic_ptr.as_mut() };
 
             $safe_fn_name(size, offset, generic_ref) as std::os::raw::c_int
+        }
+    };
+}
+
+#[macro_export]
+/// Create a C-compatible open callback compatible with `CryptTokenHandler`
+macro_rules! c_token_handler_open {
+    ( $fn_name:ident, $type:ty, $safe_fn_name:ident ) => {
+        extern "C" fn $fn_name(
+            cd: *mut cryptsetup_sys::crypt_device,
+            token_id: std::os::raw::c_int,
+            buffer: *mut *mut std::os::raw::c_char,
+            buffer_len: *mut $crate::SizeT,
+            usrptr: *mut std::os::raw::c_void,
+        ) -> std::os::raw::c_int {
+            let device = $crate::device::CryptDevice::from_ptr(cd);
+            let generic_ptr = usrptr as *mut $type;
+            let generic_ref = unsafe { generic_ptr.as_mut() };
+
+            let buffer: Result<Box<[u8]>, $crate::err::LibcryptErr> =
+                $safe_fn_name(device, token_id, generic_ref);
+            match buffer {
+                Ok(()) => {
+                    *buffer = Box::into_raw(buffer) as *mut std::os::raw::c_char;
+                    0
+                }
+                Err(_) => -1,
+            }
+        }
+    };
+}
+
+#[macro_export]
+/// Create a C-compatible callback for free compatible with `CryptTokenHandler`
+macro_rules! c_token_handler_free {
+    ( $fn_name:ident, $safe_fn_name:ident ) => {
+        extern "C" fn $fn_name(buffer: *mut std::os::raw::c_void, buffer_len: $crate::SizeT) {
+            let boxed_slice = unsafe {
+                Box::from_raw(std::slice::from_raw_parts_mut(
+                    buffer as *mut u8,
+                    buffer_len as usize,
+                ))
+            };
+
+            $safe_fn_name(boxed_slice)
+        }
+    };
+}
+
+#[macro_export]
+/// Create a C-compatible callback for validate compatible with `CryptTokenHandler`
+macro_rules! c_token_handler_validate {
+    ( $fn_name:ident, $safe_fn_name:ident ) => {
+        extern "C" fn $fn_name(
+            cd: *mut cryptsetup_sys::crypt_device,
+            json: *mut std::os::raw::c_char,
+        ) -> std::os::raw::c_int {
+            let device = $crate::device::CryptDevice::from_ptr(cd);
+            let s = match from_str_ptr!(json) {
+                Ok(s) => s,
+                Err(_) => return -1,
+            };
+            let json_obj = match serde_json::from_str(s) {
+                Ok(j) => j,
+                Err(_) => return -1,
+            };
+
+            let rc: Result<(), $crate::err::LibcryptErr> = $safe_fn_name(device, json_obj);
+            match rc {
+                Ok(()) => 0,
+                Err(_) => -1,
+            }
+        }
+    };
+}
+
+#[macro_export]
+/// Create a C-compatible callback for compatible with `CryptTokenHandler`
+macro_rules! c_token_handler_dump {
+    ( $fn_name:ident, $safe_fn_name:ident ) => {
+        extern "C" fn $fn_name(
+            cd: *mut cryptsetup_sys::crypt_device,
+            json: *mut std::os::raw::c_char,
+        ) {
+            let device = $crate::device::CryptDevice::from_ptr(cd);
+            let s = match from_str_ptr!(json) {
+                Ok(s) => s,
+                Err(_) => return,
+            };
+            let json_obj = match serde_json::from_str(s) {
+                Ok(j) => j,
+                Err(_) => return,
+            };
+
+            $safe_fn_name(device, json_obj)
         }
     };
 }

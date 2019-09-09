@@ -3,7 +3,7 @@ use std::{
     os::raw::{c_char, c_int},
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr, Bool};
+use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags, Bool};
 
 consts_to_from_enum!(
     /// Wrapper enum for `CRYPT_TOKEN_*` values
@@ -74,7 +74,7 @@ impl<'a> CryptLuks2Token<'a> {
             },
             CryptTokenInfo
         )
-        .and_then(|cti| from_str_ptr!(ptr).map(|s| (cti, s.to_string())))
+        .and_then(|cti| from_str_ptr_to_owned!(ptr).map(|s| (cti, s)))
     }
 
     /// Create new LUKS2 keyring token
@@ -146,5 +146,46 @@ impl<'a> CryptLuks2Token<'a> {
         } else {
             Err(LibcryptErr::IOError(std::io::Error::from_raw_os_error(-rc)))
         }
+    }
+
+    /// Register token handler
+    pub fn register(
+        name: &'static str,
+        open: cryptsetup_sys::crypt_token_open_func,
+        buffer_free: cryptsetup_sys::crypt_token_buffer_free_func,
+        validate: cryptsetup_sys::crypt_token_validate_func,
+        dump: cryptsetup_sys::crypt_token_dump_func,
+    ) -> Result<(), LibcryptErr> {
+        let handler = cryptsetup_sys::crypt_token_handler {
+            name: to_str_ptr!(name)?,
+            open,
+            buffer_free,
+            validate,
+            dump,
+        };
+        errno!(unsafe {
+            cryptsetup_sys::crypt_token_register(
+                &handler as *const cryptsetup_sys::crypt_token_handler,
+            )
+        })
+    }
+
+    /// Activate device or check key using a token
+    pub fn activate_by_token<T>(
+        &mut self,
+        name: &str,
+        token: c_int,
+        usrdata: &mut T,
+        flags: CryptActivateFlags,
+    ) -> Result<c_int, LibcryptErr> {
+        errno_int_success!(unsafe {
+            cryptsetup_sys::crypt_activate_by_token(
+                self.reference.as_ptr(),
+                to_str_ptr!(name)?,
+                token,
+                usrdata as *mut _ as *mut std::os::raw::c_void,
+                flags.into(),
+            )
+        })
     }
 }

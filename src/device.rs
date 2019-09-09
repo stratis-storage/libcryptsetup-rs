@@ -79,6 +79,11 @@ pub struct CryptDevice {
 }
 
 impl CryptDevice {
+    /// Reconstruct a `CryptDevice` object from a pointer
+    pub fn from_ptr(ptr: *mut crypt_device) -> Self {
+        CryptDevice { ptr }
+    }
+
     /// Get a logging option handle
     pub fn logging_handle(&mut self) -> CryptLog {
         CryptLog::new(self)
