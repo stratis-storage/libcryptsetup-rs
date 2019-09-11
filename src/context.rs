@@ -58,24 +58,27 @@ impl<'a> CryptContext<'a> {
     }
 
     /// Set UUID of crypt device
-    pub fn set_uuid(&mut self, uuid: Uuid) -> Result<(), LibcryptErr> {
-        errno!(unsafe {
-            crypt_set_uuid(
-                self.reference.as_ptr(),
-                uuid.as_bytes().as_ptr() as *const c_char,
-            )
-        })
+    pub fn set_uuid(&mut self, uuid: Option<Uuid>) -> Result<(), LibcryptErr> {
+        let uptr = match uuid {
+            Some(u) => u.as_bytes().as_ptr() as *const c_char,
+            None => std::ptr::null(),
+        };
+        errno!(unsafe { crypt_set_uuid(self.reference.as_ptr(), uptr) })
     }
 
     /// Set LUKS2 device label
-    pub fn set_label(&mut self, label: &str, subsystem_label: &str) -> Result<(), LibcryptErr> {
-        errno!(unsafe {
-            crypt_set_label(
-                self.reference.as_ptr(),
-                to_str_ptr!(label)?,
-                to_str_ptr!(subsystem_label)?,
-            )
-        })
+    pub fn set_label(
+        &mut self,
+        label: Option<&str>,
+        subsystem_label: Option<&str>,
+    ) -> Result<(), LibcryptErr> {
+        let (lptr, slptr) = match (label, subsystem_label) {
+            (Some(l), Some(sl)) => (to_str_ptr!(l)?, to_str_ptr!(sl)?),
+            (Some(l), _) => (to_str_ptr!(l)?, std::ptr::null()),
+            (_, Some(sl)) => (std::ptr::null(), to_str_ptr!(sl)?),
+            (_, _) => (std::ptr::null(), std::ptr::null()),
+        };
+        errno!(unsafe { crypt_set_label(self.reference.as_ptr(), lptr, slptr) })
     }
 
     /// Set policty on loading volume keys via kernel keyring
