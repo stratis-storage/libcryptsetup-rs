@@ -4,6 +4,10 @@ version = "0.1.0"
 authors = ["John Baublitz <jbaublitz@redhat.com>"]
 edition = "2018"
 
+[[bin]]
+name = "cryptsetup-cli"
+path = "src/main.rs"
+
 [dependencies.cryptsetup-sys]
 version = "0.1.0"
 path = "./cryptsetup-sys"
