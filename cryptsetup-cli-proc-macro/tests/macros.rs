@@ -25,7 +25,7 @@ fn test_function_wrapped() {
     }
 
     assert_eq!(
-        test_function_wrapped("1", "2", "3", "Test string", "Test::TestOne").unwrap(),
+        test_function_str_input("1", "2", "3", "Test string", "Test::TestOne").unwrap(),
         (6, "Test string".to_string(), Test::TestOne)
     );
 }

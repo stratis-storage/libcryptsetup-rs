@@ -118,11 +118,12 @@ pub fn wrap_fn_args(_args: TokenStream, input: TokenStream) -> TokenStream {
 
     new_func = generate_conversions(new_func, old_types);
 
-    new_func.sig.ident = Ident::new(&format!("{}_wrapped", func.sig.ident), Span::call_site());
+    new_func.sig.ident = Ident::new(&format!("{}_str_input", func.sig.ident), Span::call_site());
 
     let expanded = quote! {
         #func
 
+        #[cfg(feature = "macro-code")]
         #new_func
     };
 
@@ -150,17 +151,21 @@ pub fn derive_from_str(input: TokenStream) -> TokenStream {
     };
     let error_ident = Ident::new(format!("{}Error", ident).as_str(), Span::call_site());
     TokenStream::from(quote! {
+        #[cfg(feature = "macro-code")]
         #[derive(Debug)]
         pub struct #error_ident(String);
 
+        #[cfg(feature = "macro-code")]
         impl std::fmt::Display for #error_ident {
             fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
                 write!(f, "{}", self.0)
             }
         }
 
+        #[cfg(feature = "macro-code")]
         impl std::error::Error for #error_ident {}
 
+        #[cfg(feature = "macro-code")]
         impl std::str::FromStr for #ident {
             type Err = #error_ident;
 
