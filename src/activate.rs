@@ -2,6 +2,8 @@ use std::{os::raw::c_int, path::Path, ptr};
 
 use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags};
 
+use cryptsetup_cli_proc_macro::wrap_fn_args;
+
 consts_to_from_enum!(
     /// Flags for crypt deactivate operations
     CryptDeactivateFlag,
@@ -28,6 +30,7 @@ impl<'a> CryptActivation<'a> {
         CryptActivation { reference, name }
     }
 
+    #[wrap_fn_args]
     /// Activate device by passphrase
     pub fn activate_by_passphrase(
         &mut self,

@@ -129,7 +129,7 @@ macro_rules! from_str_ptr_to_owned {
 macro_rules! consts_to_from_enum {
     ( #[$meta:meta] $flag_enum:ident, $flag_type:ty, $( $name:ident => $constant:expr ),* ) => {
         #[$meta]
-        #[derive(Copy, Clone)]
+        #[derive(Copy, Clone, FromStrEnum)]
         pub enum $flag_enum {
             $(
                 #[allow(missing_docs)]
@@ -195,6 +195,23 @@ macro_rules! bitflags_to_from_struct {
                     }
                 }
                 Ok(<$flags_type>::new(vec))
+            }
+        }
+
+        #[cfg(feature = "macro-code")]
+        impl std::str::FromStr for $flags_type {
+            type Err = LibcryptErr;
+
+            fn from_str(s: &str) -> Result<Self, Self::Err> {
+                let mut v = Vec::new();
+                for entry in s.split(',') {
+                    v.push(
+                        entry
+                            .parse::<$flag_type>()
+                            .map_err(|_| $crate::err::LibcryptErr::InvalidConversion)?,
+                    );
+                }
+                Ok($flags_type::new(v))
             }
         }
     };

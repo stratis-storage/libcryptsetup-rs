@@ -1,6 +1,5 @@
 #[macro_use]
 extern crate cryptsetup_cli_proc_macro;
-extern crate proc_macro;
 
 use cryptsetup_cli_proc_macro::wrap_fn_args;
 

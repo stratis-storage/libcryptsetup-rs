@@ -2,10 +2,13 @@ extern crate proc_macro;
 extern crate syn;
 
 use proc_macro::TokenStream;
-use quote::quote;
+use quote::{quote, ToTokens};
 use syn::{
-    export::Span, parse_macro_input, punctuated::Punctuated, token::Brace, Block, Data,
-    DeriveInput, Expr, FnArg, Ident, Item, ItemFn, Pat, ReturnType, Stmt, Token, Type,
+    export::{Span, TokenStream2},
+    parse_macro_input,
+    punctuated::Punctuated,
+    token::Brace,
+    Block, Data, DeriveInput, Expr, FnArg, Ident, Item, ItemFn, Pat, ReturnType, Stmt, Token, Type,
 };
 
 fn validate_fn(item: Item) -> ItemFn {
@@ -15,54 +18,82 @@ fn validate_fn(item: Item) -> ItemFn {
     }
 }
 
-fn wrap_args(func: &ItemFn) -> (ItemFn, Vec<(Ident, Box<Type>)>) {
+enum ArgToken {
+    SelfToken,
+    Ident(Ident, Box<Type>),
+}
+
+impl ToTokens for ArgToken {
+    fn to_tokens(&self, tokens: &mut TokenStream2) {
+        match *self {
+            ArgToken::SelfToken => tokens.extend(quote! { self }),
+            ArgToken::Ident(ref ident, _) => tokens.extend(quote! { #ident }),
+        }
+    }
+}
+
+fn wrap_args(func: &ItemFn) -> (ItemFn, Vec<ArgToken>) {
     let func_clone = func.clone();
     let mut new_func = func.clone();
     let mut punc = Punctuated::<FnArg, Token!(,)>::new();
-    let mut types = Vec::new();
+    let mut args = Vec::new();
     punc.extend(func_clone.sig.inputs.into_iter().map(|fn_arg| {
         let mut pt = match fn_arg {
             FnArg::Typed(pt) => pt,
-            r => return r,
+            r => {
+                args.push(ArgToken::SelfToken);
+                return r;
+            }
         };
         let ts = TokenStream::from(quote! {
             &str
         });
         let type_path = syn::parse::<Type>(ts).expect("Should be a valid type");
-        types.push({
+        args.push({
             let ident = match *pt.pat {
                 Pat::Ident(ref idt) => idt.clone().ident,
                 _ => panic!("Argument in function signature has no identifier"),
             };
-            (ident, pt.ty)
+            ArgToken::Ident(ident, pt.ty)
         });
         pt.ty = Box::new(type_path);
         FnArg::Typed(pt)
     }));
     new_func.sig.inputs = punc;
-    (new_func, types)
+    (new_func, args)
 }
 
-fn generate_conversions(mut new_func: ItemFn, types: Vec<(Ident, Box<Type>)>) -> ItemFn {
+fn generate_conversions(mut new_func: ItemFn, args: Vec<ArgToken>) -> ItemFn {
     let mut stmts = Vec::new();
-    let conversions: Vec<Stmt> = types
+    let conversions: Vec<Stmt> = args
         .iter()
-        .map(|(ident, ty)| {
-            let ts = TokenStream::from(quote! {
-                let #ident = match #ident.parse::<#ty>() {
-                    Ok(i) => i,
-                    Err(e) => return Err(Box::new(e)),
-                };
-            });
-            syn::parse::<Stmt>(ts).expect("Should be a valid expression")
+        .filter_map(|arg| match arg {
+            ArgToken::SelfToken => None,
+            ArgToken::Ident(ident, ty) => {
+                if *ty
+                    == Box::new(
+                        syn::parse::<Type>(TokenStream::from(quote! { &str }))
+                            .expect("Should be valid type"),
+                    )
+                {
+                    None
+                } else {
+                    let ts = TokenStream::from(quote! {
+                        let #ident = match #ident.parse::<#ty>() {
+                            Ok(i) => i,
+                            Err(e) => return Err(Box::new(e)),
+                        };
+                    });
+                    Some(syn::parse::<Stmt>(ts).expect("Should be a valid expression"))
+                }
+            }
         })
         .collect();
     stmts.extend(conversions);
     let fn_ident = new_func.sig.ident.clone();
-    let args = types.iter().map(|(ident, _)| ident);
     let call_and_return: Vec<Stmt> = {
         let ts = TokenStream::from(quote! {
-            let result = #fn_ident(
+            let result = Self::#fn_ident(
                 #(
                     #args
                 ),*
@@ -114,9 +145,9 @@ pub fn wrap_fn_args(_args: TokenStream, input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as Item);
 
     let func = validate_fn(input);
-    let (mut new_func, old_types) = wrap_args(&func);
+    let (mut new_func, old_args) = wrap_args(&func);
 
-    new_func = generate_conversions(new_func, old_types);
+    new_func = generate_conversions(new_func, old_args);
 
     new_func.sig.ident = Ident::new(&format!("{}_str_input", func.sig.ident), Span::call_site());
 
