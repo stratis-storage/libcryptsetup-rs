@@ -1,3 +1,0 @@
-mod cli;
-
-fn main() {}

@@ -4,10 +4,6 @@ version = "0.1.0"
 authors = ["John Baublitz <jbaublitz@redhat.com>"]
 edition = "2018"
 
-[[bin]]
-name = "cryptsetup-cli"
-path = "src/main.rs"
-
 [dependencies.cryptsetup-sys]
 version = "0.1.0"
 path = "./cryptsetup-sys"
@@ -16,9 +12,3 @@ path = "./cryptsetup-sys"
 libc = "0.2.60"
 serde_json = "*"
 uuid = "0.7.4"
-
-[dependencies.cryptsetup-cli-proc-macro]
-path = "./cryptsetup-cli-proc-macro"
-
-[features]
-macro-code = ["cryptsetup-cli-proc-macro/macro-code"]

@@ -9,8 +9,6 @@
 // This means that the memory cannot be safe scrubbed and freed in longer running
 // processes that invoke this function. For now, this is disabled.
 
-#[macro_use]
-extern crate cryptsetup_cli_proc_macro;
 extern crate cryptsetup_sys;
 extern crate libc;
 extern crate serde_json;
