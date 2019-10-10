@@ -18,11 +18,12 @@ impl<'a> CryptBackup<'a> {
         requested_type: Format,
         backup_file: &Path,
     ) -> Result<(), LibcryptErr> {
+        let backup_file_cstring = path_to_cstring!(backup_file)?;
         errno!(unsafe {
             cryptsetup_sys::crypt_header_backup(
                 self.reference.as_ptr(),
                 requested_type.as_ptr(),
-                path_to_str_ptr!(backup_file)?,
+                backup_file_cstring.as_ptr(),
             )
         })
     }
@@ -33,11 +34,12 @@ impl<'a> CryptBackup<'a> {
         requested_type: Format,
         backup_file: &Path,
     ) -> Result<(), LibcryptErr> {
+        let backup_file_cstring = path_to_cstring!(backup_file)?;
         errno!(unsafe {
             cryptsetup_sys::crypt_header_restore(
                 self.reference.as_ptr(),
                 requested_type.as_ptr(),
-                path_to_str_ptr!(backup_file)?,
+                backup_file_cstring.as_ptr(),
             )
         })
     }

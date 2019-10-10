@@ -1,7 +1,8 @@
 use std::{
     convert::{TryFrom, TryInto},
-    marker::PhantomData,
+    ffi::CString,
     os::raw::{c_int, c_void},
+    ptr,
 };
 
 use crate::{
@@ -61,7 +62,13 @@ struct_ref_to_bitflags!(CryptReencryptFlags, CryptReencryptFlag, u32);
 pub struct CryptParamsReencryptRef<'a> {
     pub inner: cryptsetup_sys::crypt_params_reencrypt,
     #[allow(dead_code)]
-    data: &'a PhantomData<()>,
+    reference: &'a CryptParamsReencrypt,
+    #[allow(dead_code)]
+    luks2_params: CryptParamsLuks2Ref<'a>,
+    #[allow(dead_code)]
+    resilience_cstring: CString,
+    #[allow(dead_code)]
+    hash_cstring: CString,
 }
 
 pub struct CryptParamsReencrypt {
@@ -80,21 +87,28 @@ impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<CryptParamsReencryptRef<'a>, Self::Error> {
-        let luks: CryptParamsLuks2Ref<'a> = (&self.luks2).try_into()?;
+        let luks2_params: CryptParamsLuks2Ref<'a> = (&self.luks2).try_into()?;
+
+        let resilience_cstring = to_cstring!(self.resilience)?;
+        let hash_cstring = to_cstring!(self.hash)?;
+
         let inner = cryptsetup_sys::crypt_params_reencrypt {
             mode: self.mode.into(),
             direction: self.direction.into(),
-            resilience: to_str_ptr!(self.resilience)?,
-            hash: to_str_ptr!(self.hash)?,
+            resilience: resilience_cstring.as_ptr(),
+            hash: hash_cstring.as_ptr(),
             data_shift: self.data_shift,
             max_hotzone_size: self.max_hotzone_size,
             device_size: self.device_size,
-            luks2: &luks.inner as *const _,
+            luks2: &luks2_params.inner as *const _,
             flags: (&self.flags).into(),
         };
         Ok(CryptParamsReencryptRef {
             inner,
-            data: &PhantomData,
+            reference: self,
+            luks2_params,
+            resilience_cstring,
+            hash_cstring,
         })
     }
 }
@@ -119,22 +133,25 @@ impl<'a> CryptLuks2Reencrypt<'a> {
         cipher_and_mode: (&str, &str),
         params: CryptParamsReencrypt,
     ) -> Result<c_int, LibcryptErr> {
-        let name_ptr = match name {
-            Some(n) => to_str_ptr!(n)?,
-            None => std::ptr::null(),
+        let name_cstring = match name {
+            Some(n) => Some(to_cstring!(n)?),
+            None => None,
         };
         let (cipher, cipher_mode) = cipher_and_mode;
         let params_reencrypt: CryptParamsReencryptRef<'_> = (&params).try_into()?;
+
+        let cipher_cstring = to_cstring!(cipher)?;
+        let cipher_mode_cstring = to_cstring!(cipher_mode)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_reencrypt_init_by_passphrase(
                 self.reference.as_ptr(),
-                name_ptr,
+                name_cstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
                 to_byte_ptr!(passphrase),
                 passphrase.len(),
                 keyslot_old,
                 keyslot_new,
-                to_str_ptr!(cipher)?,
-                to_str_ptr!(cipher_mode)?,
+                cipher_cstring.as_ptr(),
+                cipher_mode_cstring.as_ptr(),
                 &params_reencrypt.inner as *const _,
             )
         })
@@ -150,21 +167,25 @@ impl<'a> CryptLuks2Reencrypt<'a> {
         cipher_and_mode: (&str, &str),
         params: CryptParamsReencrypt,
     ) -> Result<c_int, LibcryptErr> {
-        let name_ptr = match name {
-            Some(n) => to_str_ptr!(n)?,
-            None => std::ptr::null(),
+        let name_cstring = match name {
+            Some(n) => Some(to_cstring!(n)?),
+            None => None,
         };
         let (cipher, cipher_mode) = cipher_and_mode;
         let params_reencrypt: CryptParamsReencryptRef<'_> = (&params).try_into()?;
+
+        let description_cstring = to_cstring!(key_description)?;
+        let cipher_cstring = to_cstring!(cipher)?;
+        let cipher_mode_cstring = to_cstring!(cipher_mode)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_reencrypt_init_by_keyring(
                 self.reference.as_ptr(),
-                name_ptr,
-                to_str_ptr!(key_description)?,
+                name_cstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
+                description_cstring.as_ptr(),
                 keyslot_old,
                 keyslot_new,
-                to_str_ptr!(cipher)?,
-                to_str_ptr!(cipher_mode)?,
+                cipher_cstring.as_ptr(),
+                cipher_mode_cstring.as_ptr(),
                 &params_reencrypt.inner as *const _,
             )
         })

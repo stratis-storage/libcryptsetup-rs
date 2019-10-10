@@ -25,6 +25,8 @@ pub enum LibcryptErr {
     InvalidConversion,
     /// Indicates that a pointer returned was null signifying an error
     NullPtr,
+    /// Indicates that a `&'static str` was not created with `c_str!()` macro
+    NoNull(&'static str),
 }
 
 impl Display for LibcryptErr {
@@ -49,6 +51,9 @@ impl Display for LibcryptErr {
                 write!(f, "Failed to perform the specified conversion")
             }
             LibcryptErr::NullPtr => write!(f, "Cryptsetup returned a null pointer"),
+            LibcryptErr::NoNull(s) => {
+                write!(f, "Static string {} was not created with c_str!() macro", s)
+            }
         }
     }
 }

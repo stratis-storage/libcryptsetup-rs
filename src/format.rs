@@ -1,9 +1,9 @@
 use std::{
     convert::{TryFrom, TryInto},
-    ffi::CStr,
-    marker::PhantomData,
+    ffi::{CStr, CString},
     os::raw::{c_char, c_uint},
     path::PathBuf,
+    ptr,
 };
 
 use crate::{
@@ -51,7 +51,19 @@ pub enum Format {
 pub struct CryptParamsLuks2Ref<'a> {
     pub inner: cryptsetup_sys::crypt_params_luks2,
     #[allow(dead_code)]
-    data: &'a PhantomData<()>,
+    reference: &'a CryptParamsLuks2,
+    #[allow(dead_code)]
+    pbkdf_type: CryptPbkdfTypeRef<'a>,
+    #[allow(dead_code)]
+    integrity_params: CryptParamsIntegrityRef<'a>,
+    #[allow(dead_code)]
+    integrity_cstring_opt: Option<CString>,
+    #[allow(dead_code)]
+    data_device_cstring: CString,
+    #[allow(dead_code)]
+    label_cstring: CString,
+    #[allow(dead_code)]
+    subsystem_cstring: CString,
 }
 
 pub struct CryptParamsLuks2 {
@@ -69,25 +81,39 @@ impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<CryptParamsLuks2Ref<'a>, Self::Error> {
-        let integrity = match self.integrity {
-            Some(ref int) => to_str_ptr!(int)?,
-            None => std::ptr::null(),
-        };
-        let pbkdf: CryptPbkdfTypeRef<'a> = (&self.pbkdf).try_into()?;
+        let pbkdf_type: CryptPbkdfTypeRef<'a> = (&self.pbkdf).try_into()?;
         let integrity_params: CryptParamsIntegrityRef<'a> = (&self.integrity_params).try_into()?;
+
+        let integrity_cstring_opt = match self.integrity {
+            Some(ref intg) => Some(to_cstring!(intg)?),
+            None => None,
+        };
+        let data_device_cstring = path_to_cstring!(self.data_device.as_path())?;
+        let label_cstring = to_cstring!(self.label)?;
+        let subsystem_cstring = to_cstring!(self.subsystem)?;
+
         let inner = cryptsetup_sys::crypt_params_luks2 {
-            pbkdf: &pbkdf.inner as *const _,
-            integrity,
+            pbkdf: &pbkdf_type.inner as *const _,
+            integrity: integrity_cstring_opt
+                .as_ref()
+                .map(|cs| cs.as_ptr())
+                .unwrap_or(ptr::null()),
             integrity_params: &integrity_params.inner as *const _,
             data_alignment: self.data_alignment,
-            data_device: path_to_str_ptr!(self.data_device.as_path())?,
+            data_device: data_device_cstring.as_ptr(),
             sector_size: self.sector_size,
-            label: to_str_ptr!(self.label)?,
-            subsystem: to_str_ptr!(self.subsystem)?,
+            label: label_cstring.as_ptr(),
+            subsystem: subsystem_cstring.as_ptr(),
         };
         Ok(CryptParamsLuks2Ref {
             inner,
-            data: &PhantomData,
+            reference: self,
+            pbkdf_type,
+            integrity_params,
+            integrity_cstring_opt,
+            data_device_cstring,
+            label_cstring,
+            subsystem_cstring,
         })
     }
 }
@@ -133,9 +159,15 @@ impl<'a> TryFrom<&'a cryptsetup_sys::crypt_params_verity> for CryptParamsVerity 
 }
 
 pub struct CryptParamsIntegrityRef<'a> {
-    inner: cryptsetup_sys::crypt_params_integrity,
+    pub inner: cryptsetup_sys::crypt_params_integrity,
     #[allow(dead_code)]
-    data: &'a PhantomData<()>,
+    reference: &'a CryptParamsIntegrity,
+    #[allow(dead_code)]
+    integrity_cstring: CString,
+    #[allow(dead_code)]
+    journal_integrity_cstring: CString,
+    #[allow(dead_code)]
+    journal_crypt_cstring: CString,
 }
 
 pub struct CryptParamsIntegrity {
@@ -158,6 +190,9 @@ impl<'a> TryInto<CryptParamsIntegrityRef<'a>> for &'a CryptParamsIntegrity {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<CryptParamsIntegrityRef<'a>, Self::Error> {
+        let integrity_cstring = to_cstring!(self.integrity)?;
+        let journal_integrity_cstring = to_cstring!(self.journal_integrity)?;
+        let journal_crypt_cstring = to_cstring!(self.journal_crypt)?;
         let inner = cryptsetup_sys::crypt_params_integrity {
             journal_size: self.journal_size,
             journal_watermark: self.journal_watermark,
@@ -166,18 +201,21 @@ impl<'a> TryInto<CryptParamsIntegrityRef<'a>> for &'a CryptParamsIntegrity {
             tag_size: self.tag_size,
             sector_size: self.sector_size,
             buffer_sectors: self.buffer_sectors,
-            integrity: to_str_ptr!(self.integrity)?,
+            integrity: integrity_cstring.as_ptr(),
             integrity_key_size: self.integrity_key_size,
-            journal_integrity: to_str_ptr!(self.journal_integrity)?,
+            journal_integrity: journal_integrity_cstring.as_ptr(),
             journal_integrity_key: to_byte_ptr!(self.journal_integrity_key),
             journal_integrity_key_size: self.journal_integrity_key.len() as u32,
-            journal_crypt: to_str_ptr!(self.journal_crypt)?,
+            journal_crypt: journal_crypt_cstring.as_ptr(),
             journal_crypt_key: to_byte_ptr!(self.journal_crypt_key),
             journal_crypt_key_size: self.journal_crypt_key.len() as u32,
         };
         Ok(CryptParamsIntegrityRef {
             inner,
-            data: &PhantomData,
+            reference: self,
+            integrity_cstring,
+            journal_integrity_cstring,
+            journal_crypt_cstring,
         })
     }
 }

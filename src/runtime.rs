@@ -75,10 +75,11 @@ impl<'a> CryptRuntime<'a> {
             size: 0,
             flags: 0,
         };
+        let name_cstring = to_cstring!(self.name)?;
         errno!(unsafe {
             cryptsetup_sys::crypt_get_active_device(
                 self.reference.as_ptr(),
-                to_str_ptr!(self.name)?,
+                name_cstring.as_ptr(),
                 &mut cad as *mut _,
             )
         })
@@ -87,10 +88,11 @@ impl<'a> CryptRuntime<'a> {
 
     /// Get detected number of integrity failures
     pub fn get_active_integrity_failures(&mut self) -> Result<u64, LibcryptErr> {
+        let name_cstring = to_cstring!(self.name)?;
         Ok(unsafe {
             cryptsetup_sys::crypt_get_active_integrity_failures(
                 self.reference.as_ptr(),
-                to_str_ptr!(self.name)?,
+                name_cstring.as_ptr(),
             )
         } as u64)
     }

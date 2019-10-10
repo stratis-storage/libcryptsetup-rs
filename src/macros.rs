@@ -68,25 +68,25 @@ macro_rules! ptr_to_result_with_reference {
     }};
 }
 
-/// Convert a `Path` type into `*const c_char`
-macro_rules! path_to_str_ptr {
+/// Convert a `Path` type into `CString`
+macro_rules! path_to_cstring {
     ( $path:expr ) => {
         match $path
             .to_str()
             .ok_or_else(|| LibcryptErr::InvalidConversion)
             .and_then(|s| std::ffi::CString::new(s).map_err(LibcryptErr::NullError))
         {
-            Ok(s) => Ok(s.as_ptr()),
+            Ok(s) => Ok(s),
             Err(e) => Err(e),
         }
     };
 }
 
-/// Convert a string type into `*const c_char`
-macro_rules! to_str_ptr {
+/// Convert a string type into `CString`
+macro_rules! to_cstring {
     ( $str:expr ) => {
         match std::ffi::CString::new($str.as_bytes()) {
-            Ok(s) => Ok(s.as_ptr()),
+            Ok(s) => Ok(s),
             Err(e) => Err($crate::err::LibcryptErr::NullError(e)),
         }
     };
@@ -228,6 +228,14 @@ macro_rules! struct_ref_to_bitflags {
                 })
             }
         }
+    };
+}
+
+#[macro_export]
+/// Create a C-compatible static string with a null byte
+macro_rules! c_str {
+    ( $str:tt ) => {
+        concat!($str, "\0")
     };
 }
 

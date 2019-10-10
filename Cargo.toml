@@ -12,3 +12,9 @@ path = "./cryptsetup-sys"
 libc = "0.2.60"
 serde_json = "*"
 uuid = "0.7.4"
+
+[dev-dependencies]
+base64 = "*"
+loopdev = "*"
+nix = "*"
+rand = "*"

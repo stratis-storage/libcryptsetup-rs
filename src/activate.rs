@@ -35,12 +35,14 @@ impl<'a> CryptActivation<'a> {
         passphrase: &str,
         flags: CryptActivateFlags,
     ) -> Result<c_int, LibcryptErr> {
+        let name_cstring = to_cstring!(self.name)?;
+        let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_activate_by_passphrase(
                 self.reference.as_ptr(),
-                to_str_ptr!(self.name)?,
+                name_cstring.as_ptr(),
                 keyslot,
-                to_str_ptr!(passphrase)?,
+                passphrase_cstring.as_ptr(),
                 passphrase.len(),
                 flags.into(),
             )
@@ -56,12 +58,14 @@ impl<'a> CryptActivation<'a> {
         keyfile_offset: u64,
         flags: CryptActivateFlags,
     ) -> Result<c_int, LibcryptErr> {
+        let name_cstring = to_cstring!(self.name)?;
+        let keyfile_cstring = path_to_cstring!(keyfile)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_activate_by_keyfile_device_offset(
                 self.reference.as_ptr(),
-                to_str_ptr!(self.name)?,
+                name_cstring.as_ptr(),
                 keyslot,
-                path_to_str_ptr!(keyfile)?,
+                keyfile_cstring.as_ptr(),
                 keyfile_size,
                 keyfile_offset,
                 flags.into(),
@@ -79,10 +83,11 @@ impl<'a> CryptActivation<'a> {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (ptr::null(), 0),
         };
+        let name_cstring = to_cstring!(self.name)?;
         errno!(unsafe {
             cryptsetup_sys::crypt_activate_by_volume_key(
                 self.reference.as_ptr(),
-                to_str_ptr!(self.name)?,
+                name_cstring.as_ptr(),
                 volume_key_ptr,
                 volume_key_len,
                 flags.into(),
@@ -97,11 +102,13 @@ impl<'a> CryptActivation<'a> {
         keyslot: c_int,
         flags: CryptActivateFlags,
     ) -> Result<c_int, LibcryptErr> {
+        let name_cstring = to_cstring!(self.name)?;
+        let description_cstring = to_cstring!(key_description)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_activate_by_keyring(
                 self.reference.as_ptr(),
-                to_str_ptr!(self.name)?,
-                to_str_ptr!(key_description)?,
+                name_cstring.as_ptr(),
+                description_cstring.as_ptr(),
                 keyslot,
                 flags.into(),
             )
@@ -110,10 +117,11 @@ impl<'a> CryptActivation<'a> {
 
     /// Deactivate crypt device
     pub fn deactivate(&mut self, flags: CryptDeactivateFlags) -> Result<(), LibcryptErr> {
+        let name_cstring = to_cstring!(self.name)?;
         errno!(unsafe {
             cryptsetup_sys::crypt_deactivate_by_name(
                 self.reference.as_ptr(),
-                to_str_ptr!(self.name)?,
+                name_cstring.as_ptr(),
                 flags.into(),
             )
         })

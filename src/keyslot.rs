@@ -92,13 +92,15 @@ impl<'a> CryptKeyslot<'a> {
         passphrase: &str,
         new_passphrase: &str,
     ) -> Result<c_int, LibcryptErr> {
+        let passphrase_cstring = to_cstring!(passphrase)?;
+        let new_passphrase_cstring = to_cstring!(new_passphrase)?;
         errno_int_success!(unsafe {
             crypt_keyslot_add_by_passphrase(
                 self.reference.as_ptr(),
                 self.keyslot,
-                to_str_ptr!(passphrase)?,
+                passphrase_cstring.as_ptr(),
                 passphrase.len(),
-                to_str_ptr!(new_passphrase)?,
+                new_passphrase_cstring.as_ptr(),
                 new_passphrase.len(),
             )
         })
@@ -112,14 +114,16 @@ impl<'a> CryptKeyslot<'a> {
         passphrase: &str,
         new_passphrase: &str,
     ) -> Result<c_int, LibcryptErr> {
+        let passphrase_cstring = to_cstring!(passphrase)?;
+        let new_passphrase_cstring = to_cstring!(new_passphrase)?;
         errno_int_success!(unsafe {
             crypt_keyslot_change_by_passphrase(
                 self.reference.as_ptr(),
                 keyslot_old,
                 keyslot_new,
-                to_str_ptr!(passphrase)?,
+                passphrase_cstring.as_ptr(),
                 passphrase.len(),
-                to_str_ptr!(new_passphrase)?,
+                new_passphrase_cstring.as_ptr(),
                 new_passphrase.len(),
             )
         })
@@ -135,14 +139,16 @@ impl<'a> CryptKeyslot<'a> {
     ) -> Result<c_int, LibcryptErr> {
         let (keyfile, keyfile_size) = keyfile_and_size;
         let (new_keyfile, new_keyfile_size) = new_keyfile_and_size;
+        let keyfile_cstring = path_to_cstring!(keyfile)?;
+        let new_keyfile_cstring = path_to_cstring!(new_keyfile)?;
         errno_int_success!(unsafe {
             crypt_keyslot_add_by_keyfile_device_offset(
                 self.reference.as_ptr(),
                 self.keyslot,
-                path_to_str_ptr!(keyfile)?,
+                keyfile_cstring.as_ptr(),
                 keyfile_size,
                 keyfile_offset,
-                path_to_str_ptr!(new_keyfile)?,
+                new_keyfile_cstring.as_ptr(),
                 new_keyfile_size,
                 new_keyfile_offset,
             )
@@ -159,13 +165,14 @@ impl<'a> CryptKeyslot<'a> {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (std::ptr::null(), 0),
         };
+        let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {
             crypt_keyslot_add_by_volume_key(
                 self.reference.as_ptr(),
                 self.keyslot,
                 vk_ptr,
                 vk_len,
-                to_str_ptr!(passphrase)?,
+                passphrase_cstring.as_ptr(),
                 passphrase.len(),
             )
         })
@@ -182,13 +189,14 @@ impl<'a> CryptKeyslot<'a> {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (std::ptr::null(), 0),
         };
+        let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {
             crypt_keyslot_add_by_key(
                 self.reference.as_ptr(),
                 self.keyslot,
                 vk_ptr,
                 vk_len,
-                to_str_ptr!(passphrase)?,
+                passphrase_cstring.as_ptr(),
                 passphrase.len(),
                 flags.into(),
             )
@@ -288,8 +296,9 @@ impl<'a> CryptKeyslot<'a> {
         cipher: &str,
         key_size: crate::SizeT,
     ) -> Result<(), LibcryptErr> {
+        let cipher_cstring = to_cstring!(cipher)?;
         errno!(unsafe {
-            crypt_keyslot_set_encryption(self.reference.as_ptr(), to_str_ptr!(cipher)?, key_size)
+            crypt_keyslot_set_encryption(self.reference.as_ptr(), cipher_cstring.as_ptr(), key_size)
         })
     }
 

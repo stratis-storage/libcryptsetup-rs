@@ -32,12 +32,15 @@ impl<'a> CryptContext<'a> {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (ptr::null(), 0),
         };
+        let (cipher, cipher_mode) = cipher_and_mode;
+        let cipher_cstring = to_cstring!(cipher)?;
+        let cipher_mode_cstring = to_cstring!(cipher_mode)?;
         errno!(unsafe {
             crypt_format(
                 self.reference.as_ptr(),
                 type_.as_ptr(),
-                to_str_ptr!(cipher_and_mode.0)?,
-                to_str_ptr!(cipher_and_mode.1)?,
+                cipher_cstring.as_ptr(),
+                cipher_mode_cstring.as_ptr(),
                 uuid.as_bytes().as_ptr() as *const c_char,
                 volume_key_ptr,
                 volume_key_len,
@@ -72,13 +75,19 @@ impl<'a> CryptContext<'a> {
         label: Option<&str>,
         subsystem_label: Option<&str>,
     ) -> Result<(), LibcryptErr> {
-        let (lptr, slptr) = match (label, subsystem_label) {
-            (Some(l), Some(sl)) => (to_str_ptr!(l)?, to_str_ptr!(sl)?),
-            (Some(l), _) => (to_str_ptr!(l)?, std::ptr::null()),
-            (_, Some(sl)) => (std::ptr::null(), to_str_ptr!(sl)?),
-            (_, _) => (std::ptr::null(), std::ptr::null()),
+        let (lcstring, slcstring) = match (label, subsystem_label) {
+            (Some(l), Some(sl)) => (Some(to_cstring!(l)?), Some(to_cstring!(sl)?)),
+            (Some(l), _) => (Some(to_cstring!(l)?), None),
+            (_, Some(sl)) => (None, Some(to_cstring!(sl)?)),
+            (_, _) => (None, None),
         };
-        errno!(unsafe { crypt_set_label(self.reference.as_ptr(), lptr, slptr) })
+        errno!(unsafe {
+            crypt_set_label(
+                self.reference.as_ptr(),
+                lcstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
+                slcstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
+            )
+        })
     }
 
     /// Set policty on loading volume keys via kernel keyring
@@ -110,12 +119,14 @@ impl<'a> CryptContext<'a> {
 
     /// Resize crypt device
     pub fn resize(&mut self, name: &str, new_size: u64) -> Result<(), LibcryptErr> {
-        errno!(unsafe { crypt_resize(self.reference.as_ptr(), to_str_ptr!(name)?, new_size,) })
+        let name_cstring = to_cstring!(name)?;
+        errno!(unsafe { crypt_resize(self.reference.as_ptr(), name_cstring.as_ptr(), new_size) })
     }
 
     /// Suspend crypt device
     pub fn suspend(&mut self, name: &str) -> Result<(), LibcryptErr> {
-        errno!(unsafe { crypt_suspend(self.reference.as_ptr(), to_str_ptr!(name)?,) })
+        let name_cstring = to_cstring!(name)?;
+        errno!(unsafe { crypt_suspend(self.reference.as_ptr(), name_cstring.as_ptr()) })
     }
 
     /// Resume crypt device using a passphrase
@@ -125,12 +136,14 @@ impl<'a> CryptContext<'a> {
         keyslot: c_int,
         passphrase: &str,
     ) -> Result<c_int, LibcryptErr> {
+        let name_cstring = to_cstring!(name)?;
+        let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {
             crypt_resume_by_passphrase(
                 self.reference.as_ptr(),
-                to_str_ptr!(name)?,
+                name_cstring.as_ptr(),
                 keyslot,
-                to_str_ptr!(passphrase)?,
+                passphrase_cstring.as_ptr(),
                 passphrase.len() as crate::SizeT,
             )
         })
@@ -145,12 +158,14 @@ impl<'a> CryptContext<'a> {
         keyfile_size: crate::SizeT,
         keyfile_offset: u64,
     ) -> Result<c_int, LibcryptErr> {
+        let name_cstring = to_cstring!(name)?;
+        let keyfile_cstring = path_to_cstring!(keyfile)?;
         errno_int_success!(unsafe {
             crypt_resume_by_keyfile_device_offset(
                 self.reference.as_ptr(),
-                to_str_ptr!(name)?,
+                name_cstring.as_ptr(),
                 keyslot,
-                path_to_str_ptr!(keyfile)?,
+                keyfile_cstring.as_ptr(),
                 keyfile_size,
                 keyfile_offset,
             )

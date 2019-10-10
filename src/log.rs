@@ -52,8 +52,14 @@ impl<'a> CryptLog<'a> {
 
     /// Generate a log entry
     pub fn log(&mut self, level: CryptLogLevel, msg: &str) -> Result<(), LibcryptErr> {
-        let msg_ptr = to_str_ptr!(msg)?;
-        unsafe { crypt_log(self.reference.as_ptr(), level as c_int, msg_ptr) };
+        let msg_cstring = to_cstring!(msg)?;
+        unsafe {
+            crypt_log(
+                self.reference.as_ptr(),
+                level as c_int,
+                msg_cstring.as_ptr(),
+            )
+        };
         Ok(())
     }
 

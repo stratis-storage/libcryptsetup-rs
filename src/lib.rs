@@ -70,6 +70,9 @@ pub use settings::CryptSettings;
 mod status;
 pub use status::CryptDeviceStatus;
 
+#[cfg(test)]
+mod tests;
+
 mod wipe;
 pub use wipe::CryptWipe;
 

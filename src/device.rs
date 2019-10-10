@@ -23,8 +23,13 @@ impl CryptInit {
     /// Initialize by device path
     pub fn init(device_path: &Path) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
-        let cstr = path_to_str_ptr!(device_path)?;
-        errno!(unsafe { crypt_init(&mut cdevice as *mut *mut crypt_device, cstr) })?;
+        let device_path_cstring = path_to_cstring!(device_path)?;
+        errno!(unsafe {
+            crypt_init(
+                &mut cdevice as *mut *mut crypt_device,
+                device_path_cstring.as_ptr(),
+            )
+        })?;
         Ok(CryptDevice { ptr: cdevice })
     }
 
@@ -34,13 +39,13 @@ impl CryptInit {
         data_device_path: &Path,
     ) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
-        let device_path_cstr = path_to_str_ptr!(device_path)?;
-        let data_device_path_cstr = path_to_str_ptr!(data_device_path)?;
+        let device_path_cstring = path_to_cstring!(device_path)?;
+        let data_device_path_cstring = path_to_cstring!(data_device_path)?;
         errno!(unsafe {
             crypt_init_data_device(
                 &mut cdevice as *mut *mut crypt_device,
-                device_path_cstr,
-                data_device_path_cstr,
+                device_path_cstring.as_ptr(),
+                data_device_path_cstring.as_ptr(),
             )
         })?;
         Ok(CryptDevice { ptr: cdevice })
@@ -52,13 +57,13 @@ impl CryptInit {
         header_device_path: &Path,
     ) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
-        let name_cstr = to_str_ptr!(name)?;
-        let header_device_path_cstr = path_to_str_ptr!(header_device_path)?;
+        let name_cstring = to_cstring!(name)?;
+        let header_device_path_cstring = path_to_cstring!(header_device_path)?;
         errno!(unsafe {
             crypt_init_by_name_and_header(
                 &mut cdevice as *mut *mut crypt_device,
-                name_cstr,
-                header_device_path_cstr,
+                name_cstring.as_ptr(),
+                header_device_path_cstring.as_ptr(),
             )
         })?;
         Ok(CryptDevice { ptr: cdevice })
@@ -67,8 +72,13 @@ impl CryptInit {
     /// Initialize by name
     pub fn init_by_name(name: &str) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
-        let name_cstr = to_str_ptr!(name)?;
-        errno!(unsafe { crypt_init_by_name(&mut cdevice as *mut *mut crypt_device, name_cstr) })?;
+        let name_cstring = to_cstring!(name)?;
+        errno!(unsafe {
+            crypt_init_by_name(
+                &mut cdevice as *mut *mut crypt_device,
+                name_cstring.as_ptr(),
+            )
+        })?;
         Ok(CryptDevice { ptr: cdevice })
     }
 }
@@ -179,8 +189,8 @@ impl CryptDevice {
 
     /// Set the device path for a data device
     pub fn set_data_device(&mut self, device_path: &Path) -> Result<(), LibcryptErr> {
-        let device_path_cstr = path_to_str_ptr!(device_path)?;
-        errno!(unsafe { crypt_set_data_device(self.ptr, device_path_cstr) })
+        let device_path_cstring = path_to_cstring!(device_path)?;
+        errno!(unsafe { crypt_set_data_device(self.ptr, device_path_cstring.as_ptr()) })
     }
 
     /// Set the offset for the data section on a device
@@ -196,5 +206,15 @@ impl CryptDevice {
 impl Drop for CryptDevice {
     fn drop(&mut self) {
         unsafe { crypt_free(self.ptr) }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::tests;
+
+    #[test]
+    fn test_init_methods() {
+        tests::init::test_init();
     }
 }

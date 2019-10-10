@@ -38,10 +38,11 @@ impl<'a> CryptWipe<'a> {
         callback: Option<WipeProgressCallback>,
         usrptr: &mut T,
     ) -> Result<(), LibcryptErr> {
+        let dev_path_cstring = path_to_cstring!(dev_path)?;
         errno!(unsafe {
             cryptsetup_sys::crypt_wipe(
                 self.reference.as_ptr(),
-                path_to_str_ptr!(dev_path)?,
+                dev_path_cstring.as_ptr(),
                 pattern as u32,
                 offset,
                 length,

@@ -41,8 +41,9 @@ impl<'a> CryptDeviceStatus<'a> {
 
     /// Get status info from device name
     pub fn status(&mut self, name: &str) -> Result<CryptStatusInfo, LibcryptErr> {
+        let name_cstring = to_cstring!(name)?;
         try_int_to_return!(
-            unsafe { cryptsetup_sys::crypt_status(self.reference.as_ptr(), to_str_ptr!(name)?) },
+            unsafe { cryptsetup_sys::crypt_status(self.reference.as_ptr(), name_cstring.as_ptr()) },
             CryptStatusInfo
         )
     }

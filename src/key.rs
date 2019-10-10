@@ -21,13 +21,14 @@ impl<'a> CryptVolumeKey<'a> {
         passphrase: &str,
     ) -> Result<(c_int, crate::SizeT), LibcryptErr> {
         let mut volume_key_size_t = volume_key.len();
+        let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_volume_key_get(
                 self.reference.as_ptr(),
                 keyslot,
                 to_mut_byte_ptr!(volume_key),
                 &mut volume_key_size_t as *mut _,
-                to_str_ptr!(passphrase)?,
+                passphrase_cstring.as_ptr(),
                 passphrase.len(),
             )
         })

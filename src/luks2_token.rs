@@ -48,6 +48,8 @@ impl<'a> CryptLuks2Token<'a> {
         json: &serde_json::Value,
         allocate_new: bool,
     ) -> Result<c_int, LibcryptErr> {
+        let json_cstring =
+            to_cstring!(serde_json::to_string(json).map_err(LibcryptErr::JsonError)?)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_token_json_set(
                 self.reference.as_ptr(),
@@ -56,7 +58,7 @@ impl<'a> CryptLuks2Token<'a> {
                 } else {
                     self.token
                 },
-                to_str_ptr!(serde_json::to_string(json).map_err(LibcryptErr::JsonError)?)?,
+                json_cstring.as_ptr(),
             )
         })
     }
@@ -83,6 +85,7 @@ impl<'a> CryptLuks2Token<'a> {
         key_description: &str,
         allocate_new: bool,
     ) -> Result<c_int, LibcryptErr> {
+        let description_cstring = to_cstring!(key_description)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_token_luks2_keyring_set(
                 self.reference.as_ptr(),
@@ -92,7 +95,7 @@ impl<'a> CryptLuks2Token<'a> {
                     self.token
                 },
                 &cryptsetup_sys::crypt_token_params_luks2_keyring {
-                    key_description: to_str_ptr!(key_description)?,
+                    key_description: description_cstring.as_ptr(),
                 } as *const _,
             )
         })
@@ -156,8 +159,11 @@ impl<'a> CryptLuks2Token<'a> {
         validate: cryptsetup_sys::crypt_token_validate_func,
         dump: cryptsetup_sys::crypt_token_dump_func,
     ) -> Result<(), LibcryptErr> {
+        if name.get(name.len() - 1..) != Some("\0") {
+            return Err(LibcryptErr::NoNull(name));
+        }
         let handler = cryptsetup_sys::crypt_token_handler {
-            name: to_str_ptr!(name)?,
+            name: name.as_ptr() as *const c_char,
             open,
             buffer_free,
             validate,
@@ -178,10 +184,11 @@ impl<'a> CryptLuks2Token<'a> {
         usrdata: &mut T,
         flags: CryptActivateFlags,
     ) -> Result<c_int, LibcryptErr> {
+        let name_cstring = to_cstring!(name)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_activate_by_token(
                 self.reference.as_ptr(),
-                to_str_ptr!(name)?,
+                name_cstring.as_ptr(),
                 token,
                 usrdata as *mut _ as *mut std::os::raw::c_void,
                 flags.into(),
