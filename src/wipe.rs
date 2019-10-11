@@ -33,7 +33,7 @@ impl<'a> CryptWipe<'a> {
         pattern: CryptWipePattern,
         offset: u64,
         length: u64,
-        wipe_block_size: crate::SizeT,
+        wipe_block_size: crate::size_t,
         wipe_no_direct_io: bool,
         callback: Option<WipeProgressCallback>,
         usrptr: &mut T,

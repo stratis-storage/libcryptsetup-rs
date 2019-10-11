@@ -115,7 +115,7 @@ impl CryptDevice {
     }
 
     /// Get a keyslot option handle
-    pub fn keyslot_handle(&mut self, keyslot: c_int) -> CryptKeyslot {
+    pub fn keyslot_handle(&mut self, keyslot: Option<c_int>) -> CryptKeyslot {
         CryptKeyslot::new(self, keyslot)
     }
 
@@ -206,15 +206,5 @@ impl CryptDevice {
 impl Drop for CryptDevice {
     fn drop(&mut self) {
         unsafe { crypt_free(self.ptr) }
-    }
-}
-
-#[cfg(test)]
-mod test {
-    use crate::tests;
-
-    #[test]
-    fn test_init_methods() {
-        tests::init::test_init();
     }
 }

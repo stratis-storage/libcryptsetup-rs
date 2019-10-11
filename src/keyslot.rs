@@ -82,8 +82,11 @@ pub struct CryptKeyslot<'a> {
 }
 
 impl<'a> CryptKeyslot<'a> {
-    pub(crate) fn new(reference: &'a mut CryptDevice, keyslot: c_int) -> Self {
-        CryptKeyslot { reference, keyslot }
+    pub(crate) fn new(reference: &'a mut CryptDevice, keyslot: Option<c_int>) -> Self {
+        CryptKeyslot {
+            reference,
+            keyslot: keyslot.unwrap_or(cryptsetup_sys::CRYPT_ANY_SLOT),
+        }
     }
 
     /// Add key slot using a passphrase
@@ -132,9 +135,9 @@ impl<'a> CryptKeyslot<'a> {
     /// Add key slot using key file
     pub fn add_by_keyfile_device_offset(
         &mut self,
-        keyfile_and_size: (&Path, crate::SizeT),
+        keyfile_and_size: (&Path, crate::size_t),
         keyfile_offset: u64,
-        new_keyfile_and_size: (&Path, crate::SizeT),
+        new_keyfile_and_size: (&Path, crate::size_t),
         new_keyfile_offset: u64,
     ) -> Result<c_int, LibcryptErr> {
         let (keyfile, keyfile_size) = keyfile_and_size;
@@ -260,13 +263,13 @@ impl<'a> CryptKeyslot<'a> {
     }
 
     /// Get encryption cipher and key size of keyslot (not data)
-    pub fn get_encryption(&mut self) -> Result<(&str, crate::SizeT), LibcryptErr> {
-        let mut key_size: crate::SizeT = 0;
+    pub fn get_encryption(&mut self) -> Result<(&str, crate::size_t), LibcryptErr> {
+        let mut key_size: crate::size_t = 0;
         ptr_to_result!(unsafe {
             crypt_keyslot_get_encryption(
                 self.reference.as_ptr(),
                 self.keyslot,
-                &mut key_size as *mut crate::SizeT,
+                &mut key_size as *mut crate::size_t,
             )
         })
         .and_then(|ptr| from_str_ptr!(ptr))
@@ -294,7 +297,7 @@ impl<'a> CryptKeyslot<'a> {
     pub fn set_encryption(
         &mut self,
         cipher: &str,
-        key_size: crate::SizeT,
+        key_size: crate::size_t,
     ) -> Result<(), LibcryptErr> {
         let cipher_cstring = to_cstring!(cipher)?;
         errno!(unsafe {

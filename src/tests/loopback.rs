@@ -58,7 +58,8 @@ where
                 io::ErrorKind::NotFound,
             ))),
         });
-    dev.detach()
+    let detach_result = if cleanup { dev.detach() } else { Ok(()) };
+    detach_result
         .and_then(|_| if cleanup { remove_file(&path) } else { Ok(()) })
         .map_err(LibcryptErr::IOError)
         .and(test_result)

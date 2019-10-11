@@ -7,6 +7,7 @@ use std::{
 use crate::{device::CryptDevice, err::LibcryptErr, format::Format, Bool};
 
 use cryptsetup_sys::*;
+use either::Either;
 use uuid::Uuid;
 
 /// Cryptographic context for device
@@ -20,17 +21,24 @@ impl<'a> CryptContext<'a> {
     }
 
     /// Set cryptography format
+    ///
+    /// For `volume_key parameter`, either the volume key or the desired length of the generated volume key
+    /// can be specified, not both at once
     pub fn format<T>(
         &mut self,
         type_: Format,
         cipher_and_mode: (&str, &str),
-        uuid: Uuid,
-        volume_key: Option<&[u8]>,
-        params: &mut T,
+        uuid: Option<Uuid>,
+        volume_key: Either<&[u8], usize>,
+        params: Option<&mut T>,
     ) -> Result<(), LibcryptErr> {
+        let uuid_ptr = uuid
+            .as_ref()
+            .map(|u| u.as_bytes().as_ptr())
+            .unwrap_or(ptr::null()) as *const c_char;
         let (volume_key_ptr, volume_key_len) = match volume_key {
-            Some(vk) => (to_byte_ptr!(vk), vk.len()),
-            None => (ptr::null(), 0),
+            Either::Left(vk) => (to_byte_ptr!(vk), vk.len()),
+            Either::Right(len) => (ptr::null(), len),
         };
         let (cipher, cipher_mode) = cipher_and_mode;
         let cipher_cstring = to_cstring!(cipher)?;
@@ -41,10 +49,12 @@ impl<'a> CryptContext<'a> {
                 type_.as_ptr(),
                 cipher_cstring.as_ptr(),
                 cipher_mode_cstring.as_ptr(),
-                uuid.as_bytes().as_ptr() as *const c_char,
+                uuid_ptr,
                 volume_key_ptr,
                 volume_key_len,
-                params as *mut _ as *mut c_void,
+                params
+                    .map(|p| p as *mut _ as *mut c_void)
+                    .unwrap_or(ptr::null_mut()),
             )
         })
     }
@@ -96,12 +106,14 @@ impl<'a> CryptContext<'a> {
     }
 
     /// Load on-disk header parameters based on provided type
-    pub fn load<T>(&mut self, type_: Format, params: &mut T) -> Result<(), LibcryptErr> {
+    pub fn load<T>(&mut self, type_: Format, params: Option<&mut T>) -> Result<(), LibcryptErr> {
         errno!(unsafe {
             crypt_load(
                 self.reference.as_ptr(),
                 type_.as_ptr(),
-                params as *mut _ as *mut c_void,
+                params
+                    .map(|p| p as *mut _ as *mut c_void)
+                    .unwrap_or(ptr::null_mut()),
             )
         })
     }
@@ -144,7 +156,7 @@ impl<'a> CryptContext<'a> {
                 name_cstring.as_ptr(),
                 keyslot,
                 passphrase_cstring.as_ptr(),
-                passphrase.len() as crate::SizeT,
+                passphrase.len() as crate::size_t,
             )
         })
     }
@@ -155,7 +167,7 @@ impl<'a> CryptContext<'a> {
         name: &str,
         keyslot: c_int,
         keyfile: &Path,
-        keyfile_size: crate::SizeT,
+        keyfile_size: crate::size_t,
         keyfile_offset: u64,
     ) -> Result<c_int, LibcryptErr> {
         let name_cstring = to_cstring!(name)?;

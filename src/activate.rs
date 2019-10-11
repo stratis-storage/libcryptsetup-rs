@@ -54,7 +54,7 @@ impl<'a> CryptActivation<'a> {
         &mut self,
         keyslot: c_int,
         keyfile: &Path,
-        keyfile_size: crate::SizeT,
+        keyfile_size: crate::size_t,
         keyfile_offset: u64,
         flags: CryptActivateFlags,
     ) -> Result<c_int, LibcryptErr> {

@@ -173,6 +173,11 @@ macro_rules! bitflags_to_from_struct {
             pub fn new(vec: Vec<$flag_type>) -> Self {
                 $flags_type(vec)
             }
+
+            /// Create an empty set of flags
+            pub fn empty() -> Self {
+                $flags_type(Vec::new())
+            }
         }
 
         impl std::convert::Into<$bitflags_type> for $flags_type {

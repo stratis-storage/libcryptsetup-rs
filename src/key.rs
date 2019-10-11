@@ -19,7 +19,7 @@ impl<'a> CryptVolumeKey<'a> {
         keyslot: c_int,
         volume_key: &mut [u8],
         passphrase: &str,
-    ) -> Result<(c_int, crate::SizeT), LibcryptErr> {
+    ) -> Result<(c_int, crate::size_t), LibcryptErr> {
         let mut volume_key_size_t = volume_key.len();
         let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {

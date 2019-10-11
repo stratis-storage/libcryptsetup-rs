@@ -70,7 +70,7 @@ pub struct CryptParamsLuks2 {
     pub pbkdf: CryptPbkdfType,
     pub integrity: Option<String>,
     pub integrity_params: CryptParamsIntegrity,
-    pub data_alignment: crate::SizeT,
+    pub data_alignment: crate::size_t,
     pub data_device: PathBuf,
     pub sector_size: u32,
     pub label: String,

@@ -10,9 +10,12 @@
 // processes that invoke this function. For now, this is disabled.
 
 extern crate cryptsetup_sys;
+extern crate either;
 extern crate libc;
 extern crate serde_json;
 extern crate uuid;
+
+pub use either::Either;
 
 use std::os::raw::c_int;
 
@@ -77,7 +80,7 @@ mod wipe;
 pub use wipe::CryptWipe;
 
 /// Re-export of `libc::size_t`
-pub type SizeT = libc::size_t;
+pub use libc::size_t;
 
 /// Boolean specifying yes or no
 #[derive(Debug, Eq, PartialEq)]
@@ -112,5 +115,15 @@ impl From<c_int> for Interrupt {
             i if i == 0 => Interrupt::No,
             _ => Interrupt::Yes,
         }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::tests;
+
+    #[test]
+    fn test_encrypt() {
+        tests::encrypt::test_encrypt();
     }
 }

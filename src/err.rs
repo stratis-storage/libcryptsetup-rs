@@ -27,6 +27,8 @@ pub enum LibcryptErr {
     NullPtr,
     /// Indicates that a `&'static str` was not created with `c_str!()` macro
     NoNull(&'static str),
+    /// Custom message
+    Other(String),
 }
 
 impl Display for LibcryptErr {
@@ -54,6 +56,7 @@ impl Display for LibcryptErr {
             LibcryptErr::NoNull(s) => {
                 write!(f, "Static string {} was not created with c_str!() macro", s)
             }
+            LibcryptErr::Other(ref s) => write!(f, "Failed with error: {}", s),
         }
     }
 }
