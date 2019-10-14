@@ -122,6 +122,7 @@ impl From<c_int> for Interrupt {
 mod test {
     use crate::tests;
 
+    #[ignore]
     #[test]
     fn test_encrypt() {
         tests::encrypt::test_encrypt();
