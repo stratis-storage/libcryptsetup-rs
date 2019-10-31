@@ -1,4 +1,5 @@
 use std::{
+    ffi::CString,
     os::raw::{c_char, c_int, c_void},
     path::Path,
     ptr,
@@ -36,16 +37,25 @@ impl CryptInit {
     /// Initialize by device path and data device path
     pub fn init_with_data_device(
         device_path: &Path,
-        data_device_path: &Path,
+        data_device_path: Option<&Path>,
     ) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
         let device_path_cstring = path_to_cstring!(device_path)?;
-        let data_device_path_cstring = path_to_cstring!(data_device_path)?;
+
+        let mut data_device_path_cstring = CString::default();
+        if let Some(path) = data_device_path {
+            data_device_path_cstring = path_to_cstring!(path)?;
+        }
+
         errno!(unsafe {
             crypt_init_data_device(
                 &mut cdevice as *mut *mut crypt_device,
                 device_path_cstring.as_ptr(),
-                data_device_path_cstring.as_ptr(),
+                if data_device_path.is_some() {
+                    data_device_path_cstring.as_ptr()
+                } else {
+                    ptr::null()
+                },
             )
         })?;
         Ok(CryptDevice { ptr: cdevice })
@@ -54,29 +64,25 @@ impl CryptInit {
     /// Initialize by name and header device path
     pub fn init_by_name_and_header(
         name: &str,
-        header_device_path: &Path,
+        header_device_path: Option<&Path>,
     ) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
         let name_cstring = to_cstring!(name)?;
-        let header_device_path_cstring = path_to_cstring!(header_device_path)?;
+
+        let mut header_device_path_cstring = CString::default();
+        if let Some(path) = header_device_path {
+            header_device_path_cstring = path_to_cstring!(path)?;
+        }
+
         errno!(unsafe {
             crypt_init_by_name_and_header(
                 &mut cdevice as *mut *mut crypt_device,
                 name_cstring.as_ptr(),
-                header_device_path_cstring.as_ptr(),
-            )
-        })?;
-        Ok(CryptDevice { ptr: cdevice })
-    }
-
-    /// Initialize by name
-    pub fn init_by_name(name: &str) -> Result<CryptDevice, LibcryptErr> {
-        let mut cdevice: *mut crypt_device = ptr::null_mut();
-        let name_cstring = to_cstring!(name)?;
-        errno!(unsafe {
-            crypt_init_by_name(
-                &mut cdevice as *mut *mut crypt_device,
-                name_cstring.as_ptr(),
+                if header_device_path.is_some() {
+                    header_device_path_cstring.as_ptr()
+                } else {
+                    ptr::null()
+                },
             )
         })?;
         Ok(CryptDevice { ptr: cdevice })

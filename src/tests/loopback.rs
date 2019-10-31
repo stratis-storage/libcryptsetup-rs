@@ -1,6 +1,9 @@
-use std::fs::{remove_file, File};
-use std::io::{self, Write};
-use std::path::{Path, PathBuf};
+use std::{
+    env,
+    fs::{remove_file, File},
+    io::{self, Write},
+    path::{Path, PathBuf},
+};
 
 use loopdev::LoopControl;
 use rand::random;
@@ -14,8 +17,11 @@ fn setup_backing_file(size_in_bytes: usize, with_zeros: bool) -> Result<PathBuf,
         &random::<[u8; 12]>(),
         base64::Config::new(base64::CharacterSet::UrlSafe, false),
     );
+    let directory = PathBuf::from(env::var("TEST_DIR").unwrap_or_else(|_| "/tmp".to_string()));
+    assert!(directory.exists() && directory.is_dir());
     let mut file_path = PathBuf::new();
-    file_path.push(Path::new(&format!("/tmp/{}", b64_string)));
+    file_path.push(directory);
+    file_path.push(b64_string.to_string());
 
     let mut f = File::create(&file_path)?;
     while i < size_in_bytes {
