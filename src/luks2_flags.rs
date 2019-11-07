@@ -2,6 +2,8 @@ use std::{convert::TryFrom, marker::PhantomData};
 
 use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags};
 
+use libcryptsetup_rs_sys as cryptsetup_sys;
+
 enum CryptFlagsType {
     Activation = cryptsetup_sys::crypt_flags_type_CRYPT_FLAGS_ACTIVATION as isize,
     Requirements = cryptsetup_sys::crypt_flags_type_CRYPT_FLAGS_REQUIREMENTS as isize,

@@ -2,6 +2,8 @@ use std::os::raw::c_int;
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
+use libcryptsetup_rs_sys as cryptsetup_sys;
+
 /// Handle for volume key operations
 pub struct CryptVolumeKey<'a> {
     reference: &'a mut CryptDevice,

@@ -11,6 +11,8 @@ use crate::{
     format::{CryptParamsLuks2, CryptParamsLuks2Ref},
 };
 
+use libcryptsetup_rs_sys as cryptsetup_sys;
+
 type ReencryptProgress = unsafe extern "C" fn(size: u64, offset: u64, *mut c_void) -> c_int;
 
 consts_to_from_enum!(

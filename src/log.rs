@@ -6,7 +6,8 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
-use cryptsetup_sys::*;
+use libcryptsetup_rs_sys as cryptsetup_sys;
+use libcryptsetup_rs_sys::*;
 
 type LoggingCallback = unsafe extern "C" fn(level: c_int, msg: *const c_char, usrptr: *mut c_void);
 

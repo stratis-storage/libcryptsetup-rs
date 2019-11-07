@@ -2,6 +2,8 @@ use std::convert::TryFrom;
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
+use libcryptsetup_rs_sys as cryptsetup_sys;
+
 consts_to_from_enum!(
     /// Enum wrapping `CRYPT_ACTIVATE_*` flags
     CryptActivateFlag,

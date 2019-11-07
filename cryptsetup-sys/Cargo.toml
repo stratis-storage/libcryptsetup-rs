@@ -1,5 +1,5 @@
 [package]
-name = "cryptsetup-sys"
+name = "libcryptsetup-rs-sys"
 version = "0.1.0"
 authors = ["John Baublitz <jbaublitz@redhat.com>"]
 edition = "2018"

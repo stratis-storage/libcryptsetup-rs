@@ -1,16 +1,18 @@
 [package]
-name = "cryptsetup"
+name = "libcryptsetup-rs"
 version = "0.1.0"
 authors = ["John Baublitz <jbaublitz@redhat.com>"]
 edition = "2018"
 
-[dependencies.cryptsetup-sys]
+[dependencies.libcryptsetup-rs-sys]
 version = "0.1.0"
 path = "./cryptsetup-sys"
 
 [dependencies]
 either = "1.5"
 libc = "0.2.60"
+libloading = "*"
+pkg-config = "*"
 serde_json = "1.0"
 uuid = "0.7.4"
 

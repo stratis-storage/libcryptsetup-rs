@@ -438,13 +438,13 @@ mod test {
     #[test]
     fn test_c_logging_callback() {
         logging_callback(
-            crate::cryptsetup_sys::CRYPT_LOG_ERROR as i32,
+            crate::libcryptsetup_rs_sys::CRYPT_LOG_ERROR as i32,
             "".as_ptr() as *const std::os::raw::c_char,
             &mut 1 as *mut _ as *mut std::os::raw::c_void,
         );
 
         logging_callback(
-            crate::cryptsetup_sys::CRYPT_LOG_DEBUG as i32,
+            crate::libcryptsetup_rs_sys::CRYPT_LOG_DEBUG as i32,
             "".as_ptr() as *const std::os::raw::c_char,
             &mut 0 as *mut _ as *mut std::os::raw::c_void,
         );

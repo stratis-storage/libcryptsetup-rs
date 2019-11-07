@@ -12,7 +12,8 @@ use crate::{
     settings::{CryptPbkdfType, CryptPbkdfTypeRef},
 };
 
-use cryptsetup_sys::*;
+use libcryptsetup_rs_sys as cryptsetup_sys;
+use libcryptsetup_rs_sys::*;
 
 consts_to_from_enum!(
     /// Verity format flags

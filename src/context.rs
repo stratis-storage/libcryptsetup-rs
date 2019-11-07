@@ -6,7 +6,8 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr, format::Format, Bool};
 
-use cryptsetup_sys::*;
+use libcryptsetup_rs_sys::*;
+
 use either::Either;
 use uuid::Uuid;
 

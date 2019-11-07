@@ -6,6 +6,8 @@ use crate::{
     format::{CryptParamsIntegrity, CryptParamsVerity},
 };
 
+use libcryptsetup_rs_sys as cryptsetup_sys;
+
 use uuid::Uuid;
 
 pub enum CryptStatusInfo {

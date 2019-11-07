@@ -5,6 +5,8 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
+use libcryptsetup_rs_sys as cryptsetup_sys;
+
 type WipeProgressCallback =
     unsafe extern "C" fn(size: u64, offset: u64, usrptr: *mut c_void) -> c_int;
 

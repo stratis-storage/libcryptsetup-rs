@@ -2,6 +2,8 @@ use std::{os::raw::c_int, path::Path, ptr};
 
 use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags};
 
+use libcryptsetup_rs_sys as cryptsetup_sys;
+
 consts_to_from_enum!(
     /// Flags for crypt deactivate operations
     CryptDeactivateFlag,

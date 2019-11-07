@@ -2,6 +2,8 @@ use std::path::Path;
 
 use crate::{device::CryptDevice, err::LibcryptErr, format::Format};
 
+use libcryptsetup_rs_sys as cryptsetup_sys;
+
 /// Handle for backup operations on a device
 pub struct CryptBackup<'a> {
     reference: &'a mut CryptDevice,

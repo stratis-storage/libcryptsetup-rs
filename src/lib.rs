@@ -9,9 +9,12 @@
 // This means that the memory cannot be safe scrubbed and freed in longer running
 // processes that invoke this function. For now, this is disabled.
 
-extern crate cryptsetup_sys;
+extern crate libcryptsetup_rs_sys;
+
 extern crate either;
 extern crate libc;
+extern crate libloading;
+extern crate pkg_config;
 extern crate serde_json;
 extern crate uuid;
 
@@ -45,6 +48,9 @@ pub use format::CryptFormat;
 
 mod key;
 pub use key::CryptVolumeKey;
+
+mod keyfile;
+pub use keyfile::CryptKeyfile;
 
 mod keyslot;
 pub use keyslot::CryptKeyslot;
@@ -124,7 +130,13 @@ mod test {
 
     #[ignore]
     #[test]
-    fn test_encrypt() {
-        tests::encrypt::test_encrypt();
+    fn test_encrypt_by_password() {
+        tests::encrypt::test_encrypt_by_password();
+    }
+
+    #[ignore]
+    #[test]
+    fn test_encrypt_by_keyfile() {
+        tests::encrypt::test_encrypt_by_keyfile();
     }
 }

@@ -1,5 +1,7 @@
 use std::os::raw::c_int;
 
+use libcryptsetup_rs_sys as cryptsetup_sys;
+
 pub enum CryptDebugLevel {
     All = cryptsetup_sys::CRYPT_DEBUG_ALL as isize,
     Json = cryptsetup_sys::CRYPT_DEBUG_JSON as isize,

@@ -5,6 +5,8 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags, Bool};
 
+use libcryptsetup_rs_sys as cryptsetup_sys;
+
 consts_to_from_enum!(
     /// Wrapper enum for `CRYPT_TOKEN_*` values
     CryptTokenInfo,

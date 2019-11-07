@@ -7,7 +7,8 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr, Bool};
 
-use cryptsetup_sys::*;
+use libcryptsetup_rs_sys as cryptsetup_sys;
+use libcryptsetup_rs_sys::*;
 
 consts_to_from_enum!(
     /// Rust representation of random number generator enum

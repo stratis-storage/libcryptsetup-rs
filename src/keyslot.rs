@@ -7,7 +7,8 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr, format::Format, settings::CryptPbkdfType};
 
-use cryptsetup_sys::*;
+use libcryptsetup_rs_sys as cryptsetup_sys;
+use libcryptsetup_rs_sys::*;
 
 pub enum CryptVolumeKey {
     NoSegment = cryptsetup_sys::CRYPT_VOLUME_KEY_NO_SEGMENT as isize,

@@ -7,13 +7,13 @@ use std::{
 
 use crate::{
     activate::CryptActivation, backup::CryptBackup, context::CryptContext, debug::CryptDebug,
-    err::LibcryptErr, format::CryptFormat, key::CryptVolumeKey, keyslot::CryptKeyslot,
-    log::CryptLog, luks2_flags::CryptLuks2Flags, luks2_reencrypt::CryptLuks2Reencrypt,
-    luks2_token::CryptLuks2Token, runtime::CryptRuntime, settings::CryptSettings,
-    status::CryptDeviceStatus, wipe::CryptWipe,
+    err::LibcryptErr, format::CryptFormat, key::CryptVolumeKey, keyfile::CryptKeyfile,
+    keyslot::CryptKeyslot, log::CryptLog, luks2_flags::CryptLuks2Flags,
+    luks2_reencrypt::CryptLuks2Reencrypt, luks2_token::CryptLuks2Token, runtime::CryptRuntime,
+    settings::CryptSettings, status::CryptDeviceStatus, wipe::CryptWipe,
 };
 
-use cryptsetup_sys::*;
+use libcryptsetup_rs_sys::*;
 
 type ConfirmCallback = unsafe extern "C" fn(msg: *const c_char, usrptr: *mut c_void) -> c_int;
 
@@ -158,6 +158,11 @@ impl CryptDevice {
     /// Get crypt debug option handle
     pub fn debug_handle() -> CryptDebug {
         CryptDebug
+    }
+
+    /// Get crypt device keyfile option handle
+    pub fn keyfile_handle(&mut self) -> CryptKeyfile {
+        CryptKeyfile::new(self)
     }
 
     /// Get crypt device wipe option handle
