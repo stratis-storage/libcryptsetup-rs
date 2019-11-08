@@ -6,13 +6,13 @@ use std::{
 
 use crate::{
     activate::CryptDeactivateFlags, device::CryptInit, err::LibcryptErr, format::Format,
-    runtime::CryptActivateFlags, tests::loopback, Either,
+    keyfile::CryptKeyfileFlags, runtime::CryptActivateFlags, tests::loopback, Either,
 };
 
 use libc::c_int;
 use rand::random;
 
-fn init(dev_path: &Path, passphrase: &'static str) -> Result<c_int, LibcryptErr> {
+fn init(dev_path: &Path, passphrase: &str) -> Result<c_int, LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
     {
         let mut ctxt = dev.context_handle();
@@ -25,7 +25,28 @@ fn init(dev_path: &Path, passphrase: &'static str) -> Result<c_int, LibcryptErr>
         )?;
     }
     let mut keyslot = dev.keyslot_handle(None);
-    keyslot.add_by_volume_key(None, passphrase)
+    keyslot.add_by_volume_key(None, passphrase.as_bytes())
+}
+
+fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_int, LibcryptErr> {
+    let mut dev = CryptInit::init(dev_path)?;
+    {
+        let mut ctxt = dev.context_handle();
+        ctxt.format::<()>(
+            Format::Luks2,
+            ("aes", "xts-plain"),
+            None,
+            Either::Right(512 / 8),
+            None,
+        )?;
+    }
+    let keyfile_contents = {
+        let mut kf_handle = dev.keyfile_handle();
+        kf_handle.device_read(keyfile_path, 0, None, CryptKeyfileFlags::empty())?
+    };
+    let mut keyslot_handle = dev.keyslot_handle(None);
+    let keyslot = keyslot_handle.add_by_volume_key(None, keyfile_contents.as_ref())?;
+    Ok(keyslot)
 }
 
 fn activate_by_passphrase(
@@ -40,8 +61,13 @@ fn activate_by_passphrase(
         context.load::<()>(Format::Luks2, None)?;
     }
     {
-        let mut activation = dev.activate_handle(device_name);
-        activation.activate_by_passphrase(keyslot, passphrase, CryptActivateFlags::empty())?;
+        let mut activation = dev.activate_handle();
+        activation.activate_by_passphrase(
+            Some(device_name),
+            keyslot,
+            passphrase.as_bytes(),
+            CryptActivateFlags::empty(),
+        )?;
     }
     Ok(())
 }
@@ -54,20 +80,28 @@ fn create_keyfile(loopback_file_path: &Path) -> Result<PathBuf, LibcryptErr> {
     Ok(path)
 }
 
-fn add_keyfile(dev_path: &Path, _passphrase: &str) -> Result<c_int, LibcryptErr> {
+fn activate_by_keyfile(
+    dev_path: &Path,
+    device_name: &'static str,
+    keyslot: c_int,
+    keyfile_path: &Path,
+    keyfile_size: Option<crate::size_t>,
+) -> Result<(), LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
     {
-        let mut ctxt = dev.context_handle();
-        ctxt.format::<()>(
-            Format::Luks2,
-            ("aes", "xts-plain"),
-            None,
-            Either::Right(512 / 8),
-            None,
-        )?;
+        let mut context = dev.context_handle();
+        context.load::<()>(Format::Luks2, None)?;
     }
-    let _keyslot = dev.keyslot_handle(None);
-    Ok(0)
+    let mut activation = dev.activate_handle();
+    activation.activate_by_keyfile_device_offset(
+        Some(device_name),
+        keyslot,
+        keyfile_path,
+        keyfile_size,
+        0,
+        CryptActivateFlags::empty(),
+    )?;
+    Ok(())
 }
 
 fn mount(device: &Path, mount_point: &Path) -> Result<(), LibcryptErr> {
@@ -150,9 +184,9 @@ pub fn test_encrypt_by_password() {
                 mount_write_umount(encrypted_device.as_path(), mount_path.as_path());
 
             if super::do_cleanup() {
-                let mut dev = CryptInit::init_by_name_and_header("test-device", None)?;
-                let mut activation = dev.activate_handle("test-device");
-                activation.deactivate(CryptDeactivateFlags::empty())?;
+                let mut dev = CryptInit::init_by_name_and_header(device_name, None)?;
+                let mut activation = dev.activate_handle();
+                activation.deactivate(device_name, CryptDeactivateFlags::empty())?;
             }
 
             let file_contents = get_file_contents(file_path)?;
@@ -162,23 +196,6 @@ pub fn test_encrypt_by_password() {
         },
     )
     .expect("Should succeed");
-
-    loopback::use_loopback(
-        1024 * 1024 * 1024,
-        super::format_with_zeros(),
-        super::do_cleanup(),
-        |dev_path, file_path| {
-            let mount_path = PathBuf::from(format!("{}-mount", file_path.display().to_string()));
-
-            let mount_umount_result = mount_write_umount(dev_path, mount_path.as_path());
-
-            let file_contents = get_file_contents(file_path)?;
-            assert!(file_contents.contains("I contain a test string"));
-
-            mount_umount_result
-        },
-    )
-    .unwrap();
 }
 
 pub fn test_encrypt_by_keyfile() {
@@ -188,23 +205,22 @@ pub fn test_encrypt_by_keyfile() {
         super::do_cleanup(),
         |dev_path, file_path| {
             let device_name = "test-device";
-            let passphrase = "abadpassphrase";
             let encrypted_device = PathBuf::from(format!("/dev/mapper/{}", device_name));
 
-            let keyslot = init(dev_path, passphrase)?;
-            activate_by_passphrase(dev_path, device_name, keyslot, passphrase)?;
-            let _keyfile_path = create_keyfile(file_path)?;
-            add_keyfile(dev_path, passphrase)?;
+            let keyfile_path = create_keyfile(file_path)?;
+            let keyslot = init_by_keyfile(dev_path, keyfile_path.as_path())?;
+            activate_by_keyfile(dev_path, device_name, keyslot, keyfile_path.as_path(), None)?;
 
-            let mount_path = PathBuf::from(format!("{}-mount", file_path.display().to_string()));
+            let mount_path = PathBuf::from(format!("{}-mount", file_path.display().to_string(),));
 
             let mount_umount_result =
                 mount_write_umount(encrypted_device.as_path(), mount_path.as_path());
 
             if super::do_cleanup() {
-                let mut dev = CryptInit::init_by_name_and_header("test-device", None)?;
-                let mut activation = dev.activate_handle("test-device");
-                activation.deactivate(CryptDeactivateFlags::empty())?;
+                let mut dev = CryptInit::init_by_name_and_header(device_name, None)?;
+                let mut activation = dev.activate_handle();
+                activation.deactivate(device_name, CryptDeactivateFlags::empty())?;
+                std::fs::remove_file(keyfile_path).map_err(LibcryptErr::IOError)?;
             }
 
             let file_contents = get_file_contents(file_path)?;
@@ -214,7 +230,9 @@ pub fn test_encrypt_by_keyfile() {
         },
     )
     .expect("Should succeed");
+}
 
+pub fn test_unecrypted() {
     loopback::use_loopback(
         1024 * 1024 * 1024,
         super::format_with_zeros(),
@@ -230,5 +248,5 @@ pub fn test_encrypt_by_keyfile() {
             mount_umount_result
         },
     )
-    .unwrap();
+    .expect("Should succeed");
 }

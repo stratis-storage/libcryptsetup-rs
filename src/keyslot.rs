@@ -163,20 +163,19 @@ impl<'a> CryptKeyslot<'a> {
     pub fn add_by_volume_key(
         &mut self,
         volume_key: Option<&[u8]>,
-        passphrase: &str,
+        passphrase: &[u8],
     ) -> Result<c_int, LibcryptErr> {
         let (vk_ptr, vk_len) = match volume_key {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (std::ptr::null(), 0),
         };
-        let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {
             crypt_keyslot_add_by_volume_key(
                 self.reference.as_ptr(),
                 self.keyslot,
                 vk_ptr,
                 vk_len,
-                passphrase_cstring.as_ptr(),
+                to_byte_ptr!(passphrase),
                 passphrase.len(),
             )
         })

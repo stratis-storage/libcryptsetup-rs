@@ -1,50 +1,30 @@
-use std::{
-    error::Error,
-    path::{Path, PathBuf},
-    ptr,
-};
+use std::{path::Path, ptr};
 
 use libc::{c_char, c_void};
-use libloading::{Library, Symbol};
-use pkg_config::Config;
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
-type CryptSafeFree = unsafe extern "C" fn(data: *mut c_void);
-
-fn get_cryptsetup_lib_path() -> Result<PathBuf, Box<dyn Error>> {
-    let lib = Config::new().probe("libcryptsetup")?;
-    for mut path in lib.link_paths.into_iter() {
-        path.push("libcryptsetup.so");
-        if path.exists() {
-            return Ok(path);
-        }
-    }
-    Err(Box::new(LibcryptErr::Other(
-        "libcryptsetup.so not found".to_string(),
-    )))
-}
-
-fn get_cryptsetup_lib_handle(lib_path: &Path) -> Result<Library, Box<dyn Error>> {
-    Ok(Library::new(lib_path)?)
-}
-
-pub struct CryptKeyfileContents<'a> {
-    sym: Symbol<'a, CryptSafeFree>,
+pub struct CryptKeyfileContents {
     key: *mut c_char,
+    key_size: crate::size_t,
 }
 
-impl<'a> CryptKeyfileContents<'a> {
+impl CryptKeyfileContents {
     /// Expose keyfile contents as a pointer
     pub fn as_ptr(&self) -> *const c_char {
         self.key
     }
 }
 
-impl<'a> Drop for CryptKeyfileContents<'a> {
+impl AsRef<[u8]> for CryptKeyfileContents {
+    fn as_ref(&self) -> &[u8] {
+        unsafe { std::slice::from_raw_parts(self.key as *const u8, self.key_size) }
+    }
+}
+
+impl Drop for CryptKeyfileContents {
     fn drop(&mut self) {
-        let sym = &self.sym;
-        unsafe { sym(self.key as *mut c_void) };
+        unsafe { libcryptsetup_rs_sys::crypt_safe_free(self.as_ptr() as *mut c_void) }
     }
 }
 
@@ -65,41 +45,30 @@ bitflags_to_from_struct!(
 /// Handle for keyfile operations
 pub struct CryptKeyfile<'a> {
     reference: &'a mut CryptDevice,
-    cryptsetup_library: Option<Library>,
 }
 
-impl<'a, 'b: 'a> CryptKeyfile<'a> {
+impl<'a> CryptKeyfile<'a> {
     /// Create a new keyfile operation handle
-    pub fn new(reference: &'a mut CryptDevice) -> Self {
-        let cryptsetup_library = match get_cryptsetup_lib_path() {
-            Ok(p) => match get_cryptsetup_lib_handle(p.as_path()) {
-                Ok(l) => Some(l),
-                Err(e) => {
-                    println!("Failed to load libcryptsetup.so: {}", e);
-                    None
-                }
-            },
-            Err(e) => {
-                println!("Failed to find libcryptsetup.so: {}", e);
-                None
-            }
-        };
-        CryptKeyfile {
-            reference,
-            cryptsetup_library,
-        }
+    pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
+        CryptKeyfile { reference }
     }
 
     /// Read keyfile into memory - these bindings will automatically
     /// safely clean it up after `CryptKeyfileContents` is dropped
     pub fn device_read(
-        &'b mut self,
+        &mut self,
         keyfile: &Path,
         keyfile_offset: u64,
-        key_size: crate::size_t,
+        key_size: Option<crate::size_t>,
         flags: CryptKeyfileFlags,
-    ) -> Result<(CryptKeyfileContents<'b>, crate::size_t), LibcryptErr> {
+    ) -> Result<CryptKeyfileContents, LibcryptErr> {
         let keyfile_cstring = path_to_cstring!(keyfile)?;
+        let keyfile_size = match key_size {
+            Some(i) => i,
+            None => std::fs::metadata(keyfile)
+                .map_err(LibcryptErr::IOError)?
+                .len() as crate::size_t,
+        };
 
         let mut key: *mut c_char = ptr::null_mut();
         let mut size: crate::size_t = 0;
@@ -110,19 +79,13 @@ impl<'a, 'b: 'a> CryptKeyfile<'a> {
                 &mut key as *mut *mut c_char,
                 &mut size as *mut crate::size_t,
                 keyfile_offset,
-                key_size,
+                keyfile_size,
                 flags.into(),
             )
         })?;
-        let sym = match self.cryptsetup_library {
-            Some(ref l) => unsafe { l.get(b"crypt_safe_free\0") }
-                .map_err(|e| LibcryptErr::Other(e.to_string()))?,
-            None => {
-                return Err(LibcryptErr::Other(
-                    "libcryptsetup library handle is not initialized".to_string(),
-                ))
-            }
-        };
-        Ok((CryptKeyfileContents { key, sym }, size))
+        Ok(CryptKeyfileContents {
+            key,
+            key_size: size,
+        })
     }
 }

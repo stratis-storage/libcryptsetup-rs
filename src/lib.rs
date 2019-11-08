@@ -13,8 +13,6 @@ extern crate libcryptsetup_rs_sys;
 
 extern crate either;
 extern crate libc;
-extern crate libloading;
-extern crate pkg_config;
 extern crate serde_json;
 extern crate uuid;
 
@@ -138,5 +136,11 @@ mod test {
     #[test]
     fn test_encrypt_by_keyfile() {
         tests::encrypt::test_encrypt_by_keyfile();
+    }
+
+    #[ignore]
+    #[test]
+    fn test_unencrypted() {
+        tests::encrypt::test_unecrypted();
     }
 }

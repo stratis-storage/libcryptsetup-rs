@@ -22,29 +22,34 @@ bitflags_to_from_struct!(
 /// Handle for activation options
 pub struct CryptActivation<'a> {
     reference: &'a mut CryptDevice,
-    name: &'a str,
 }
 
 impl<'a> CryptActivation<'a> {
-    pub(crate) fn new(reference: &'a mut CryptDevice, name: &'a str) -> Self {
-        CryptActivation { reference, name }
+    pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
+        CryptActivation { reference }
     }
 
     /// Activate device by passphrase
     pub fn activate_by_passphrase(
         &mut self,
+        name: Option<&str>,
         keyslot: c_int,
-        passphrase: &str,
+        passphrase: &[u8],
         flags: CryptActivateFlags,
     ) -> Result<c_int, LibcryptErr> {
-        let name_cstring = to_cstring!(self.name)?;
-        let passphrase_cstring = to_cstring!(passphrase)?;
+        let name_cstring_option = match name {
+            Some(n) => Some(to_cstring!(n)?),
+            None => None,
+        };
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_activate_by_passphrase(
                 self.reference.as_ptr(),
-                name_cstring.as_ptr(),
+                match name_cstring_option {
+                    Some(ref cs) => cs.as_ptr(),
+                    None => ptr::null_mut(),
+                },
                 keyslot,
-                passphrase_cstring.as_ptr(),
+                to_byte_ptr!(passphrase),
                 passphrase.len(),
                 flags.into(),
             )
@@ -54,21 +59,33 @@ impl<'a> CryptActivation<'a> {
     /// Activate device by key file
     pub fn activate_by_keyfile_device_offset(
         &mut self,
+        name: Option<&str>,
         keyslot: c_int,
         keyfile: &Path,
-        keyfile_size: crate::size_t,
+        keyfile_size: Option<crate::size_t>,
         keyfile_offset: u64,
         flags: CryptActivateFlags,
     ) -> Result<c_int, LibcryptErr> {
-        let name_cstring = to_cstring!(self.name)?;
+        let name_cstring_option = match name {
+            Some(n) => Some(to_cstring!(n)?),
+            None => None,
+        };
         let keyfile_cstring = path_to_cstring!(keyfile)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_activate_by_keyfile_device_offset(
                 self.reference.as_ptr(),
-                name_cstring.as_ptr(),
+                match name_cstring_option {
+                    Some(ref cs) => cs.as_ptr(),
+                    None => ptr::null_mut(),
+                },
                 keyslot,
                 keyfile_cstring.as_ptr(),
-                keyfile_size,
+                match keyfile_size {
+                    Some(i) => i,
+                    None => std::fs::metadata(keyfile)
+                        .map_err(LibcryptErr::IOError)?
+                        .len() as crate::size_t,
+                },
                 keyfile_offset,
                 flags.into(),
             )
@@ -78,18 +95,25 @@ impl<'a> CryptActivation<'a> {
     /// Activate device by volume key
     pub fn activate_by_volume_key(
         &mut self,
+        name: Option<&str>,
         volume_key: Option<&[u8]>,
         flags: CryptActivateFlags,
     ) -> Result<(), LibcryptErr> {
+        let name_cstring_option = match name {
+            Some(n) => Some(to_cstring!(n)?),
+            None => None,
+        };
         let (volume_key_ptr, volume_key_len) = match volume_key {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (ptr::null(), 0),
         };
-        let name_cstring = to_cstring!(self.name)?;
         errno!(unsafe {
             cryptsetup_sys::crypt_activate_by_volume_key(
                 self.reference.as_ptr(),
-                name_cstring.as_ptr(),
+                match name_cstring_option {
+                    Some(ref cs) => cs.as_ptr(),
+                    None => ptr::null_mut(),
+                },
                 volume_key_ptr,
                 volume_key_len,
                 flags.into(),
@@ -100,16 +124,23 @@ impl<'a> CryptActivation<'a> {
     /// Activeate device using passphrase in kernel keyring
     pub fn activate_by_keyring(
         &mut self,
+        name: Option<&str>,
         key_description: &str,
         keyslot: c_int,
         flags: CryptActivateFlags,
     ) -> Result<c_int, LibcryptErr> {
-        let name_cstring = to_cstring!(self.name)?;
+        let name_cstring_option = match name {
+            Some(n) => Some(to_cstring!(n)?),
+            None => None,
+        };
         let description_cstring = to_cstring!(key_description)?;
         errno_int_success!(unsafe {
             cryptsetup_sys::crypt_activate_by_keyring(
                 self.reference.as_ptr(),
-                name_cstring.as_ptr(),
+                match name_cstring_option {
+                    Some(ref cs) => cs.as_ptr(),
+                    None => ptr::null_mut(),
+                },
                 description_cstring.as_ptr(),
                 keyslot,
                 flags.into(),
@@ -118,8 +149,12 @@ impl<'a> CryptActivation<'a> {
     }
 
     /// Deactivate crypt device
-    pub fn deactivate(&mut self, flags: CryptDeactivateFlags) -> Result<(), LibcryptErr> {
-        let name_cstring = to_cstring!(self.name)?;
+    pub fn deactivate(
+        &mut self,
+        name: &str,
+        flags: CryptDeactivateFlags,
+    ) -> Result<(), LibcryptErr> {
+        let name_cstring = to_cstring!(name)?;
         errno!(unsafe {
             cryptsetup_sys::crypt_deactivate_by_name(
                 self.reference.as_ptr(),

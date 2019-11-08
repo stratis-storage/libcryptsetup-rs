@@ -136,8 +136,8 @@ impl CryptDevice {
     }
 
     /// Get activation option handle
-    pub fn activate_handle<'a>(&'a mut self, name: &'a str) -> CryptActivation<'a> {
-        CryptActivation::new(self, name)
+    pub fn activate_handle(&mut self) -> CryptActivation {
+        CryptActivation::new(self)
     }
 
     /// Get volume key option handle
