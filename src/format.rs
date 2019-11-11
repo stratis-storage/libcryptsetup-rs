@@ -12,16 +12,13 @@ use crate::{
     settings::{CryptPbkdfType, CryptPbkdfTypeRef},
 };
 
-use libcryptsetup_rs_sys as cryptsetup_sys;
-use libcryptsetup_rs_sys::*;
-
 consts_to_from_enum!(
     /// Verity format flags
     CryptVerityFlag,
     u32,
-    NoHeader => cryptsetup_sys::CRYPT_VERITY_NO_HEADER,
-    CheckHash => cryptsetup_sys::CRYPT_VERITY_CHECK_HASH,
-    CreateHash => cryptsetup_sys::CRYPT_VERITY_CREATE_HASH
+    NoHeader => libcryptsetup_rs_sys::CRYPT_VERITY_NO_HEADER,
+    CheckHash => libcryptsetup_rs_sys::CRYPT_VERITY_CHECK_HASH,
+    CreateHash => libcryptsetup_rs_sys::CRYPT_VERITY_CREATE_HASH
 );
 
 bitflags_to_from_struct!(
@@ -50,7 +47,7 @@ pub enum Format {
 }
 
 pub struct CryptParamsLuks2Ref<'a> {
-    pub inner: cryptsetup_sys::crypt_params_luks2,
+    pub inner: libcryptsetup_rs_sys::crypt_params_luks2,
     #[allow(dead_code)]
     reference: &'a CryptParamsLuks2,
     #[allow(dead_code)]
@@ -93,7 +90,7 @@ impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
         let label_cstring = to_cstring!(self.label)?;
         let subsystem_cstring = to_cstring!(self.subsystem)?;
 
-        let inner = cryptsetup_sys::crypt_params_luks2 {
+        let inner = libcryptsetup_rs_sys::crypt_params_luks2 {
             pbkdf: &pbkdf_type.inner as *const _,
             integrity: integrity_cstring_opt
                 .as_ref()
@@ -135,10 +132,10 @@ pub struct CryptParamsVerity {
     pub flags: CryptVerityFlags,
 }
 
-impl<'a> TryFrom<&'a cryptsetup_sys::crypt_params_verity> for CryptParamsVerity {
+impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_verity> for CryptParamsVerity {
     type Error = LibcryptErr;
 
-    fn try_from(v: &'a cryptsetup_sys::crypt_params_verity) -> Result<Self, Self::Error> {
+    fn try_from(v: &'a libcryptsetup_rs_sys::crypt_params_verity) -> Result<Self, Self::Error> {
         Ok(CryptParamsVerity {
             hash_name: from_str_ptr_to_owned!(v.hash_name)?,
             data_device: PathBuf::from(from_str_ptr_to_owned!(v.data_device)?),
@@ -160,7 +157,7 @@ impl<'a> TryFrom<&'a cryptsetup_sys::crypt_params_verity> for CryptParamsVerity 
 }
 
 pub struct CryptParamsIntegrityRef<'a> {
-    pub inner: cryptsetup_sys::crypt_params_integrity,
+    pub inner: libcryptsetup_rs_sys::crypt_params_integrity,
     #[allow(dead_code)]
     reference: &'a CryptParamsIntegrity,
     #[allow(dead_code)]
@@ -194,7 +191,7 @@ impl<'a> TryInto<CryptParamsIntegrityRef<'a>> for &'a CryptParamsIntegrity {
         let integrity_cstring = to_cstring!(self.integrity)?;
         let journal_integrity_cstring = to_cstring!(self.journal_integrity)?;
         let journal_crypt_cstring = to_cstring!(self.journal_crypt)?;
-        let inner = cryptsetup_sys::crypt_params_integrity {
+        let inner = libcryptsetup_rs_sys::crypt_params_integrity {
             journal_size: self.journal_size,
             journal_watermark: self.journal_watermark,
             journal_commit_time: self.journal_commit_time,
@@ -221,10 +218,10 @@ impl<'a> TryInto<CryptParamsIntegrityRef<'a>> for &'a CryptParamsIntegrity {
     }
 }
 
-impl<'a> TryFrom<&'a cryptsetup_sys::crypt_params_integrity> for CryptParamsIntegrity {
+impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_integrity> for CryptParamsIntegrity {
     type Error = LibcryptErr;
 
-    fn try_from(v: &'a cryptsetup_sys::crypt_params_integrity) -> Result<Self, Self::Error> {
+    fn try_from(v: &'a libcryptsetup_rs_sys::crypt_params_integrity) -> Result<Self, Self::Error> {
         Ok(CryptParamsIntegrity {
             journal_size: v.journal_size,
             journal_watermark: v.journal_watermark,
@@ -257,31 +254,31 @@ impl Format {
     /// Get `Format` as a char pointer
     pub(crate) fn as_ptr(&self) -> *const c_char {
         match *self {
-            Format::Plain => cryptsetup_sys::CRYPT_PLAIN.as_ptr() as *const c_char,
-            Format::Luks1 => cryptsetup_sys::CRYPT_LUKS1.as_ptr() as *const c_char,
-            Format::Luks2 => cryptsetup_sys::CRYPT_LUKS2.as_ptr() as *const c_char,
-            Format::Loopaes => cryptsetup_sys::CRYPT_LOOPAES.as_ptr() as *const c_char,
-            Format::Verity => cryptsetup_sys::CRYPT_VERITY.as_ptr() as *const c_char,
-            Format::Tcrypt => cryptsetup_sys::CRYPT_TCRYPT.as_ptr() as *const c_char,
-            Format::Integrity => cryptsetup_sys::CRYPT_INTEGRITY.as_ptr() as *const c_char,
+            Format::Plain => libcryptsetup_rs_sys::CRYPT_PLAIN.as_ptr() as *const c_char,
+            Format::Luks1 => libcryptsetup_rs_sys::CRYPT_LUKS1.as_ptr() as *const c_char,
+            Format::Luks2 => libcryptsetup_rs_sys::CRYPT_LUKS2.as_ptr() as *const c_char,
+            Format::Loopaes => libcryptsetup_rs_sys::CRYPT_LOOPAES.as_ptr() as *const c_char,
+            Format::Verity => libcryptsetup_rs_sys::CRYPT_VERITY.as_ptr() as *const c_char,
+            Format::Tcrypt => libcryptsetup_rs_sys::CRYPT_TCRYPT.as_ptr() as *const c_char,
+            Format::Integrity => libcryptsetup_rs_sys::CRYPT_INTEGRITY.as_ptr() as *const c_char,
         }
     }
 
     /// Get `Format` from a char pointer
     fn from_ptr(p: *const c_char) -> Result<Self, LibcryptErr> {
-        if cryptsetup_sys::CRYPT_PLAIN == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        if libcryptsetup_rs_sys::CRYPT_PLAIN == unsafe { CStr::from_ptr(p) }.to_bytes() {
             Ok(Format::Plain)
-        } else if cryptsetup_sys::CRYPT_LUKS1 == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_LUKS1 == unsafe { CStr::from_ptr(p) }.to_bytes() {
             Ok(Format::Luks1)
-        } else if cryptsetup_sys::CRYPT_LUKS2 == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_LUKS2 == unsafe { CStr::from_ptr(p) }.to_bytes() {
             Ok(Format::Luks2)
-        } else if cryptsetup_sys::CRYPT_LOOPAES == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_LOOPAES == unsafe { CStr::from_ptr(p) }.to_bytes() {
             Ok(Format::Loopaes)
-        } else if cryptsetup_sys::CRYPT_VERITY == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_VERITY == unsafe { CStr::from_ptr(p) }.to_bytes() {
             Ok(Format::Verity)
-        } else if cryptsetup_sys::CRYPT_TCRYPT == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_TCRYPT == unsafe { CStr::from_ptr(p) }.to_bytes() {
             Ok(Format::Tcrypt)
-        } else if cryptsetup_sys::CRYPT_INTEGRITY == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_INTEGRITY == unsafe { CStr::from_ptr(p) }.to_bytes() {
             Ok(Format::Integrity)
         } else {
             Err(LibcryptErr::InvalidConversion)
@@ -301,11 +298,11 @@ impl<'a> CryptFormat<'a> {
 
     /// Get the formatting type
     pub fn get_type(&mut self) -> Result<Format, LibcryptErr> {
-        Format::from_ptr(unsafe { crypt_get_type(self.reference.as_ptr()) })
+        Format::from_ptr(unsafe { libcryptsetup_rs_sys::crypt_get_type(self.reference.as_ptr()) })
     }
 
     /// Get the default formatting type
     pub fn get_default_type() -> Result<Format, LibcryptErr> {
-        Format::from_ptr(unsafe { crypt_get_default_type() })
+        Format::from_ptr(unsafe { libcryptsetup_rs_sys::crypt_get_default_type() })
     }
 }

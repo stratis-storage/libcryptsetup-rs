@@ -308,7 +308,7 @@ macro_rules! c_progress_callback {
 macro_rules! c_token_handler_open {
     ( $fn_name:ident, $type:ty, $safe_fn_name:ident ) => {
         extern "C" fn $fn_name(
-            cd: *mut cryptsetup_sys::crypt_device,
+            cd: *mut libcryptsetup_rs_sys::crypt_device,
             token_id: std::os::raw::c_int,
             buffer: *mut *mut std::os::raw::c_char,
             buffer_len: *mut $crate::SizeT,
@@ -353,7 +353,7 @@ macro_rules! c_token_handler_free {
 macro_rules! c_token_handler_validate {
     ( $fn_name:ident, $safe_fn_name:ident ) => {
         extern "C" fn $fn_name(
-            cd: *mut cryptsetup_sys::crypt_device,
+            cd: *mut libcryptsetup_rs_sys::crypt_device,
             json: *mut std::os::raw::c_char,
         ) -> std::os::raw::c_int {
             let device = $crate::device::CryptDevice::from_ptr(cd);
@@ -380,7 +380,7 @@ macro_rules! c_token_handler_validate {
 macro_rules! c_token_handler_dump {
     ( $fn_name:ident, $safe_fn_name:ident ) => {
         extern "C" fn $fn_name(
-            cd: *mut cryptsetup_sys::crypt_device,
+            cd: *mut libcryptsetup_rs_sys::crypt_device,
             json: *mut std::os::raw::c_char,
         ) {
             let device = $crate::device::CryptDevice::from_ptr(cd);

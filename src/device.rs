@@ -5,6 +5,8 @@ use std::{
     ptr,
 };
 
+use libcryptsetup_rs_sys::crypt_device;
+
 use crate::{
     activate::CryptActivation, backup::CryptBackup, context::CryptContext, debug::CryptDebug,
     err::LibcryptErr, format::CryptFormat, key::CryptVolumeKey, keyfile::CryptKeyfile,
@@ -12,8 +14,6 @@ use crate::{
     luks2_reencrypt::CryptLuks2Reencrypt, luks2_token::CryptLuks2Token, runtime::CryptRuntime,
     settings::CryptSettings, status::CryptDeviceStatus, wipe::CryptWipe,
 };
-
-use libcryptsetup_rs_sys::*;
 
 type ConfirmCallback = unsafe extern "C" fn(msg: *const c_char, usrptr: *mut c_void) -> c_int;
 
@@ -26,7 +26,7 @@ impl CryptInit {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
         let device_path_cstring = path_to_cstring!(device_path)?;
         errno!(unsafe {
-            crypt_init(
+            libcryptsetup_rs_sys::crypt_init(
                 &mut cdevice as *mut *mut crypt_device,
                 device_path_cstring.as_ptr(),
             )
@@ -48,7 +48,7 @@ impl CryptInit {
         }
 
         errno!(unsafe {
-            crypt_init_data_device(
+            libcryptsetup_rs_sys::crypt_init_data_device(
                 &mut cdevice as *mut *mut crypt_device,
                 device_path_cstring.as_ptr(),
                 if data_device_path.is_some() {
@@ -75,7 +75,7 @@ impl CryptInit {
         }
 
         errno!(unsafe {
-            crypt_init_by_name_and_header(
+            libcryptsetup_rs_sys::crypt_init_by_name_and_header(
                 &mut cdevice as *mut *mut crypt_device,
                 name_cstring.as_ptr(),
                 if header_device_path.is_some() {
@@ -187,7 +187,7 @@ impl CryptDevice {
         usrdata: Option<&mut T>,
     ) {
         unsafe {
-            crypt_set_confirm_callback(
+            libcryptsetup_rs_sys::crypt_set_confirm_callback(
                 self.ptr,
                 confirm,
                 match usrdata {
@@ -201,12 +201,14 @@ impl CryptDevice {
     /// Set the device path for a data device
     pub fn set_data_device(&mut self, device_path: &Path) -> Result<(), LibcryptErr> {
         let device_path_cstring = path_to_cstring!(device_path)?;
-        errno!(unsafe { crypt_set_data_device(self.ptr, device_path_cstring.as_ptr()) })
+        errno!(unsafe {
+            libcryptsetup_rs_sys::crypt_set_data_device(self.ptr, device_path_cstring.as_ptr())
+        })
     }
 
     /// Set the offset for the data section on a device
     pub fn set_data_offset(&mut self, offset: u64) -> Result<(), LibcryptErr> {
-        errno!(unsafe { crypt_set_data_offset(self.ptr, offset) })
+        errno!(unsafe { libcryptsetup_rs_sys::crypt_set_data_offset(self.ptr, offset) })
     }
 
     pub(crate) fn as_ptr(&mut self) -> *mut crypt_device {
@@ -216,6 +218,6 @@ impl CryptDevice {
 
 impl Drop for CryptDevice {
     fn drop(&mut self) {
-        unsafe { crypt_free(self.ptr) }
+        unsafe { libcryptsetup_rs_sys::crypt_free(self.ptr) }
     }
 }

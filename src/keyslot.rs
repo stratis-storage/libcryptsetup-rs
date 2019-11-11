@@ -7,13 +7,10 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr, format::Format, settings::CryptPbkdfType};
 
-use libcryptsetup_rs_sys as cryptsetup_sys;
-use libcryptsetup_rs_sys::*;
-
 pub enum CryptVolumeKey {
-    NoSegment = cryptsetup_sys::CRYPT_VOLUME_KEY_NO_SEGMENT as isize,
-    Set = cryptsetup_sys::CRYPT_VOLUME_KEY_SET as isize,
-    DigestReuse = cryptsetup_sys::CRYPT_VOLUME_KEY_DIGEST_REUSE as isize,
+    NoSegment = libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_NO_SEGMENT as isize,
+    Set = libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_SET as isize,
+    DigestReuse = libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_DIGEST_REUSE as isize,
 }
 
 pub struct CryptVolumeKeyFlags(Vec<CryptVolumeKey>);
@@ -31,11 +28,11 @@ impl Into<u32> for CryptVolumeKeyFlags {
 }
 
 pub enum KeyslotInfo {
-    Invalid = cryptsetup_sys::crypt_keyslot_info_CRYPT_SLOT_INVALID as isize,
-    Inactive = cryptsetup_sys::crypt_keyslot_info_CRYPT_SLOT_INACTIVE as isize,
-    Active = cryptsetup_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE as isize,
-    ActiveLast = cryptsetup_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE_LAST as isize,
-    Unbound = cryptsetup_sys::crypt_keyslot_info_CRYPT_SLOT_UNBOUND as isize,
+    Invalid = libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_INVALID as isize,
+    Inactive = libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_INACTIVE as isize,
+    Active = libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE as isize,
+    ActiveLast = libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE_LAST as isize,
+    Unbound = libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_UNBOUND as isize,
 }
 
 impl TryFrom<u32> for KeyslotInfo {
@@ -55,10 +52,10 @@ impl TryFrom<u32> for KeyslotInfo {
 }
 
 pub enum KeyslotPriority {
-    Invalid = cryptsetup_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_INVALID as isize,
-    Ignore = cryptsetup_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_IGNORE as isize,
-    Normal = cryptsetup_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_NORMAL as isize,
-    Prefer = cryptsetup_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_PREFER as isize,
+    Invalid = libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_INVALID as isize,
+    Ignore = libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_IGNORE as isize,
+    Normal = libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_NORMAL as isize,
+    Prefer = libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_PREFER as isize,
 }
 
 impl TryFrom<i32> for KeyslotPriority {
@@ -86,7 +83,7 @@ impl<'a> CryptKeyslot<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice, keyslot: Option<c_int>) -> Self {
         CryptKeyslot {
             reference,
-            keyslot: keyslot.unwrap_or(cryptsetup_sys::CRYPT_ANY_SLOT),
+            keyslot: keyslot.unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
         }
     }
 
@@ -99,7 +96,7 @@ impl<'a> CryptKeyslot<'a> {
         let passphrase_cstring = to_cstring!(passphrase)?;
         let new_passphrase_cstring = to_cstring!(new_passphrase)?;
         errno_int_success!(unsafe {
-            crypt_keyslot_add_by_passphrase(
+            libcryptsetup_rs_sys::crypt_keyslot_add_by_passphrase(
                 self.reference.as_ptr(),
                 self.keyslot,
                 passphrase_cstring.as_ptr(),
@@ -121,7 +118,7 @@ impl<'a> CryptKeyslot<'a> {
         let passphrase_cstring = to_cstring!(passphrase)?;
         let new_passphrase_cstring = to_cstring!(new_passphrase)?;
         errno_int_success!(unsafe {
-            crypt_keyslot_change_by_passphrase(
+            libcryptsetup_rs_sys::crypt_keyslot_change_by_passphrase(
                 self.reference.as_ptr(),
                 keyslot_old,
                 keyslot_new,
@@ -146,7 +143,7 @@ impl<'a> CryptKeyslot<'a> {
         let keyfile_cstring = path_to_cstring!(keyfile)?;
         let new_keyfile_cstring = path_to_cstring!(new_keyfile)?;
         errno_int_success!(unsafe {
-            crypt_keyslot_add_by_keyfile_device_offset(
+            libcryptsetup_rs_sys::crypt_keyslot_add_by_keyfile_device_offset(
                 self.reference.as_ptr(),
                 self.keyslot,
                 keyfile_cstring.as_ptr(),
@@ -170,7 +167,7 @@ impl<'a> CryptKeyslot<'a> {
             None => (std::ptr::null(), 0),
         };
         errno_int_success!(unsafe {
-            crypt_keyslot_add_by_volume_key(
+            libcryptsetup_rs_sys::crypt_keyslot_add_by_volume_key(
                 self.reference.as_ptr(),
                 self.keyslot,
                 vk_ptr,
@@ -194,7 +191,7 @@ impl<'a> CryptKeyslot<'a> {
         };
         let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {
-            crypt_keyslot_add_by_key(
+            libcryptsetup_rs_sys::crypt_keyslot_add_by_key(
                 self.reference.as_ptr(),
                 self.keyslot,
                 vk_ptr,
@@ -208,13 +205,17 @@ impl<'a> CryptKeyslot<'a> {
 
     /// Destroy key slot
     pub fn destroy(&mut self) -> Result<(), LibcryptErr> {
-        errno!(unsafe { crypt_keyslot_destroy(self.reference.as_ptr(), self.keyslot) })
+        errno!(unsafe {
+            libcryptsetup_rs_sys::crypt_keyslot_destroy(self.reference.as_ptr(), self.keyslot)
+        })
     }
 
     /// Get keyslot status
     pub fn status(&mut self) -> Result<KeyslotInfo, LibcryptErr> {
         try_int_to_return!(
-            unsafe { crypt_keyslot_status(self.reference.as_ptr(), self.keyslot) },
+            unsafe {
+                libcryptsetup_rs_sys::crypt_keyslot_status(self.reference.as_ptr(), self.keyslot)
+            },
             KeyslotInfo
         )
     }
@@ -222,7 +223,12 @@ impl<'a> CryptKeyslot<'a> {
     /// Get keyslot priority (LUKS2 specific)
     pub fn get_priority(&mut self) -> Result<KeyslotPriority, LibcryptErr> {
         try_int_to_return!(
-            unsafe { crypt_keyslot_get_priority(self.reference.as_ptr(), self.keyslot) },
+            unsafe {
+                libcryptsetup_rs_sys::crypt_keyslot_get_priority(
+                    self.reference.as_ptr(),
+                    self.keyslot,
+                )
+            },
             KeyslotPriority
         )
     }
@@ -230,13 +236,17 @@ impl<'a> CryptKeyslot<'a> {
     /// Get keyslot priority (LUKS2 specific)
     pub fn set_priority(&mut self, priority: KeyslotPriority) -> Result<(), LibcryptErr> {
         errno!(unsafe {
-            crypt_keyslot_set_priority(self.reference.as_ptr(), self.keyslot, priority as i32)
+            libcryptsetup_rs_sys::crypt_keyslot_set_priority(
+                self.reference.as_ptr(),
+                self.keyslot,
+                priority as i32,
+            )
         })
     }
 
     /// Get maximum keyslots supported for device type
     pub fn max_keyslots(fmt: Format) -> Result<c_int, LibcryptErr> {
-        errno_int_success!(unsafe { crypt_keyslot_max(fmt.as_ptr()) })
+        errno_int_success!(unsafe { libcryptsetup_rs_sys::crypt_keyslot_max(fmt.as_ptr()) })
     }
 
     /// Get keyslot area pointers
@@ -244,7 +254,7 @@ impl<'a> CryptKeyslot<'a> {
         let mut offset = 0u64;
         let mut length = 0u64;
         errno!(unsafe {
-            crypt_keyslot_area(
+            libcryptsetup_rs_sys::crypt_keyslot_area(
                 self.reference.as_ptr(),
                 self.keyslot,
                 &mut offset as *mut u64,
@@ -258,7 +268,7 @@ impl<'a> CryptKeyslot<'a> {
     /// in the case of LUKS2 using unbound keyslots
     pub fn get_key_size(&mut self) -> Result<c_int, LibcryptErr> {
         errno_int_success!(unsafe {
-            crypt_keyslot_get_key_size(self.reference.as_ptr(), self.keyslot)
+            libcryptsetup_rs_sys::crypt_keyslot_get_key_size(self.reference.as_ptr(), self.keyslot)
         })
     }
 
@@ -266,7 +276,7 @@ impl<'a> CryptKeyslot<'a> {
     pub fn get_encryption(&mut self) -> Result<(&str, crate::size_t), LibcryptErr> {
         let mut key_size: crate::size_t = 0;
         ptr_to_result!(unsafe {
-            crypt_keyslot_get_encryption(
+            libcryptsetup_rs_sys::crypt_keyslot_get_encryption(
                 self.reference.as_ptr(),
                 self.keyslot,
                 &mut key_size as *mut crate::size_t,
@@ -278,7 +288,7 @@ impl<'a> CryptKeyslot<'a> {
 
     /// Get PBDKF parameters for a keyslot
     pub fn get_pbkdf(&mut self) -> Result<CryptPbkdfType, LibcryptErr> {
-        let mut type_ = cryptsetup_sys::crypt_pbkdf_type {
+        let mut type_ = libcryptsetup_rs_sys::crypt_pbkdf_type {
             type_: ptr::null(),
             hash: ptr::null(),
             time_ms: 0,
@@ -288,7 +298,11 @@ impl<'a> CryptKeyslot<'a> {
             flags: 0,
         };
         errno!(unsafe {
-            crypt_keyslot_get_pbkdf(self.reference.as_ptr(), self.keyslot, &mut type_ as *mut _)
+            libcryptsetup_rs_sys::crypt_keyslot_get_pbkdf(
+                self.reference.as_ptr(),
+                self.keyslot,
+                &mut type_ as *mut _,
+            )
         })
         .and_then(|_| CryptPbkdfType::try_from(type_))
     }
@@ -301,13 +315,17 @@ impl<'a> CryptKeyslot<'a> {
     ) -> Result<(), LibcryptErr> {
         let cipher_cstring = to_cstring!(cipher)?;
         errno!(unsafe {
-            crypt_keyslot_set_encryption(self.reference.as_ptr(), cipher_cstring.as_ptr(), key_size)
+            libcryptsetup_rs_sys::crypt_keyslot_set_encryption(
+                self.reference.as_ptr(),
+                cipher_cstring.as_ptr(),
+                key_size,
+            )
         })
     }
 
     /// Get directory where crypt devices are mapped
     pub fn get_dir() -> Result<Box<Path>, LibcryptErr> {
-        ptr_to_result!(unsafe { cryptsetup_sys::crypt_get_dir() })
+        ptr_to_result!(unsafe { libcryptsetup_rs_sys::crypt_get_dir() })
             .and_then(|s| from_str_ptr_to_owned!(s))
             .map(PathBuf::from)
             .map(|b| b.into_boxed_path())

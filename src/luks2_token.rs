@@ -5,18 +5,16 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags, Bool};
 
-use libcryptsetup_rs_sys as cryptsetup_sys;
-
 consts_to_from_enum!(
     /// Wrapper enum for `CRYPT_TOKEN_*` values
     CryptTokenInfo,
     u32,
-    Invalid => cryptsetup_sys::crypt_token_info_CRYPT_TOKEN_INVALID,
-    Inactive => cryptsetup_sys::crypt_token_info_CRYPT_TOKEN_INACTIVE,
-    Internal => cryptsetup_sys::crypt_token_info_CRYPT_TOKEN_INTERNAL,
-    InternalUnknown => cryptsetup_sys::crypt_token_info_CRYPT_TOKEN_INTERNAL_UNKNOWN,
-    External => cryptsetup_sys::crypt_token_info_CRYPT_TOKEN_EXTERNAL,
-    ExternalUnknown => cryptsetup_sys::crypt_token_info_CRYPT_TOKEN_EXTERNAL_UNKNOWN
+    Invalid => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INVALID,
+    Inactive => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INACTIVE,
+    Internal => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INTERNAL,
+    InternalUnknown => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INTERNAL_UNKNOWN,
+    External => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_EXTERNAL,
+    ExternalUnknown => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_EXTERNAL_UNKNOWN
 );
 
 /// Handle for LUKS2 token operations
@@ -34,7 +32,7 @@ impl<'a> CryptLuks2Token<'a> {
     pub fn json_get(&mut self) -> Result<serde_json::Value, LibcryptErr> {
         let mut ptr: *const c_char = std::ptr::null();
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_token_json_get(
+            libcryptsetup_rs_sys::crypt_token_json_get(
                 self.reference.as_ptr(),
                 self.token,
                 &mut ptr as *mut _,
@@ -53,10 +51,10 @@ impl<'a> CryptLuks2Token<'a> {
         let json_cstring =
             to_cstring!(serde_json::to_string(json).map_err(LibcryptErr::JsonError)?)?;
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_token_json_set(
+            libcryptsetup_rs_sys::crypt_token_json_set(
                 self.reference.as_ptr(),
                 if allocate_new {
-                    cryptsetup_sys::CRYPT_ANY_TOKEN
+                    libcryptsetup_rs_sys::CRYPT_ANY_TOKEN
                 } else {
                     self.token
                 },
@@ -70,7 +68,7 @@ impl<'a> CryptLuks2Token<'a> {
         let mut ptr: *const c_char = std::ptr::null();
         try_int_to_return!(
             unsafe {
-                cryptsetup_sys::crypt_token_status(
+                libcryptsetup_rs_sys::crypt_token_status(
                     self.reference.as_ptr(),
                     self.token,
                     &mut ptr as *mut _,
@@ -89,14 +87,14 @@ impl<'a> CryptLuks2Token<'a> {
     ) -> Result<c_int, LibcryptErr> {
         let description_cstring = to_cstring!(key_description)?;
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_token_luks2_keyring_set(
+            libcryptsetup_rs_sys::crypt_token_luks2_keyring_set(
                 self.reference.as_ptr(),
                 if allocate_new {
-                    cryptsetup_sys::CRYPT_ANY_TOKEN
+                    libcryptsetup_rs_sys::CRYPT_ANY_TOKEN
                 } else {
                     self.token
                 },
-                &cryptsetup_sys::crypt_token_params_luks2_keyring {
+                &libcryptsetup_rs_sys::crypt_token_params_luks2_keyring {
                     key_description: description_cstring.as_ptr(),
                 } as *const _,
             )
@@ -105,11 +103,11 @@ impl<'a> CryptLuks2Token<'a> {
 
     /// Get LUKS2 keyring token description
     pub fn luks2_keyring_get(&mut self) -> Result<String, LibcryptErr> {
-        let mut params = cryptsetup_sys::crypt_token_params_luks2_keyring {
+        let mut params = libcryptsetup_rs_sys::crypt_token_params_luks2_keyring {
             key_description: std::ptr::null(),
         };
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_token_luks2_keyring_get(
+            libcryptsetup_rs_sys::crypt_token_luks2_keyring_get(
                 self.reference.as_ptr(),
                 self.token,
                 &mut params as *mut _,
@@ -121,7 +119,11 @@ impl<'a> CryptLuks2Token<'a> {
     /// Assign token to keyslot
     pub fn assign_keyslot(&mut self, keyslot: c_int) -> Result<(), LibcryptErr> {
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_token_assign_keyslot(self.reference.as_ptr(), self.token, keyslot)
+            libcryptsetup_rs_sys::crypt_token_assign_keyslot(
+                self.reference.as_ptr(),
+                self.token,
+                keyslot,
+            )
         })
         .map(|_| ())
     }
@@ -129,7 +131,7 @@ impl<'a> CryptLuks2Token<'a> {
     /// Unassign token from keyslot
     pub fn unassign_keyslot(&mut self, keyslot: c_int) -> Result<(), LibcryptErr> {
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_token_unassign_keyslot(
+            libcryptsetup_rs_sys::crypt_token_unassign_keyslot(
                 self.reference.as_ptr(),
                 self.token,
                 keyslot,
@@ -142,7 +144,11 @@ impl<'a> CryptLuks2Token<'a> {
     #[allow(clippy::wrong_self_convention)]
     pub fn is_assigned(&mut self, keyslot: c_int) -> Result<Bool, LibcryptErr> {
         let rc = unsafe {
-            cryptsetup_sys::crypt_token_is_assigned(self.reference.as_ptr(), self.token, keyslot)
+            libcryptsetup_rs_sys::crypt_token_is_assigned(
+                self.reference.as_ptr(),
+                self.token,
+                keyslot,
+            )
         };
         if rc == 0 {
             Ok(Bool::Yes)
@@ -156,15 +162,15 @@ impl<'a> CryptLuks2Token<'a> {
     /// Register token handler
     pub fn register(
         name: &'static str,
-        open: cryptsetup_sys::crypt_token_open_func,
-        buffer_free: cryptsetup_sys::crypt_token_buffer_free_func,
-        validate: cryptsetup_sys::crypt_token_validate_func,
-        dump: cryptsetup_sys::crypt_token_dump_func,
+        open: libcryptsetup_rs_sys::crypt_token_open_func,
+        buffer_free: libcryptsetup_rs_sys::crypt_token_buffer_free_func,
+        validate: libcryptsetup_rs_sys::crypt_token_validate_func,
+        dump: libcryptsetup_rs_sys::crypt_token_dump_func,
     ) -> Result<(), LibcryptErr> {
         if name.get(name.len() - 1..) != Some("\0") {
             return Err(LibcryptErr::NoNull(name));
         }
-        let handler = cryptsetup_sys::crypt_token_handler {
+        let handler = libcryptsetup_rs_sys::crypt_token_handler {
             name: name.as_ptr() as *const c_char,
             open,
             buffer_free,
@@ -172,8 +178,8 @@ impl<'a> CryptLuks2Token<'a> {
             dump,
         };
         errno!(unsafe {
-            cryptsetup_sys::crypt_token_register(
-                &handler as *const cryptsetup_sys::crypt_token_handler,
+            libcryptsetup_rs_sys::crypt_token_register(
+                &handler as *const libcryptsetup_rs_sys::crypt_token_handler,
             )
         })
     }
@@ -188,7 +194,7 @@ impl<'a> CryptLuks2Token<'a> {
     ) -> Result<c_int, LibcryptErr> {
         let name_cstring = to_cstring!(name)?;
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_activate_by_token(
+            libcryptsetup_rs_sys::crypt_activate_by_token(
                 self.reference.as_ptr(),
                 name_cstring.as_ptr(),
                 token,

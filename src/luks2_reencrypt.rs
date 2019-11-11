@@ -11,45 +11,43 @@ use crate::{
     format::{CryptParamsLuks2, CryptParamsLuks2Ref},
 };
 
-use libcryptsetup_rs_sys as cryptsetup_sys;
-
 type ReencryptProgress = unsafe extern "C" fn(size: u64, offset: u64, *mut c_void) -> c_int;
 
 consts_to_from_enum!(
     /// Encryption mode flags
     CryptReencryptInfo,
     u32,
-    None => cryptsetup_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_NONE,
-    Clean => cryptsetup_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_CLEAN,
-    Crash => cryptsetup_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_CRASH,
-    Invalid => cryptsetup_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_INVALID
+    None => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_NONE,
+    Clean => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_CLEAN,
+    Crash => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_CRASH,
+    Invalid => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_INVALID
 );
 
 consts_to_from_enum!(
     /// Encryption mode flags
     CryptReencryptModeInfo,
     u32,
-    Reencrypt => cryptsetup_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_REENCRYPT,
-    Encrypt => cryptsetup_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_ENCRYPT,
-    Decrypt => cryptsetup_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_DECRYPT
+    Reencrypt => libcryptsetup_rs_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_REENCRYPT,
+    Encrypt => libcryptsetup_rs_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_ENCRYPT,
+    Decrypt => libcryptsetup_rs_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_DECRYPT
 );
 
 consts_to_from_enum!(
     /// Reencryption direction flags
     CryptReencryptDirectionInfo,
     u32,
-    Forward => cryptsetup_sys::crypt_reencrypt_direction_info_CRYPT_REENCRYPT_FORWARD,
-    Backward => cryptsetup_sys::crypt_reencrypt_direction_info_CRYPT_REENCRYPT_BACKWARD
+    Forward => libcryptsetup_rs_sys::crypt_reencrypt_direction_info_CRYPT_REENCRYPT_FORWARD,
+    Backward => libcryptsetup_rs_sys::crypt_reencrypt_direction_info_CRYPT_REENCRYPT_BACKWARD
 );
 
 consts_to_from_enum!(
     /// Enum for `CRYPT_REENCRYPT_*` flags
     CryptReencryptFlag,
     u32,
-    InitializeOnly => cryptsetup_sys::CRYPT_REENCRYPT_INITIALIZE_ONLY,
-    MoveFirstSegment => cryptsetup_sys::CRYPT_REENCRYPT_MOVE_FIRST_SEGMENT,
-    ResumeOnly => cryptsetup_sys::CRYPT_REENCRYPT_RESUME_ONLY,
-    Recovery => cryptsetup_sys::CRYPT_REENCRYPT_RECOVERY
+    InitializeOnly => libcryptsetup_rs_sys::CRYPT_REENCRYPT_INITIALIZE_ONLY,
+    MoveFirstSegment => libcryptsetup_rs_sys::CRYPT_REENCRYPT_MOVE_FIRST_SEGMENT,
+    ResumeOnly => libcryptsetup_rs_sys::CRYPT_REENCRYPT_RESUME_ONLY,
+    Recovery => libcryptsetup_rs_sys::CRYPT_REENCRYPT_RECOVERY
 );
 
 bitflags_to_from_struct!(
@@ -62,7 +60,7 @@ bitflags_to_from_struct!(
 struct_ref_to_bitflags!(CryptReencryptFlags, CryptReencryptFlag, u32);
 
 pub struct CryptParamsReencryptRef<'a> {
-    pub inner: cryptsetup_sys::crypt_params_reencrypt,
+    pub inner: libcryptsetup_rs_sys::crypt_params_reencrypt,
     #[allow(dead_code)]
     reference: &'a CryptParamsReencrypt,
     #[allow(dead_code)]
@@ -94,7 +92,7 @@ impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
         let resilience_cstring = to_cstring!(self.resilience)?;
         let hash_cstring = to_cstring!(self.hash)?;
 
-        let inner = cryptsetup_sys::crypt_params_reencrypt {
+        let inner = libcryptsetup_rs_sys::crypt_params_reencrypt {
             mode: self.mode.into(),
             direction: self.direction.into(),
             resilience: resilience_cstring.as_ptr(),
@@ -145,7 +143,7 @@ impl<'a> CryptLuks2Reencrypt<'a> {
         let cipher_cstring = to_cstring!(cipher)?;
         let cipher_mode_cstring = to_cstring!(cipher_mode)?;
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_reencrypt_init_by_passphrase(
+            libcryptsetup_rs_sys::crypt_reencrypt_init_by_passphrase(
                 self.reference.as_ptr(),
                 name_cstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
                 to_byte_ptr!(passphrase),
@@ -180,7 +178,7 @@ impl<'a> CryptLuks2Reencrypt<'a> {
         let cipher_cstring = to_cstring!(cipher)?;
         let cipher_mode_cstring = to_cstring!(cipher_mode)?;
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_reencrypt_init_by_keyring(
+            libcryptsetup_rs_sys::crypt_reencrypt_init_by_keyring(
                 self.reference.as_ptr(),
                 name_cstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
                 description_cstring.as_ptr(),
@@ -195,7 +193,7 @@ impl<'a> CryptLuks2Reencrypt<'a> {
 
     /// Run data reencryption
     pub fn reencrypt(&mut self, progress: Option<ReencryptProgress>) -> Result<(), LibcryptErr> {
-        errno!(unsafe { cryptsetup_sys::crypt_reencrypt(self.reference.as_ptr(), progress) })
+        errno!(unsafe { libcryptsetup_rs_sys::crypt_reencrypt(self.reference.as_ptr(), progress) })
     }
 
     /// LUKS2 reencryption status
@@ -206,7 +204,7 @@ impl<'a> CryptLuks2Reencrypt<'a> {
         let mut params_reencrypt: CryptParamsReencryptRef<'_> = (&params).try_into()?;
         try_int_to_return!(
             unsafe {
-                cryptsetup_sys::crypt_reencrypt_status(
+                libcryptsetup_rs_sys::crypt_reencrypt_status(
                     self.reference.as_ptr(),
                     &mut params_reencrypt.inner as *mut _,
                 )

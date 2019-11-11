@@ -6,23 +6,20 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
-use libcryptsetup_rs_sys as cryptsetup_sys;
-use libcryptsetup_rs_sys::*;
-
 type LoggingCallback = unsafe extern "C" fn(level: c_int, msg: *const c_char, usrptr: *mut c_void);
 
 /// Logging levels
 pub enum CryptLogLevel {
     #[allow(missing_docs)]
-    Normal = cryptsetup_sys::CRYPT_LOG_NORMAL as isize,
+    Normal = libcryptsetup_rs_sys::CRYPT_LOG_NORMAL as isize,
     #[allow(missing_docs)]
-    Error = cryptsetup_sys::CRYPT_LOG_ERROR as isize,
+    Error = libcryptsetup_rs_sys::CRYPT_LOG_ERROR as isize,
     #[allow(missing_docs)]
-    Verbose = cryptsetup_sys::CRYPT_LOG_VERBOSE as isize,
+    Verbose = libcryptsetup_rs_sys::CRYPT_LOG_VERBOSE as isize,
     #[allow(missing_docs)]
-    Debug = cryptsetup_sys::CRYPT_LOG_DEBUG as isize,
+    Debug = libcryptsetup_rs_sys::CRYPT_LOG_DEBUG as isize,
     #[allow(missing_docs)]
-    DebugJson = cryptsetup_sys::CRYPT_LOG_DEBUG_JSON as isize,
+    DebugJson = libcryptsetup_rs_sys::CRYPT_LOG_DEBUG_JSON as isize,
 }
 
 impl TryFrom<c_int> for CryptLogLevel {
@@ -55,7 +52,7 @@ impl<'a> CryptLog<'a> {
     pub fn log(&mut self, level: CryptLogLevel, msg: &str) -> Result<(), LibcryptErr> {
         let msg_cstring = to_cstring!(msg)?;
         unsafe {
-            crypt_log(
+            libcryptsetup_rs_sys::crypt_log(
                 self.reference.as_ptr(),
                 level as c_int,
                 msg_cstring.as_ptr(),
@@ -71,7 +68,7 @@ impl<'a> CryptLog<'a> {
         usrdata: Option<&mut T>,
     ) {
         unsafe {
-            crypt_set_log_callback(
+            libcryptsetup_rs_sys::crypt_set_log_callback(
                 self.reference.as_ptr(),
                 callback,
                 match usrdata {

@@ -5,17 +5,16 @@ use std::{
     os::raw::{c_char, c_int},
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr, Bool};
+use libcryptsetup_rs_sys::crypt_pbkdf_type;
 
-use libcryptsetup_rs_sys as cryptsetup_sys;
-use libcryptsetup_rs_sys::*;
+use crate::{device::CryptDevice, err::LibcryptErr, Bool};
 
 consts_to_from_enum!(
     /// Rust representation of random number generator enum
     CryptRngFlag,
     u32,
-    Urandom => cryptsetup_sys::CRYPT_RNG_URANDOM,
-    Random => cryptsetup_sys::CRYPT_RNG_RANDOM
+    Urandom => libcryptsetup_rs_sys::CRYPT_RNG_URANDOM,
+    Random => libcryptsetup_rs_sys::CRYPT_RNG_RANDOM
 );
 
 /// Rust representation of key generator enum
@@ -32,19 +31,25 @@ impl CryptKdf {
     /// Convert to a `char *` for C
     fn as_ptr(&self) -> *const c_char {
         match *self {
-            CryptKdf::Pbkdf2 => cryptsetup_sys::CRYPT_KDF_PBKDF2.as_ptr() as *const c_char,
-            CryptKdf::Argon2I => cryptsetup_sys::CRYPT_KDF_ARGON2I.as_ptr() as *const c_char,
-            CryptKdf::Argon2Id => cryptsetup_sys::CRYPT_KDF_ARGON2ID.as_ptr() as *const c_char,
+            CryptKdf::Pbkdf2 => libcryptsetup_rs_sys::CRYPT_KDF_PBKDF2.as_ptr() as *const c_char,
+            CryptKdf::Argon2I => libcryptsetup_rs_sys::CRYPT_KDF_ARGON2I.as_ptr() as *const c_char,
+            CryptKdf::Argon2Id => {
+                libcryptsetup_rs_sys::CRYPT_KDF_ARGON2ID.as_ptr() as *const c_char
+            }
         }
     }
 
     /// Convert from a C `char *`
     fn from_ptr(ptr: *const c_char) -> Result<Self, LibcryptErr> {
-        if cryptsetup_sys::CRYPT_KDF_PBKDF2 == unsafe { CStr::from_ptr(ptr) }.to_bytes() {
+        if libcryptsetup_rs_sys::CRYPT_KDF_PBKDF2 == unsafe { CStr::from_ptr(ptr) }.to_bytes() {
             Ok(CryptKdf::Pbkdf2)
-        } else if cryptsetup_sys::CRYPT_KDF_ARGON2I == unsafe { CStr::from_ptr(ptr) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_KDF_ARGON2I
+            == unsafe { CStr::from_ptr(ptr) }.to_bytes()
+        {
             Ok(CryptKdf::Argon2I)
-        } else if cryptsetup_sys::CRYPT_KDF_ARGON2ID == unsafe { CStr::from_ptr(ptr) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_KDF_ARGON2ID
+            == unsafe { CStr::from_ptr(ptr) }.to_bytes()
+        {
             Ok(CryptKdf::Argon2Id)
         } else {
             Err(LibcryptErr::InvalidConversion)
@@ -56,8 +61,8 @@ consts_to_from_enum!(
     /// Enum wrapping `CRYPT_PBKDF_*` flags
     CryptPbkdfFlag,
     u32,
-    IterTimeSet => cryptsetup_sys::CRYPT_PBKDF_ITER_TIME_SET,
-    NoBenchmark => cryptsetup_sys::CRYPT_PBKDF_NO_BENCHMARK
+    IterTimeSet => libcryptsetup_rs_sys::CRYPT_PBKDF_ITER_TIME_SET,
+    NoBenchmark => libcryptsetup_rs_sys::CRYPT_PBKDF_NO_BENCHMARK
 );
 
 bitflags_to_from_struct!(
@@ -87,10 +92,12 @@ pub struct CryptPbkdfType {
     pub flags: CryptPbkdfFlags,
 }
 
-impl TryFrom<cryptsetup_sys::crypt_pbkdf_type> for CryptPbkdfType {
+impl TryFrom<libcryptsetup_rs_sys::crypt_pbkdf_type> for CryptPbkdfType {
     type Error = LibcryptErr;
 
-    fn try_from(type_: cryptsetup_sys::crypt_pbkdf_type) -> Result<CryptPbkdfType, LibcryptErr> {
+    fn try_from(
+        type_: libcryptsetup_rs_sys::crypt_pbkdf_type,
+    ) -> Result<CryptPbkdfType, LibcryptErr> {
         Ok(CryptPbkdfType {
             type_: CryptKdf::from_ptr(type_.type_)?,
             hash: String::from(from_str_ptr!(type_.hash)?),
@@ -103,10 +110,10 @@ impl TryFrom<cryptsetup_sys::crypt_pbkdf_type> for CryptPbkdfType {
     }
 }
 
-impl<'a> TryFrom<&'a cryptsetup_sys::crypt_pbkdf_type> for CryptPbkdfType {
+impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_pbkdf_type> for CryptPbkdfType {
     type Error = LibcryptErr;
 
-    fn try_from(v: &'a cryptsetup_sys::crypt_pbkdf_type) -> Result<Self, Self::Error> {
+    fn try_from(v: &'a libcryptsetup_rs_sys::crypt_pbkdf_type) -> Result<Self, Self::Error> {
         Ok(CryptPbkdfType {
             type_: CryptKdf::from_ptr(v.type_)?,
             hash: from_str_ptr!(v.hash)?.to_string(),
@@ -142,7 +149,7 @@ impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<CryptPbkdfTypeRef<'a>, Self::Error> {
-        let inner = cryptsetup_sys::crypt_pbkdf_type {
+        let inner = libcryptsetup_rs_sys::crypt_pbkdf_type {
             type_: self.type_.as_ptr(),
             hash: {
                 let bytes = self.hash.as_bytes();
@@ -171,8 +178,8 @@ pub enum LuksType {
 impl LuksType {
     pub fn as_ptr(&self) -> *const c_char {
         match *self {
-            LuksType::Luks1 => cryptsetup_sys::CRYPT_LUKS1.as_ptr() as *const c_char,
-            LuksType::Luks2 => cryptsetup_sys::CRYPT_LUKS2.as_ptr() as *const c_char,
+            LuksType::Luks1 => libcryptsetup_rs_sys::CRYPT_LUKS1.as_ptr() as *const c_char,
+            LuksType::Luks2 => libcryptsetup_rs_sys::CRYPT_LUKS2.as_ptr() as *const c_char,
         }
     }
 }
@@ -266,12 +273,16 @@ impl<'a> CryptSettings<'a> {
     /// Set random number generator type
     pub fn set_rng_type(&mut self, rng_type: CryptRngFlag) {
         let rng_u32: u32 = rng_type.into();
-        unsafe { crypt_set_rng_type(self.reference.as_ptr(), rng_u32 as c_int) }
+        unsafe {
+            libcryptsetup_rs_sys::crypt_set_rng_type(self.reference.as_ptr(), rng_u32 as c_int)
+        }
     }
 
     /// Get random number generator type
     pub fn get_rng_type(&mut self) -> Result<CryptRngFlag, LibcryptErr> {
-        CryptRngFlag::try_from(unsafe { crypt_get_rng_type(self.reference.as_ptr()) } as u32)
+        CryptRngFlag::try_from(unsafe {
+            libcryptsetup_rs_sys::crypt_get_rng_type(self.reference.as_ptr())
+        } as u32)
     }
 
     /// Set PBKDF type
@@ -281,7 +292,7 @@ impl<'a> CryptSettings<'a> {
     ) -> Result<(), LibcryptErr> {
         let type_: CryptPbkdfTypeRef<'b> = pbkdf_type.try_into()?;
         errno!(unsafe {
-            crypt_set_pbkdf_type(
+            libcryptsetup_rs_sys::crypt_set_pbkdf_type(
                 self.reference.as_ptr(),
                 &type_.inner as *const crypt_pbkdf_type,
             )
@@ -291,42 +302,52 @@ impl<'a> CryptSettings<'a> {
     /// Get PBKDF parameters
     pub fn get_pbkdf_type_params(pbkdf_type: &CryptKdf) -> Result<CryptPbkdfType, LibcryptErr> {
         let type_ = ptr_to_result_with_reference!(unsafe {
-            crypt_get_pbkdf_type_params(pbkdf_type.as_ptr())
+            libcryptsetup_rs_sys::crypt_get_pbkdf_type_params(pbkdf_type.as_ptr())
         })?;
         CryptPbkdfType::try_from(type_)
     }
 
     /// Get PBKDF default type
     pub fn get_pbkdf_default(luks_type: &LuksType) -> Result<CryptPbkdfType, LibcryptErr> {
-        let default =
-            ptr_to_result_with_reference!(unsafe { crypt_get_pbkdf_default(luks_type.as_ptr()) })?;
+        let default = ptr_to_result_with_reference!(unsafe {
+            libcryptsetup_rs_sys::crypt_get_pbkdf_default(luks_type.as_ptr())
+        })?;
         CryptPbkdfType::try_from(default)
     }
 
     /// Get PBKDF type
     pub fn get_pbkdf_type(&mut self) -> Result<CryptPbkdfType, LibcryptErr> {
         let type_ = ptr_to_result_with_reference!(unsafe {
-            crypt_get_pbkdf_type(self.reference.as_ptr())
+            libcryptsetup_rs_sys::crypt_get_pbkdf_type(self.reference.as_ptr())
         })?;
         CryptPbkdfType::try_from(type_)
     }
 
     /// Set the iteration time in milliseconds
     pub fn set_iteration_time(&mut self, iteration_time_ms: u64) {
-        unsafe { crypt_set_iteration_time(self.reference.as_ptr(), iteration_time_ms) }
+        unsafe {
+            libcryptsetup_rs_sys::crypt_set_iteration_time(
+                self.reference.as_ptr(),
+                iteration_time_ms,
+            )
+        }
     }
 
     /// Lock or unlock memory
     pub fn memory_lock(&mut self, lock: LockState) -> LockState {
         int_to_return!(
-            unsafe { crypt_memory_lock(self.reference.as_ptr(), lock as c_int) },
+            unsafe {
+                libcryptsetup_rs_sys::crypt_memory_lock(self.reference.as_ptr(), lock as c_int)
+            },
             LockState
         )
     }
 
     /// Lock or unlock the metadata
     pub fn metadata_locking(&mut self, enable: Bool) -> Result<(), LibcryptErr> {
-        errno!(unsafe { crypt_metadata_locking(self.reference.as_ptr(), enable as c_int) })
+        errno!(unsafe {
+            libcryptsetup_rs_sys::crypt_metadata_locking(self.reference.as_ptr(), enable as c_int)
+        })
     }
 
     /// Set the metadata size and keyslot size
@@ -336,7 +357,7 @@ impl<'a> CryptSettings<'a> {
         keyslots_size: KeyslotsSize,
     ) -> Result<(), LibcryptErr> {
         errno!(unsafe {
-            crypt_set_metadata_size(
+            libcryptsetup_rs_sys::crypt_set_metadata_size(
                 self.reference.as_ptr(),
                 metadata_size as u64,
                 keyslots_size.try_into()?,
@@ -349,7 +370,7 @@ impl<'a> CryptSettings<'a> {
         let mut metadata_size = 0u64;
         let mut keyslots_size = 0u64;
         errno!(unsafe {
-            crypt_get_metadata_size(
+            libcryptsetup_rs_sys::crypt_get_metadata_size(
                 self.reference.as_ptr(),
                 &mut metadata_size as *mut u64,
                 &mut keyslots_size as *mut u64,

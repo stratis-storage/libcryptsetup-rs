@@ -6,7 +6,7 @@ edition = "2018"
 
 [dependencies.libcryptsetup-rs-sys]
 version = "0.1.0"
-path = "./cryptsetup-sys"
+path = "./libcryptsetup-rs-sys"
 
 [dependencies]
 either = "1.5"

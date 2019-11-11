@@ -5,16 +5,14 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
-use libcryptsetup_rs_sys as cryptsetup_sys;
-
 type WipeProgressCallback =
     unsafe extern "C" fn(size: u64, offset: u64, usrptr: *mut c_void) -> c_int;
 
 pub enum CryptWipePattern {
-    Zero = cryptsetup_sys::crypt_wipe_pattern_CRYPT_WIPE_ZERO as isize,
-    Random = cryptsetup_sys::crypt_wipe_pattern_CRYPT_WIPE_RANDOM as isize,
-    EncryptedZero = cryptsetup_sys::crypt_wipe_pattern_CRYPT_WIPE_ENCRYPTED_ZERO as isize,
-    Special = cryptsetup_sys::crypt_wipe_pattern_CRYPT_WIPE_SPECIAL as isize,
+    Zero = libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_ZERO as isize,
+    Random = libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_RANDOM as isize,
+    EncryptedZero = libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_ENCRYPTED_ZERO as isize,
+    Special = libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_SPECIAL as isize,
 }
 
 /// Handle for volume key operations
@@ -42,7 +40,7 @@ impl<'a> CryptWipe<'a> {
     ) -> Result<(), LibcryptErr> {
         let dev_path_cstring = path_to_cstring!(dev_path)?;
         errno!(unsafe {
-            cryptsetup_sys::crypt_wipe(
+            libcryptsetup_rs_sys::crypt_wipe(
                 self.reference.as_ptr(),
                 dev_path_cstring.as_ptr(),
                 pattern as u32,
@@ -50,7 +48,7 @@ impl<'a> CryptWipe<'a> {
                 length,
                 wipe_block_size,
                 if wipe_no_direct_io {
-                    cryptsetup_sys::CRYPT_WIPE_NO_DIRECT_IO
+                    libcryptsetup_rs_sys::CRYPT_WIPE_NO_DIRECT_IO
                 } else {
                     0
                 },

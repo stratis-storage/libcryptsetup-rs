@@ -2,8 +2,6 @@ use std::os::raw::c_int;
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
-use libcryptsetup_rs_sys as cryptsetup_sys;
-
 /// Handle for volume key operations
 pub struct CryptVolumeKey<'a> {
     reference: &'a mut CryptDevice,
@@ -25,7 +23,7 @@ impl<'a> CryptVolumeKey<'a> {
         let mut volume_key_size_t = volume_key.len();
         let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_volume_key_get(
+            libcryptsetup_rs_sys::crypt_volume_key_get(
                 self.reference.as_ptr(),
                 keyslot,
                 to_mut_byte_ptr!(volume_key),
@@ -40,7 +38,7 @@ impl<'a> CryptVolumeKey<'a> {
     /// Verify that volume key is valid for crypt device
     pub fn verify(&mut self, volume_key: &[u8]) -> Result<(), LibcryptErr> {
         errno!(unsafe {
-            cryptsetup_sys::crypt_volume_key_verify(
+            libcryptsetup_rs_sys::crypt_volume_key_verify(
                 self.reference.as_ptr(),
                 to_byte_ptr!(volume_key),
                 volume_key.len(),

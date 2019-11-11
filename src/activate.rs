@@ -2,14 +2,12 @@ use std::{os::raw::c_int, path::Path, ptr};
 
 use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags};
 
-use libcryptsetup_rs_sys as cryptsetup_sys;
-
 consts_to_from_enum!(
     /// Flags for crypt deactivate operations
     CryptDeactivateFlag,
     u32,
-    Deferred => cryptsetup_sys::CRYPT_DEACTIVATE_DEFERRED,
-    Force => cryptsetup_sys::CRYPT_DEACTIVATE_FORCE
+    Deferred => libcryptsetup_rs_sys::CRYPT_DEACTIVATE_DEFERRED,
+    Force => libcryptsetup_rs_sys::CRYPT_DEACTIVATE_FORCE
 );
 
 bitflags_to_from_struct!(
@@ -42,7 +40,7 @@ impl<'a> CryptActivation<'a> {
             None => None,
         };
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_activate_by_passphrase(
+            libcryptsetup_rs_sys::crypt_activate_by_passphrase(
                 self.reference.as_ptr(),
                 match name_cstring_option {
                     Some(ref cs) => cs.as_ptr(),
@@ -72,7 +70,7 @@ impl<'a> CryptActivation<'a> {
         };
         let keyfile_cstring = path_to_cstring!(keyfile)?;
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_activate_by_keyfile_device_offset(
+            libcryptsetup_rs_sys::crypt_activate_by_keyfile_device_offset(
                 self.reference.as_ptr(),
                 match name_cstring_option {
                     Some(ref cs) => cs.as_ptr(),
@@ -108,7 +106,7 @@ impl<'a> CryptActivation<'a> {
             None => (ptr::null(), 0),
         };
         errno!(unsafe {
-            cryptsetup_sys::crypt_activate_by_volume_key(
+            libcryptsetup_rs_sys::crypt_activate_by_volume_key(
                 self.reference.as_ptr(),
                 match name_cstring_option {
                     Some(ref cs) => cs.as_ptr(),
@@ -135,7 +133,7 @@ impl<'a> CryptActivation<'a> {
         };
         let description_cstring = to_cstring!(key_description)?;
         errno_int_success!(unsafe {
-            cryptsetup_sys::crypt_activate_by_keyring(
+            libcryptsetup_rs_sys::crypt_activate_by_keyring(
                 self.reference.as_ptr(),
                 match name_cstring_option {
                     Some(ref cs) => cs.as_ptr(),
@@ -156,7 +154,7 @@ impl<'a> CryptActivation<'a> {
     ) -> Result<(), LibcryptErr> {
         let name_cstring = to_cstring!(name)?;
         errno!(unsafe {
-            cryptsetup_sys::crypt_deactivate_by_name(
+            libcryptsetup_rs_sys::crypt_deactivate_by_name(
                 self.reference.as_ptr(),
                 name_cstring.as_ptr(),
                 flags.into(),

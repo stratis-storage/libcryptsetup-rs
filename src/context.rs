@@ -6,8 +6,6 @@ use std::{
 
 use crate::{device::CryptDevice, err::LibcryptErr, format::Format, Bool};
 
-use libcryptsetup_rs_sys::*;
-
 use either::Either;
 use uuid::Uuid;
 
@@ -45,7 +43,7 @@ impl<'a> CryptContext<'a> {
         let cipher_cstring = to_cstring!(cipher)?;
         let cipher_mode_cstring = to_cstring!(cipher_mode)?;
         errno!(unsafe {
-            crypt_format(
+            libcryptsetup_rs_sys::crypt_format(
                 self.reference.as_ptr(),
                 type_.as_ptr(),
                 cipher_cstring.as_ptr(),
@@ -63,7 +61,7 @@ impl<'a> CryptContext<'a> {
     /// Convert to new format type
     pub fn convert<T>(&mut self, type_: Format, params: &mut T) -> Result<(), LibcryptErr> {
         errno!(unsafe {
-            crypt_convert(
+            libcryptsetup_rs_sys::crypt_convert(
                 self.reference.as_ptr(),
                 type_.as_ptr(),
                 params as *mut _ as *mut c_void,
@@ -77,7 +75,7 @@ impl<'a> CryptContext<'a> {
             Some(u) => u.as_bytes().as_ptr() as *const c_char,
             None => std::ptr::null(),
         };
-        errno!(unsafe { crypt_set_uuid(self.reference.as_ptr(), uptr) })
+        errno!(unsafe { libcryptsetup_rs_sys::crypt_set_uuid(self.reference.as_ptr(), uptr) })
     }
 
     /// Set LUKS2 device label
@@ -93,7 +91,7 @@ impl<'a> CryptContext<'a> {
             (_, _) => (None, None),
         };
         errno!(unsafe {
-            crypt_set_label(
+            libcryptsetup_rs_sys::crypt_set_label(
                 self.reference.as_ptr(),
                 lcstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
                 slcstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
@@ -103,13 +101,15 @@ impl<'a> CryptContext<'a> {
 
     /// Set policty on loading volume keys via kernel keyring
     pub fn volume_key_keyring(&mut self, enable: Bool) -> Result<(), LibcryptErr> {
-        errno!(unsafe { crypt_volume_key_keyring(self.reference.as_ptr(), enable as c_int) })
+        errno!(unsafe {
+            libcryptsetup_rs_sys::crypt_volume_key_keyring(self.reference.as_ptr(), enable as c_int)
+        })
     }
 
     /// Load on-disk header parameters based on provided type
     pub fn load<T>(&mut self, type_: Format, params: Option<&mut T>) -> Result<(), LibcryptErr> {
         errno!(unsafe {
-            crypt_load(
+            libcryptsetup_rs_sys::crypt_load(
                 self.reference.as_ptr(),
                 type_.as_ptr(),
                 params
@@ -122,7 +122,7 @@ impl<'a> CryptContext<'a> {
     /// Repair crypt device header if invalid
     pub fn repair<T>(&mut self, type_: Format, params: &mut T) -> Result<(), LibcryptErr> {
         errno!(unsafe {
-            crypt_repair(
+            libcryptsetup_rs_sys::crypt_repair(
                 self.reference.as_ptr(),
                 type_.as_ptr(),
                 params as *mut _ as *mut c_void,
@@ -133,13 +133,21 @@ impl<'a> CryptContext<'a> {
     /// Resize crypt device
     pub fn resize(&mut self, name: &str, new_size: u64) -> Result<(), LibcryptErr> {
         let name_cstring = to_cstring!(name)?;
-        errno!(unsafe { crypt_resize(self.reference.as_ptr(), name_cstring.as_ptr(), new_size) })
+        errno!(unsafe {
+            libcryptsetup_rs_sys::crypt_resize(
+                self.reference.as_ptr(),
+                name_cstring.as_ptr(),
+                new_size,
+            )
+        })
     }
 
     /// Suspend crypt device
     pub fn suspend(&mut self, name: &str) -> Result<(), LibcryptErr> {
         let name_cstring = to_cstring!(name)?;
-        errno!(unsafe { crypt_suspend(self.reference.as_ptr(), name_cstring.as_ptr()) })
+        errno!(unsafe {
+            libcryptsetup_rs_sys::crypt_suspend(self.reference.as_ptr(), name_cstring.as_ptr())
+        })
     }
 
     /// Resume crypt device using a passphrase
@@ -152,7 +160,7 @@ impl<'a> CryptContext<'a> {
         let name_cstring = to_cstring!(name)?;
         let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {
-            crypt_resume_by_passphrase(
+            libcryptsetup_rs_sys::crypt_resume_by_passphrase(
                 self.reference.as_ptr(),
                 name_cstring.as_ptr(),
                 keyslot,
@@ -174,7 +182,7 @@ impl<'a> CryptContext<'a> {
         let name_cstring = to_cstring!(name)?;
         let keyfile_cstring = path_to_cstring!(keyfile)?;
         errno_int_success!(unsafe {
-            crypt_resume_by_keyfile_device_offset(
+            libcryptsetup_rs_sys::crypt_resume_by_keyfile_device_offset(
                 self.reference.as_ptr(),
                 name_cstring.as_ptr(),
                 keyslot,
