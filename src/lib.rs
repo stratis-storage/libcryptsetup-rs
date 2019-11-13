@@ -9,13 +9,6 @@
 // This means that the memory cannot be safe scrubbed and freed in longer running
 // processes that invoke this function. For now, this is disabled.
 
-extern crate libcryptsetup_rs_sys;
-
-extern crate either;
-extern crate libc;
-extern crate serde_json;
-extern crate uuid;
-
 pub use either::Either;
 
 use std::os::raw::c_int;

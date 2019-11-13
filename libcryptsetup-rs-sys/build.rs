@@ -1,5 +1,5 @@
-extern crate bindgen;
-extern crate cc;
+use bindgen;
+use cc;
 
 use std::path::PathBuf;
 

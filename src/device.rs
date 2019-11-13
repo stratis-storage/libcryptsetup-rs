@@ -7,6 +7,8 @@ use std::{
 
 use libcryptsetup_rs_sys::crypt_device;
 
+use either::Either;
+
 use crate::{
     activate::CryptActivation, backup::CryptBackup, context::CryptContext, debug::CryptDebug,
     err::LibcryptErr, format::CryptFormat, key::CryptVolumeKey, keyfile::CryptKeyfile,
@@ -34,27 +36,26 @@ impl CryptInit {
         Ok(CryptDevice { ptr: cdevice })
     }
 
-    /// Initialize by device path and data device path
+    /// Initialize by device path or a header path and a data device path
     pub fn init_with_data_device(
-        device_path: &Path,
-        data_device_path: Option<&Path>,
+        device_paths: Either<&Path, (&Path, &Path)>,
     ) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
-        let device_path_cstring = path_to_cstring!(device_path)?;
-
-        let mut data_device_path_cstring = CString::default();
-        if let Some(path) = data_device_path {
-            data_device_path_cstring = path_to_cstring!(path)?;
-        }
+        let (device_path_cstring, data_device_option) = match device_paths {
+            Either::Left(device) => (path_to_cstring!(device)?, None),
+            Either::Right((header_device, data_device)) => (
+                path_to_cstring!(header_device)?,
+                Some(path_to_cstring!(data_device)?),
+            ),
+        };
 
         errno!(unsafe {
             libcryptsetup_rs_sys::crypt_init_data_device(
                 &mut cdevice as *mut *mut crypt_device,
                 device_path_cstring.as_ptr(),
-                if data_device_path.is_some() {
-                    data_device_path_cstring.as_ptr()
-                } else {
-                    ptr::null()
+                match data_device_option {
+                    Some(ref d) => d.as_ptr(),
+                    None => ptr::null(),
                 },
             )
         })?;
@@ -206,9 +207,9 @@ impl CryptDevice {
         })
     }
 
-    /// Set the offset for the data section on a device
+    /// Set the offset in 4096-byte sectors for the data section on a device
     pub fn set_data_offset(&mut self, offset: u64) -> Result<(), LibcryptErr> {
-        errno!(unsafe { libcryptsetup_rs_sys::crypt_set_data_offset(self.ptr, offset) })
+        errno!(unsafe { libcryptsetup_rs_sys::crypt_set_data_offset(self.ptr, offset * 8) })
     }
 
     pub(crate) fn as_ptr(&mut self) -> *mut crypt_device {

@@ -131,8 +131,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_pbkdf_type> for CryptPbkdfType 
 pub struct CryptPbkdfTypeRef<'a> {
     /// Field containing a `crypt_pbkdf_type` that contains pointers valid for the supplied struct lifetime
     pub inner: crypt_pbkdf_type,
-    #[allow(dead_code)]
-    phantomdata: &'a PhantomData<()>,
+    phantomdata: PhantomData<&'a ()>,
 }
 
 impl<'a> CryptPbkdfTypeRef<'a> {
@@ -140,7 +139,7 @@ impl<'a> CryptPbkdfTypeRef<'a> {
     pub fn new(inner: crypt_pbkdf_type) -> Self {
         CryptPbkdfTypeRef {
             inner,
-            phantomdata: &PhantomData,
+            phantomdata: PhantomData,
         }
     }
 }
@@ -165,7 +164,7 @@ impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
         };
         Ok(CryptPbkdfTypeRef {
             inner,
-            phantomdata: &PhantomData,
+            phantomdata: PhantomData,
         })
     }
 }
