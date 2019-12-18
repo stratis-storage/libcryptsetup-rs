@@ -5,73 +5,46 @@ use std::{
     ptr,
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr, format::Format, settings::CryptPbkdfType};
+use crate::{
+    device::CryptDevice, err::LibcryptErr, format::EncryptionFormat, settings::CryptPbkdfType,
+};
 
-pub enum CryptVolumeKey {
-    NoSegment = libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_NO_SEGMENT as isize,
-    Set = libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_SET as isize,
-    DigestReuse = libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_DIGEST_REUSE as isize,
-}
+consts_to_from_enum!(
+    /// Flags for tunable options when operating with volume keys
+    CryptVolumeKeyFlag,
+    u32,
+    NoSegment => libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_NO_SEGMENT,
+    Set => libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_SET,
+    DigestReuse => libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_DIGEST_REUSE
+);
 
-pub struct CryptVolumeKeyFlags(Vec<CryptVolumeKey>);
+bitflags_to_from_struct!(
+    /// Set of volume key flags
+    CryptVolumeKeyFlags,
+    CryptVolumeKeyFlag,
+    u32
+);
 
-impl CryptVolumeKeyFlags {
-    pub fn new(vec: Vec<CryptVolumeKey>) -> Self {
-        CryptVolumeKeyFlags(vec)
-    }
-}
+consts_to_from_enum!(
+    /// Value indicating the status of a keyslot
+    KeyslotInfo,
+    u32,
+    Invalid => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_INVALID,
+    Inactive => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_INACTIVE,
+    Active => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE,
+    ActiveLast => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE_LAST,
+    Unbound => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_UNBOUND
+);
 
-impl Into<u32> for CryptVolumeKeyFlags {
-    fn into(self) -> u32 {
-        self.0.into_iter().fold(0, |acc, flag| acc | flag as u32)
-    }
-}
-
-pub enum KeyslotInfo {
-    Invalid = libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_INVALID as isize,
-    Inactive = libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_INACTIVE as isize,
-    Active = libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE as isize,
-    ActiveLast = libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE_LAST as isize,
-    Unbound = libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_UNBOUND as isize,
-}
-
-impl TryFrom<u32> for KeyslotInfo {
-    type Error = LibcryptErr;
-
-    fn try_from(v: u32) -> Result<KeyslotInfo, LibcryptErr> {
-        let ki = match v {
-            i if i == KeyslotInfo::Invalid as u32 => KeyslotInfo::Invalid,
-            i if i == KeyslotInfo::Inactive as u32 => KeyslotInfo::Inactive,
-            i if i == KeyslotInfo::Active as u32 => KeyslotInfo::Active,
-            i if i == KeyslotInfo::ActiveLast as u32 => KeyslotInfo::ActiveLast,
-            i if i == KeyslotInfo::Unbound as u32 => KeyslotInfo::Unbound,
-            _ => return Err(LibcryptErr::InvalidConversion),
-        };
-        Ok(ki)
-    }
-}
-
-pub enum KeyslotPriority {
-    Invalid = libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_INVALID as isize,
-    Ignore = libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_IGNORE as isize,
-    Normal = libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_NORMAL as isize,
-    Prefer = libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_PREFER as isize,
-}
-
-impl TryFrom<i32> for KeyslotPriority {
-    type Error = LibcryptErr;
-
-    fn try_from(v: i32) -> Result<KeyslotPriority, LibcryptErr> {
-        let kp = match v {
-            i if i == KeyslotPriority::Invalid as i32 => KeyslotPriority::Invalid,
-            i if i == KeyslotPriority::Ignore as i32 => KeyslotPriority::Ignore,
-            i if i == KeyslotPriority::Normal as i32 => KeyslotPriority::Normal,
-            i if i == KeyslotPriority::Prefer as i32 => KeyslotPriority::Prefer,
-            _ => return Err(LibcryptErr::InvalidConversion),
-        };
-        Ok(kp)
-    }
-}
+consts_to_from_enum!(
+    /// Value indicating the priority of a keyslot
+    KeyslotPriority,
+    i32,
+    Invalid => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_INVALID,
+    Ignore => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_IGNORE,
+    Normal => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_NORMAL,
+    Prefer => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_PREFER
+);
 
 /// Handle for keyslot operations
 pub struct CryptKeyslot<'a> {
@@ -90,18 +63,16 @@ impl<'a> CryptKeyslot<'a> {
     /// Add key slot using a passphrase
     pub fn add_by_passphrase(
         &mut self,
-        passphrase: &str,
-        new_passphrase: &str,
+        passphrase: &[u8],
+        new_passphrase: &[u8],
     ) -> Result<c_int, LibcryptErr> {
-        let passphrase_cstring = to_cstring!(passphrase)?;
-        let new_passphrase_cstring = to_cstring!(new_passphrase)?;
         errno_int_success!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_add_by_passphrase(
                 self.reference.as_ptr(),
                 self.keyslot,
-                passphrase_cstring.as_ptr(),
+                to_byte_ptr!(passphrase),
                 passphrase.len(),
-                new_passphrase_cstring.as_ptr(),
+                to_byte_ptr!(new_passphrase),
                 new_passphrase.len(),
             )
         })
@@ -112,19 +83,17 @@ impl<'a> CryptKeyslot<'a> {
         &mut self,
         keyslot_old: c_int,
         keyslot_new: c_int,
-        passphrase: &str,
-        new_passphrase: &str,
+        passphrase: &[u8],
+        new_passphrase: &[u8],
     ) -> Result<c_int, LibcryptErr> {
-        let passphrase_cstring = to_cstring!(passphrase)?;
-        let new_passphrase_cstring = to_cstring!(new_passphrase)?;
         errno_int_success!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_change_by_passphrase(
                 self.reference.as_ptr(),
                 keyslot_old,
                 keyslot_new,
-                passphrase_cstring.as_ptr(),
+                to_byte_ptr!(passphrase),
                 passphrase.len(),
-                new_passphrase_cstring.as_ptr(),
+                to_byte_ptr!(new_passphrase),
                 new_passphrase.len(),
             )
         })
@@ -156,47 +125,24 @@ impl<'a> CryptKeyslot<'a> {
         })
     }
 
-    /// Add key slot with volume key
-    pub fn add_by_volume_key(
-        &mut self,
-        volume_key: Option<&[u8]>,
-        passphrase: &[u8],
-    ) -> Result<c_int, LibcryptErr> {
-        let (vk_ptr, vk_len) = match volume_key {
-            Some(vk) => (to_byte_ptr!(vk), vk.len()),
-            None => (std::ptr::null(), 0),
-        };
-        errno_int_success!(unsafe {
-            libcryptsetup_rs_sys::crypt_keyslot_add_by_volume_key(
-                self.reference.as_ptr(),
-                self.keyslot,
-                vk_ptr,
-                vk_len,
-                to_byte_ptr!(passphrase),
-                passphrase.len(),
-            )
-        })
-    }
-
     /// Add key slot with a key
     pub fn add_by_key(
         &mut self,
         volume_key: Option<&[u8]>,
-        passphrase: &str,
+        passphrase: &[u8],
         flags: CryptVolumeKeyFlags,
     ) -> Result<c_int, LibcryptErr> {
         let (vk_ptr, vk_len) = match volume_key {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (std::ptr::null(), 0),
         };
-        let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_add_by_key(
                 self.reference.as_ptr(),
                 self.keyslot,
                 vk_ptr,
                 vk_len,
-                passphrase_cstring.as_ptr(),
+                to_byte_ptr!(passphrase),
                 passphrase.len(),
                 flags.into(),
             )
@@ -245,7 +191,7 @@ impl<'a> CryptKeyslot<'a> {
     }
 
     /// Get maximum keyslots supported for device type
-    pub fn max_keyslots(fmt: Format) -> Result<c_int, LibcryptErr> {
+    pub fn max_keyslots(fmt: EncryptionFormat) -> Result<c_int, LibcryptErr> {
         errno_int_success!(unsafe { libcryptsetup_rs_sys::crypt_keyslot_max(fmt.as_ptr()) })
     }
 

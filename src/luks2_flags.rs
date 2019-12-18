@@ -1,6 +1,6 @@
 use std::{convert::TryFrom, marker::PhantomData};
 
-use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags};
+use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr};
 
 enum CryptFlagsType {
     Activation = libcryptsetup_rs_sys::crypt_flags_type_CRYPT_FLAGS_ACTIVATION as isize,

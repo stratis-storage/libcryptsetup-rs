@@ -11,8 +11,5 @@ the high level bindings build, and libcryptsetup successfully encrypts a loopbac
 This can be invoked as follows:
 
 ```
-sudo cargo test <TEST_NAME> -- --test-threads=1 --ignored
+sudo cargo test -- --test-threads=1 --ignored
 ```
-
-Tests should only ever be run one at a time so a test name matching exactly
-one test is required. Otherwise, you may see spurious failures.

@@ -4,7 +4,7 @@ use std::{
     ptr,
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr, format::Format, Bool};
+use crate::{device::CryptDevice, err::LibcryptErr, format::EncryptionFormat, Bool};
 
 use either::Either;
 use uuid::Uuid;
@@ -19,18 +19,18 @@ impl<'a> CryptContext<'a> {
         CryptContext { reference }
     }
 
-    /// Set cryptography format
+    /// Set encryption format
     ///
     /// For `volume_key parameter`, either the volume key or the desired length of the generated volume key
     /// can be specified, not both at once
     pub fn format<T>(
         &mut self,
-        type_: Format,
+        type_: EncryptionFormat,
         cipher_and_mode: (&str, &str),
         uuid: Option<Uuid>,
         volume_key: Either<&[u8], usize>,
         params: Option<&mut T>,
-    ) -> Result<(), LibcryptErr> {
+    ) -> Result<&mut Self, LibcryptErr> {
         let uuid_ptr = uuid
             .as_ref()
             .map(|u| u.as_bytes().as_ptr())
@@ -55,11 +55,16 @@ impl<'a> CryptContext<'a> {
                     .map(|p| p as *mut _ as *mut c_void)
                     .unwrap_or(ptr::null_mut()),
             )
-        })
+        })?;
+        Ok(self)
     }
 
     /// Convert to new format type
-    pub fn convert<T>(&mut self, type_: Format, params: &mut T) -> Result<(), LibcryptErr> {
+    pub fn convert<T>(
+        &mut self,
+        type_: EncryptionFormat,
+        params: &mut T,
+    ) -> Result<(), LibcryptErr> {
         errno!(unsafe {
             libcryptsetup_rs_sys::crypt_convert(
                 self.reference.as_ptr(),
@@ -107,7 +112,11 @@ impl<'a> CryptContext<'a> {
     }
 
     /// Load on-disk header parameters based on provided type
-    pub fn load<T>(&mut self, type_: Format, params: Option<&mut T>) -> Result<(), LibcryptErr> {
+    pub fn load<T>(
+        &mut self,
+        type_: EncryptionFormat,
+        params: Option<&mut T>,
+    ) -> Result<&mut Self, LibcryptErr> {
         errno!(unsafe {
             libcryptsetup_rs_sys::crypt_load(
                 self.reference.as_ptr(),
@@ -116,11 +125,16 @@ impl<'a> CryptContext<'a> {
                     .map(|p| p as *mut _ as *mut c_void)
                     .unwrap_or(ptr::null_mut()),
             )
-        })
+        })?;
+        Ok(self)
     }
 
     /// Repair crypt device header if invalid
-    pub fn repair<T>(&mut self, type_: Format, params: &mut T) -> Result<(), LibcryptErr> {
+    pub fn repair<T>(
+        &mut self,
+        type_: EncryptionFormat,
+        params: &mut T,
+    ) -> Result<(), LibcryptErr> {
         errno!(unsafe {
             libcryptsetup_rs_sys::crypt_repair(
                 self.reference.as_ptr(),

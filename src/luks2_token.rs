@@ -3,7 +3,7 @@ use std::{
     os::raw::{c_char, c_int},
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags, Bool};
+use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr, Bool};
 
 consts_to_from_enum!(
     /// Wrapper enum for `CRYPT_TOKEN_*` values

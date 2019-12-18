@@ -5,8 +5,9 @@ use std::{
 };
 
 use crate::{
-    activate::CryptDeactivateFlags, device::CryptInit, err::LibcryptErr, format::Format,
-    keyfile::CryptKeyfileFlags, runtime::CryptActivateFlags, tests::loopback, Either,
+    activate::CryptActivateFlags, activate::CryptDeactivateFlags, device::CryptInit,
+    err::LibcryptErr, format::EncryptionFormat, keyfile::CryptKeyfileFlags,
+    keyslot::CryptVolumeKeyFlags, tests::loopback, Either,
 };
 
 use libc::c_int;
@@ -17,7 +18,7 @@ fn init(dev_path: &Path, passphrase: &str) -> Result<c_int, LibcryptErr> {
     {
         let mut ctxt = dev.context_handle();
         ctxt.format::<()>(
-            Format::Luks2,
+            EncryptionFormat::Luks2,
             ("aes", "xts-plain"),
             None,
             Either::Right(512 / 8),
@@ -25,7 +26,7 @@ fn init(dev_path: &Path, passphrase: &str) -> Result<c_int, LibcryptErr> {
         )?;
     }
     let mut keyslot = dev.keyslot_handle(None);
-    keyslot.add_by_volume_key(None, passphrase.as_bytes())
+    keyslot.add_by_key(None, passphrase.as_bytes(), CryptVolumeKeyFlags::empty())
 }
 
 fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_int, LibcryptErr> {
@@ -33,7 +34,7 @@ fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_int, Libcry
     {
         let mut ctxt = dev.context_handle();
         ctxt.format::<()>(
-            Format::Luks2,
+            EncryptionFormat::Luks2,
             ("aes", "xts-plain"),
             None,
             Either::Right(512 / 8),
@@ -45,7 +46,11 @@ fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_int, Libcry
         kf_handle.device_read(keyfile_path, 0, None, CryptKeyfileFlags::empty())?
     };
     let mut keyslot_handle = dev.keyslot_handle(None);
-    let keyslot = keyslot_handle.add_by_volume_key(None, keyfile_contents.as_ref())?;
+    let keyslot = keyslot_handle.add_by_key(
+        None,
+        keyfile_contents.as_ref(),
+        CryptVolumeKeyFlags::empty(),
+    )?;
     Ok(keyslot)
 }
 
@@ -58,13 +63,13 @@ fn activate_by_passphrase(
     let mut dev = CryptInit::init(dev_path)?;
     {
         let mut context = dev.context_handle();
-        context.load::<()>(Format::Luks2, None)?;
+        context.load::<()>(EncryptionFormat::Luks2, None)?;
     }
     {
         let mut activation = dev.activate_handle();
         activation.activate_by_passphrase(
             Some(device_name),
-            keyslot,
+            Some(keyslot),
             passphrase.as_bytes(),
             CryptActivateFlags::empty(),
         )?;
@@ -90,12 +95,12 @@ fn activate_by_keyfile(
     let mut dev = CryptInit::init(dev_path)?;
     {
         let mut context = dev.context_handle();
-        context.load::<()>(Format::Luks2, None)?;
+        context.load::<()>(EncryptionFormat::Luks2, None)?;
     }
     let mut activation = dev.activate_handle();
     activation.activate_by_keyfile_device_offset(
         Some(device_name),
-        keyslot,
+        Some(keyslot),
         keyfile_path,
         keyfile_size,
         0,

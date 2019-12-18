@@ -3,11 +3,12 @@
 //! This is a wrapper library for libcryptsetup. The intension is to provide as much safety as
 //! possible when crossing FFI boundaries to the crypsetup C library.
 
-// Keyfile reading functions are not supported in these bindings due
+// Keyfile reading functions are supported through a workaround in these bindings due
 // to how memory is handled in these functions - memory for keys is allocated
 // and the corresponding free functions are not part of the public API.
-// This means that the memory cannot be safe scrubbed and freed in longer running
-// processes that invoke this function. For now, this is disabled.
+// The function is copied and pasted from libcryptsetup and compiled into the bindings
+// for now to work around this. This will be supported by libcryptsetup at a later
+// time.
 
 pub use either::Either;
 
@@ -17,7 +18,7 @@ use std::os::raw::c_int;
 mod macros;
 
 mod activate;
-pub use activate::CryptActivation;
+pub use activate::{CryptActivateFlags, CryptActivation};
 
 mod backup;
 pub use backup::CryptBackup;
@@ -35,7 +36,7 @@ mod err;
 pub use err::LibcryptErr;
 
 mod format;
-pub use format::CryptFormat;
+pub use format::{CryptFormat, EncryptionFormat};
 
 mod key;
 pub use key::CryptVolumeKey;
@@ -44,7 +45,7 @@ mod keyfile;
 pub use keyfile::CryptKeyfile;
 
 mod keyslot;
-pub use keyslot::CryptKeyslot;
+pub use keyslot::{CryptKeyslot, CryptVolumeKeyFlag, CryptVolumeKeyFlags};
 
 mod log;
 pub use log::{CryptLog, CryptLogLevel};

@@ -1,6 +1,40 @@
 use std::{os::raw::c_int, path::Path, ptr};
 
-use crate::{device::CryptDevice, err::LibcryptErr, runtime::CryptActivateFlags};
+use crate::{device::CryptDevice, err::LibcryptErr};
+
+consts_to_from_enum!(
+    /// Enum wrapping `CRYPT_ACTIVATE_*` flags
+    CryptActivateFlag,
+    u32,
+    Readonly => libcryptsetup_rs_sys::CRYPT_ACTIVATE_READONLY,
+    NoUuid => libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_UUID,
+    Shared => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SHARED,
+    AllowDiscards => libcryptsetup_rs_sys::CRYPT_ACTIVATE_ALLOW_DISCARDS,
+    Private => libcryptsetup_rs_sys::CRYPT_ACTIVATE_PRIVATE,
+    Corrupted => libcryptsetup_rs_sys::CRYPT_ACTIVATE_CORRUPTED,
+    SameCpuCrypt => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SAME_CPU_CRYPT,
+    SubmitFromCryptCpus => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SUBMIT_FROM_CRYPT_CPUS,
+    IgnoreCorruption => libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_CORRUPTION,
+    RestartOnCorruption => libcryptsetup_rs_sys::CRYPT_ACTIVATE_RESTART_ON_CORRUPTION,
+    IgnoreZeroBlocks => libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_ZERO_BLOCKS,
+    KeyringKey => libcryptsetup_rs_sys::CRYPT_ACTIVATE_KEYRING_KEY,
+    NoJournal => libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_JOURNAL,
+    Recovery => libcryptsetup_rs_sys::CRYPT_ACTIVATE_RECOVERY,
+    IgnorePersistent => libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_PERSISTENT,
+    CheckAtMostOnce => libcryptsetup_rs_sys::CRYPT_ACTIVATE_CHECK_AT_MOST_ONCE,
+    AllowUnboundKey => libcryptsetup_rs_sys::CRYPT_ACTIVATE_ALLOW_UNBOUND_KEY,
+    Recalculate => libcryptsetup_rs_sys::CRYPT_ACTIVATE_RECALCULATE,
+    Refresh => libcryptsetup_rs_sys::CRYPT_ACTIVATE_REFRESH,
+    SerializeMemoryHardPbkdf => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SERIALIZE_MEMORY_HARD_PBKDF,
+    NoJournalBitmap => libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_JOURNAL_BITMAP
+);
+
+bitflags_to_from_struct!(
+    /// Enum wrapping `CRYPT_ACTIVATE_*` flags
+    CryptActivateFlags,
+    CryptActivateFlag,
+    u32
+);
 
 consts_to_from_enum!(
     /// Flags for crypt deactivate operations
@@ -27,11 +61,14 @@ impl<'a> CryptActivation<'a> {
         CryptActivation { reference }
     }
 
-    /// Activate device by passphrase
+    /// Activate device by passphrase.
+    ///
+    /// A value of `None` for the name will only check the passphrase and will
+    /// not activate the keyslot.
     pub fn activate_by_passphrase(
         &mut self,
         name: Option<&str>,
-        keyslot: c_int,
+        keyslot: Option<c_int>,
         passphrase: &[u8],
         flags: CryptActivateFlags,
     ) -> Result<c_int, LibcryptErr> {
@@ -46,7 +83,7 @@ impl<'a> CryptActivation<'a> {
                     Some(ref cs) => cs.as_ptr(),
                     None => ptr::null_mut(),
                 },
-                keyslot,
+                keyslot.unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
                 to_byte_ptr!(passphrase),
                 passphrase.len(),
                 flags.into(),
@@ -58,7 +95,7 @@ impl<'a> CryptActivation<'a> {
     pub fn activate_by_keyfile_device_offset(
         &mut self,
         name: Option<&str>,
-        keyslot: c_int,
+        keyslot: Option<c_int>,
         keyfile: &Path,
         keyfile_size: Option<crate::size_t>,
         keyfile_offset: u64,
@@ -76,7 +113,7 @@ impl<'a> CryptActivation<'a> {
                     Some(ref cs) => cs.as_ptr(),
                     None => ptr::null_mut(),
                 },
-                keyslot,
+                keyslot.unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
                 keyfile_cstring.as_ptr(),
                 match keyfile_size {
                     Some(i) => i,
@@ -124,7 +161,7 @@ impl<'a> CryptActivation<'a> {
         &mut self,
         name: Option<&str>,
         key_description: &str,
-        keyslot: c_int,
+        keyslot: Option<c_int>,
         flags: CryptActivateFlags,
     ) -> Result<c_int, LibcryptErr> {
         let name_cstring_option = match name {
@@ -140,7 +177,7 @@ impl<'a> CryptActivation<'a> {
                     None => ptr::null_mut(),
                 },
                 description_cstring.as_ptr(),
-                keyslot,
+                keyslot.unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
                 flags.into(),
             )
         })

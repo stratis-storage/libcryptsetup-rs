@@ -1,40 +1,6 @@
 use std::convert::TryFrom;
 
-use crate::{device::CryptDevice, err::LibcryptErr};
-
-consts_to_from_enum!(
-    /// Enum wrapping `CRYPT_ACTIVATE_*` flags
-    CryptActivateFlag,
-    u32,
-    Readonly => libcryptsetup_rs_sys::CRYPT_ACTIVATE_READONLY,
-    NoUuid => libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_UUID,
-    Shared => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SHARED,
-    AllowDiscards => libcryptsetup_rs_sys::CRYPT_ACTIVATE_ALLOW_DISCARDS,
-    Private => libcryptsetup_rs_sys::CRYPT_ACTIVATE_PRIVATE,
-    Corrupted => libcryptsetup_rs_sys::CRYPT_ACTIVATE_CORRUPTED,
-    SameCpuCrypt => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SAME_CPU_CRYPT,
-    SubmitFromCryptCpus => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SUBMIT_FROM_CRYPT_CPUS,
-    IgnoreCorruption => libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_CORRUPTION,
-    RestartOnCorruption => libcryptsetup_rs_sys::CRYPT_ACTIVATE_RESTART_ON_CORRUPTION,
-    IgnoreZeroBlocks => libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_ZERO_BLOCKS,
-    KeyringKey => libcryptsetup_rs_sys::CRYPT_ACTIVATE_KEYRING_KEY,
-    NoJournal => libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_JOURNAL,
-    Recovery => libcryptsetup_rs_sys::CRYPT_ACTIVATE_RECOVERY,
-    IgnorePersistent => libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_PERSISTENT,
-    CheckAtMostOnce => libcryptsetup_rs_sys::CRYPT_ACTIVATE_CHECK_AT_MOST_ONCE,
-    AllowUnboundKey => libcryptsetup_rs_sys::CRYPT_ACTIVATE_ALLOW_UNBOUND_KEY,
-    Recalculate => libcryptsetup_rs_sys::CRYPT_ACTIVATE_RECALCULATE,
-    Refresh => libcryptsetup_rs_sys::CRYPT_ACTIVATE_REFRESH,
-    SerializeMemoryHardPbkdf => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SERIALIZE_MEMORY_HARD_PBKDF,
-    NoJournalBitmap => libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_JOURNAL_BITMAP
-);
-
-bitflags_to_from_struct!(
-    /// Enum wrapping `CRYPT_ACTIVATE_*` flags
-    CryptActivateFlags,
-    CryptActivateFlag,
-    u32
-);
+use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr};
 
 pub struct ActiveDevice {
     pub offset: u64,

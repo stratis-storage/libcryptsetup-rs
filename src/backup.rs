@@ -1,6 +1,6 @@
 use std::path::Path;
 
-use crate::{device::CryptDevice, err::LibcryptErr, format::Format};
+use crate::{device::CryptDevice, err::LibcryptErr, format::EncryptionFormat};
 
 /// Handle for backup operations on a device
 pub struct CryptBackup<'a> {
@@ -15,7 +15,7 @@ impl<'a> CryptBackup<'a> {
     /// Back up header and keyslots to a file
     pub fn header_backup(
         &mut self,
-        requested_type: Format,
+        requested_type: EncryptionFormat,
         backup_file: &Path,
     ) -> Result<(), LibcryptErr> {
         let backup_file_cstring = path_to_cstring!(backup_file)?;
@@ -31,7 +31,7 @@ impl<'a> CryptBackup<'a> {
     /// Restore header and keyslots from a file
     pub fn header_restore(
         &mut self,
-        requested_type: Format,
+        requested_type: EncryptionFormat,
         backup_file: &Path,
     ) -> Result<(), LibcryptErr> {
         let backup_file_cstring = path_to_cstring!(backup_file)?;
