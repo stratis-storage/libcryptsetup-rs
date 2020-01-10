@@ -12,26 +12,14 @@ use crate::{
 
 use uuid::Uuid;
 
-pub enum CryptStatusInfo {
-    Invalid = libcryptsetup_rs_sys::crypt_status_info_CRYPT_INVALID as isize,
-    Inactive = libcryptsetup_rs_sys::crypt_status_info_CRYPT_INACTIVE as isize,
-    Active = libcryptsetup_rs_sys::crypt_status_info_CRYPT_ACTIVE as isize,
-    Busy = libcryptsetup_rs_sys::crypt_status_info_CRYPT_BUSY as isize,
-}
-
-impl TryFrom<u32> for CryptStatusInfo {
-    type Error = LibcryptErr;
-
-    fn try_from(v: u32) -> Result<Self, Self::Error> {
-        Ok(match v {
-            i if i == CryptStatusInfo::Invalid as u32 => CryptStatusInfo::Invalid,
-            i if i == CryptStatusInfo::Inactive as u32 => CryptStatusInfo::Inactive,
-            i if i == CryptStatusInfo::Active as u32 => CryptStatusInfo::Active,
-            i if i == CryptStatusInfo::Busy as u32 => CryptStatusInfo::Busy,
-            _ => return Err(LibcryptErr::InvalidConversion),
-        })
-    }
-}
+consts_to_from_enum!(
+    /// Status of a crypt device
+    CryptStatusInfo, u32,
+    Invalid => libcryptsetup_rs_sys::crypt_status_info_CRYPT_INVALID,
+    Inactive => libcryptsetup_rs_sys::crypt_status_info_CRYPT_INACTIVE,
+    Active => libcryptsetup_rs_sys::crypt_status_info_CRYPT_ACTIVE,
+    Busy => libcryptsetup_rs_sys::crypt_status_info_CRYPT_BUSY
+);
 
 /// Handle for crypt device status operations
 pub struct CryptDeviceStatus<'a> {

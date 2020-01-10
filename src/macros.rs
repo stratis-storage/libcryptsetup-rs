@@ -152,14 +152,14 @@ macro_rules! consts_to_from_enum {
         }
 
         impl std::convert::TryFrom<$flag_type> for $flag_enum {
-            type Error = LibcryptErr;
+            type Error = $crate::err::LibcryptErr;
 
             fn try_from(v: $flag_type) -> Result<Self, Self::Error> {
                 Ok(match v {
                     $(
                         i if i == $constant => $flag_enum::$name,
                     )*
-                    _ => return Err(LibcryptErr::InvalidConversion),
+                    _ => return Err($crate::err::LibcryptErr::InvalidConversion),
                 })
             }
         }

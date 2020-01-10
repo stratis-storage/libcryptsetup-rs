@@ -173,12 +173,16 @@ impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
     }
 }
 
+/// LUKS type (1 or 2)
 pub enum LuksType {
+    #[allow(missing_docs)]
     Luks1,
+    #[allow(missing_docs)]
     Luks2,
 }
 
 impl LuksType {
+    /// Convert Rust expression to an equivalent C pointer
     pub fn as_ptr(&self) -> *const c_char {
         match *self {
             LuksType::Luks1 => libcryptsetup_rs_sys::CRYPT_LUKS1.as_ptr() as *const c_char,
@@ -187,8 +191,11 @@ impl LuksType {
     }
 }
 
+/// State of memory lock
 pub enum LockState {
+    #[allow(missing_docs)]
     Unlocked = 0,
+    #[allow(missing_docs)]
     Locked = 1,
 }
 
@@ -201,16 +208,26 @@ impl From<c_int> for LockState {
     }
 }
 
+/// Size allocated for metadata
 #[derive(Debug, PartialEq, Eq)]
 pub enum MetadataSize {
+    #[allow(missing_docs)]
     Kb16 = 0x4_000,
+    #[allow(missing_docs)]
     Kb32 = 0x8_000,
+    #[allow(missing_docs)]
     Kb64 = 0x10_000,
+    #[allow(missing_docs)]
     Kb128 = 0x20_000,
+    #[allow(missing_docs)]
     Kb256 = 0x40_000,
+    #[allow(missing_docs)]
     Kb512 = 0x80_000,
+    #[allow(missing_docs)]
     Kb1024 = 0x100_000,
+    #[allow(missing_docs)]
     Kb2048 = 0x200_000,
+    #[allow(missing_docs)]
     Kb4096 = 0x400_000,
 }
 
@@ -234,6 +251,7 @@ impl TryFrom<u64> for MetadataSize {
     }
 }
 
+/// Size in KB for the allocated keyslot
 pub struct KeyslotsSize(u64);
 
 impl TryInto<u64> for KeyslotsSize {

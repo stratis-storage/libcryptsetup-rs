@@ -12,12 +12,14 @@ use crate::{device::CryptDevice, err::LibcryptErr};
 type WipeProgressCallback =
     unsafe extern "C" fn(size: u64, offset: u64, usrptr: *mut c_void) -> c_int;
 
-pub enum CryptWipePattern {
-    Zero = libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_ZERO as isize,
-    Random = libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_RANDOM as isize,
-    EncryptedZero = libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_ENCRYPTED_ZERO as isize,
-    Special = libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_SPECIAL as isize,
-}
+consts_to_from_enum!(
+    /// Pattern for disk wipe
+    CryptWipePattern, u32,
+    Zero => libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_ZERO,
+    Random => libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_RANDOM,
+    EncryptedZero => libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_ENCRYPTED_ZERO,
+    Special => libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_SPECIAL
+);
 
 /// Handle for volume key operations
 pub struct CryptWipe<'a> {
@@ -47,7 +49,7 @@ impl<'a> CryptWipe<'a> {
             libcryptsetup_rs_sys::crypt_wipe(
                 self.reference.as_ptr(),
                 dev_path_cstring.as_ptr(),
-                pattern as u32,
+                pattern.into(),
                 offset,
                 length,
                 wipe_block_size,

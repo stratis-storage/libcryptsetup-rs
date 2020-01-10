@@ -94,7 +94,10 @@ impl EncryptionFormat {
     }
 }
 
+/// A struct representing a reference with a lifetime to a `CryptParamsLuks2Ref`
+/// struct
 pub struct CryptParamsLuks2Ref<'a> {
+    #[allow(missing_docs)]
     pub inner: libcryptsetup_rs_sys::crypt_params_luks2,
     #[allow(dead_code)]
     reference: &'a CryptParamsLuks2,
@@ -112,14 +115,23 @@ pub struct CryptParamsLuks2Ref<'a> {
     subsystem_cstring: CString,
 }
 
+/// LUKS2-specific parameters
 pub struct CryptParamsLuks2 {
+    #[allow(missing_docs)]
     pub pbkdf: CryptPbkdfType,
+    #[allow(missing_docs)]
     pub integrity: Option<String>,
+    #[allow(missing_docs)]
     pub integrity_params: CryptParamsIntegrity,
+    #[allow(missing_docs)]
     pub data_alignment: crate::size_t,
+    #[allow(missing_docs)]
     pub data_device: PathBuf,
+    #[allow(missing_docs)]
     pub sector_size: u32,
+    #[allow(missing_docs)]
     pub label: String,
+    #[allow(missing_docs)]
     pub subsystem: String,
 }
 
@@ -164,19 +176,33 @@ impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
     }
 }
 
+/// Parameters specific to Verity
 pub struct CryptParamsVerity {
+    #[allow(missing_docs)]
     pub hash_name: String,
+    #[allow(missing_docs)]
     pub data_device: PathBuf,
+    #[allow(missing_docs)]
     pub hash_device: PathBuf,
+    #[allow(missing_docs)]
     pub fec_device: PathBuf,
+    #[allow(missing_docs)]
     pub salt: Vec<u8>,
+    #[allow(missing_docs)]
     pub hash_type: u32,
+    #[allow(missing_docs)]
     pub data_block_size: u32,
+    #[allow(missing_docs)]
     pub hash_block_size: u32,
+    #[allow(missing_docs)]
     pub data_size: u64,
+    #[allow(missing_docs)]
     pub hash_area_offset: u64,
+    #[allow(missing_docs)]
     pub fec_area_offset: u64,
+    #[allow(missing_docs)]
     pub fec_roots: u32,
+    #[allow(missing_docs)]
     pub flags: CryptVerityFlags,
 }
 
@@ -204,7 +230,10 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_verity> for CryptParamsV
     }
 }
 
+/// A struct representing a reference with a lifetime to a `CryptParamsIntegrity`
+/// struct
 pub struct CryptParamsIntegrityRef<'a> {
+    #[allow(missing_docs)]
     pub inner: libcryptsetup_rs_sys::crypt_params_integrity,
     #[allow(dead_code)]
     reference: &'a CryptParamsIntegrity,
@@ -216,19 +245,33 @@ pub struct CryptParamsIntegrityRef<'a> {
     journal_crypt_cstring: CString,
 }
 
+/// Parameters for integrity checking
 pub struct CryptParamsIntegrity {
+    #[allow(missing_docs)]
     pub journal_size: u64,
+    #[allow(missing_docs)]
     pub journal_watermark: c_uint,
+    #[allow(missing_docs)]
     pub journal_commit_time: c_uint,
+    #[allow(missing_docs)]
     pub interleave_sectors: u32,
+    #[allow(missing_docs)]
     pub tag_size: u32,
+    #[allow(missing_docs)]
     pub sector_size: u32,
+    #[allow(missing_docs)]
     pub buffer_sectors: u32,
+    #[allow(missing_docs)]
     pub integrity: String,
+    #[allow(missing_docs)]
     pub integrity_key_size: u32,
+    #[allow(missing_docs)]
     pub journal_integrity: String,
+    #[allow(missing_docs)]
     pub journal_integrity_key: Vec<u8>,
+    #[allow(missing_docs)]
     pub journal_crypt: String,
+    #[allow(missing_docs)]
     pub journal_crypt_key: Vec<u8>,
 }
 

@@ -8,6 +8,7 @@ use libc::{c_char, c_void};
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
+/// Contents of a keyfile that have been read
 pub struct CryptKeyfileContents {
     key: *mut c_char,
     key_size: crate::size_t,

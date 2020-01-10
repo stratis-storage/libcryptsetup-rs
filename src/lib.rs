@@ -22,7 +22,10 @@ use std::os::raw::c_int;
 mod macros;
 
 mod activate;
-pub use activate::{CryptActivateFlags, CryptActivation};
+pub use activate::{
+    CryptActivateFlag, CryptActivateFlags, CryptActivation, CryptDeactivateFlag,
+    CryptDeactivateFlags,
+};
 
 mod backup;
 pub use backup::CryptBackup;
@@ -31,7 +34,7 @@ mod context;
 pub use context::CryptContext;
 
 mod debug;
-pub use debug::CryptDebug;
+pub use debug::{CryptDebug, CryptDebugLevel};
 
 mod device;
 pub use device::{CryptDevice, CryptInit};
@@ -40,16 +43,21 @@ mod err;
 pub use err::LibcryptErr;
 
 mod format;
-pub use format::{CryptFormat, EncryptionFormat};
+pub use format::{
+    CryptFormat, CryptParamsIntegrity, CryptParamsIntegrityRef, CryptParamsLuks2,
+    CryptParamsLuks2Ref, CryptParamsVerity, CryptVerityFlag, CryptVerityFlags, EncryptionFormat,
+};
 
 mod key;
 pub use key::CryptVolumeKey;
 
 mod keyfile;
-pub use keyfile::CryptKeyfile;
+pub use keyfile::{CryptKeyfile, CryptKeyfileContents};
 
 mod keyslot;
-pub use keyslot::{CryptKeyslot, CryptVolumeKeyFlag, CryptVolumeKeyFlags};
+pub use keyslot::{
+    CryptKeyslot, CryptVolumeKeyFlag, CryptVolumeKeyFlags, KeyslotInfo, KeyslotPriority,
+};
 
 mod log;
 pub use log::{CryptLog, CryptLogLevel};
@@ -59,27 +67,31 @@ pub use luks2_flags::{CryptLuks2Flags, CryptRequirementFlag, CryptRequirementFla
 
 mod luks2_reencrypt;
 pub use luks2_reencrypt::{
-    CryptLuks2Reencrypt, CryptReencryptDirectionInfo, CryptReencryptFlag, CryptReencryptFlags,
+    CryptLuks2Reencrypt, CryptParamsReencrypt, CryptParamsReencryptRef,
+    CryptReencryptDirectionInfo, CryptReencryptFlag, CryptReencryptFlags, CryptReencryptInfo,
     CryptReencryptModeInfo,
 };
 
 mod luks2_token;
-pub use luks2_token::CryptLuks2Token;
+pub use luks2_token::{CryptLuks2Token, CryptTokenInfo};
 
 mod runtime;
-pub use runtime::CryptRuntime;
+pub use runtime::{ActiveDevice, CryptRuntime};
 
 mod settings;
-pub use settings::CryptSettings;
+pub use settings::{
+    CryptKdf, CryptPbkdfFlag, CryptPbkdfFlags, CryptPbkdfType, CryptPbkdfTypeRef, CryptRngFlag,
+    CryptSettings, KeyslotsSize, LockState, LuksType, MetadataSize,
+};
 
 mod status;
-pub use status::CryptDeviceStatus;
+pub use status::{CryptDeviceStatus, CryptStatusInfo};
 
 #[cfg(test)]
 mod tests;
 
 mod wipe;
-pub use wipe::CryptWipe;
+pub use wipe::{CryptWipe, CryptWipePattern};
 
 /// Re-export of `libc::size_t`
 pub use libc::size_t;

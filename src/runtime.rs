@@ -6,10 +6,15 @@ use std::convert::TryFrom;
 
 use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr};
 
+/// Record containing data on the given active device
 pub struct ActiveDevice {
+    /// Device offset
     pub offset: u64,
+    /// Initialization vector offset
     pub iv_offset: u64,
+    /// Size of the device
     pub size: u64,
+    /// Flags with activation options
     pub flags: CryptActivateFlags,
 }
 

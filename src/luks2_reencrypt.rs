@@ -63,7 +63,10 @@ bitflags_to_from_struct!(
 
 struct_ref_to_bitflags!(CryptReencryptFlags, CryptReencryptFlag, u32);
 
+/// A struct representing a reference with a lifetime to a `CryptParamsReencrypt`
+/// struct
 pub struct CryptParamsReencryptRef<'a> {
+    #[allow(missing_docs)]
     pub inner: libcryptsetup_rs_sys::crypt_params_reencrypt,
     #[allow(dead_code)]
     reference: &'a CryptParamsReencrypt,
@@ -75,16 +78,26 @@ pub struct CryptParamsReencryptRef<'a> {
     hash_cstring: CString,
 }
 
+/// Parameters for reencryption operations
 pub struct CryptParamsReencrypt {
-    mode: CryptReencryptModeInfo,
-    direction: CryptReencryptDirectionInfo,
-    resilience: String,
-    hash: String,
-    data_shift: u64,
-    max_hotzone_size: u64,
-    device_size: u64,
-    luks2: CryptParamsLuks2,
-    flags: CryptReencryptFlags,
+    /// Type of reencryption operation
+    pub mode: CryptReencryptModeInfo,
+    /// Start at beginning or end of disk
+    pub direction: CryptReencryptDirectionInfo,
+    #[allow(missing_docs)]
+    pub resilience: String,
+    #[allow(missing_docs)]
+    pub hash: String,
+    #[allow(missing_docs)]
+    pub data_shift: u64,
+    #[allow(missing_docs)]
+    pub max_hotzone_size: u64,
+    /// Size of the device
+    pub device_size: u64,
+    /// LUKS2-specific parameters
+    pub luks2: CryptParamsLuks2,
+    /// Reencryption flags
+    pub flags: CryptReencryptFlags,
 }
 
 impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
