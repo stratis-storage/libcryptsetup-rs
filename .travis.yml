@@ -5,6 +5,9 @@ addons:
     packages:
       - libcryptsetup-dev
 
+before_script:
+  - dpkg -s cryptsetup | grep Version
+
 language: rust
 matrix:
     include:
