@@ -1,12 +1,13 @@
 os: linux
 
+before_script:
+  - echo "deb http://us.archive.ubuntu.com/ubuntu/ eoan main" | sudo tee /etc/apt/sources.list
+  - sudo apt update
+
 addons:
   apt:
     packages:
       - libcryptsetup-dev
-
-before_script:
-  - dpkg -s cryptsetup | grep Version
 
 language: rust
 matrix:
