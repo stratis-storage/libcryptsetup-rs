@@ -1,11 +1,9 @@
 os: linux
 
-before_install:
-  - echo "deb http://us.archive.ubuntu.com/ubuntu/ eoan main" | sudo tee /etc/apt/sources.list
-  - sudo apt update
-
 addons:
   apt:
+    sources:
+      - sourceline: 'deb http://us.archive.ubuntu.com/ubuntu/ eoan main'
     packages:
       - libcryptsetup-dev
 
