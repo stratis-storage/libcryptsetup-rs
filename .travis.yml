@@ -1,6 +1,6 @@
 os: linux
 
-before_script:
+before_install:
   - echo "deb http://us.archive.ubuntu.com/ubuntu/ eoan main" | sudo tee /etc/apt/sources.list
   - sudo apt update
 
