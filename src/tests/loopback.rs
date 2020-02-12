@@ -25,7 +25,7 @@ fn setup_backing_file(size_in_bytes: usize, with_zeros: bool) -> Result<PathBuf,
     assert!(directory.exists() && directory.is_dir());
     let mut file_path = PathBuf::new();
     file_path.push(directory);
-    file_path.push(b64_string.to_string());
+    file_path.push(b64_string);
 
     let mut f = File::create(&file_path)?;
     while i < size_in_bytes {
