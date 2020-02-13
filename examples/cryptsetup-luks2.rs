@@ -64,7 +64,7 @@ fn parse_args() -> Result<CryptCommand, LibcryptErr> {
 }
 
 fn encrypt(path: &Path) -> Result<(), LibcryptErr> {
-    let mut device = CryptInit::init(&path)?;
+    let mut device = CryptInit::init(path)?;
     device.context_handle().format::<()>(
         EncryptionFormat::Luks2,
         ("aes", "xts-plain"),
@@ -79,7 +79,7 @@ fn encrypt(path: &Path) -> Result<(), LibcryptErr> {
 }
 
 fn activate(path: &Path, name: &str) -> Result<(), LibcryptErr> {
-    let mut device = CryptInit::init(&path)?;
+    let mut device = CryptInit::init(path)?;
     device
         .context_handle()
         .load::<()>(EncryptionFormat::Luks2, None)?;
