@@ -4,9 +4,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use libcryptsetup_rs::{
-    c_uint, CryptInit, CryptVolumeKeyFlags, EncryptionFormat, LibcryptErr,
-};
+use libcryptsetup_rs::{c_uint, CryptInit, CryptVolumeKeyFlags, EncryptionFormat, LibcryptErr};
 
 #[macro_use]
 extern crate serde_json;
@@ -38,7 +36,7 @@ impl TryFrom<&String> for Openable {
 
 fn parse_args() -> Result<(PathBuf, String, Openable), &'static str> {
     let args: Vec<_> = args().collect();
-    if args.len() != usage().split('\n').collect::<Vec<_>>().len() {
+    if args.len() != usage().split('\n').count() {
         println!("{}", usage());
         return Err("Incorrect arguments provided");
     }
@@ -72,23 +70,34 @@ fn format(dev: &Path) -> Result<c_uint, LibcryptErr> {
         libcryptsetup_rs::Either::Right(256 / 8),
         None,
     )?;
-    let keyslot = device.keyslot_handle(None).add_by_key(None, b"changeme", CryptVolumeKeyFlags::empty())?;
+    let keyslot =
+        device
+            .keyslot_handle(None)
+            .add_by_key(None, b"changeme", CryptVolumeKeyFlags::empty())?;
 
     Ok(keyslot)
 }
 
-fn luks2_token_handler(dev: &Path, key_description: &str, keyslot: c_uint) -> Result<(), LibcryptErr> {
+fn luks2_token_handler(
+    dev: &Path,
+    key_description: &str,
+    keyslot: c_uint,
+) -> Result<(), LibcryptErr> {
     let mut device = CryptInit::init(dev)?;
-    device.context_handle().load::<()>(EncryptionFormat::Luks2, None)?;
+    device
+        .context_handle()
+        .load::<()>(EncryptionFormat::Luks2, None)?;
     let mut token = device.token_handle();
     let token_num = token.luks2_keyring_set(None, key_description)?;
-    let _ = token.assign_keyslot(token_num as c_uint, Some(keyslot as c_uint))?;
+    token.assign_keyslot(token_num as c_uint, Some(keyslot as c_uint))?;
     Ok(())
 }
 
 fn proto_token_handler(dev: &Path, key_description: &str) -> Result<(), LibcryptErr> {
     let mut device = CryptInit::init(dev)?;
-    device.context_handle().load::<()>(EncryptionFormat::Luks2, None)?;
+    device
+        .context_handle()
+        .load::<()>(EncryptionFormat::Luks2, None)?;
     let mut token = device.token_handle();
     let _ = token.json_set(
         None,

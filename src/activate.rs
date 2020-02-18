@@ -2,7 +2,9 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{os::raw::c_int, path::Path, ptr};
+use std::{path::Path, ptr};
+
+use libc::{c_int, c_uint};
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
@@ -72,10 +74,10 @@ impl<'a> CryptActivation<'a> {
     pub fn activate_by_passphrase(
         &mut self,
         name: Option<&str>,
-        keyslot: Option<c_int>,
+        keyslot: Option<c_uint>,
         passphrase: &[u8],
         flags: CryptActivateFlags,
-    ) -> Result<c_int, LibcryptErr> {
+    ) -> Result<c_uint, LibcryptErr> {
         let name_cstring_option = match name {
             Some(n) => Some(to_cstring!(n)?),
             None => None,
@@ -87,24 +89,27 @@ impl<'a> CryptActivation<'a> {
                     Some(ref cs) => cs.as_ptr(),
                     None => ptr::null_mut(),
                 },
-                keyslot.unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
+                keyslot
+                    .map(|k| k as c_int)
+                    .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
                 to_byte_ptr!(passphrase),
                 passphrase.len(),
                 flags.into(),
             )
         })
+        .map(|k| k as c_uint)
     }
 
     /// Activate device by key file
     pub fn activate_by_keyfile_device_offset(
         &mut self,
         name: Option<&str>,
-        keyslot: Option<c_int>,
+        keyslot: Option<c_uint>,
         keyfile: &Path,
         keyfile_size: Option<crate::size_t>,
         keyfile_offset: u64,
         flags: CryptActivateFlags,
-    ) -> Result<c_int, LibcryptErr> {
+    ) -> Result<c_uint, LibcryptErr> {
         let name_cstring_option = match name {
             Some(n) => Some(to_cstring!(n)?),
             None => None,
@@ -117,7 +122,9 @@ impl<'a> CryptActivation<'a> {
                     Some(ref cs) => cs.as_ptr(),
                     None => ptr::null_mut(),
                 },
-                keyslot.unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
+                keyslot
+                    .map(|k| k as c_int)
+                    .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
                 keyfile_cstring.as_ptr(),
                 match keyfile_size {
                     Some(i) => i,
@@ -129,6 +136,7 @@ impl<'a> CryptActivation<'a> {
                 flags.into(),
             )
         })
+        .map(|k| k as c_uint)
     }
 
     /// Activate device by volume key
@@ -165,9 +173,9 @@ impl<'a> CryptActivation<'a> {
         &mut self,
         name: Option<&str>,
         key_description: &str,
-        keyslot: Option<c_int>,
+        keyslot: Option<c_uint>,
         flags: CryptActivateFlags,
-    ) -> Result<c_int, LibcryptErr> {
+    ) -> Result<c_uint, LibcryptErr> {
         let name_cstring_option = match name {
             Some(n) => Some(to_cstring!(n)?),
             None => None,
@@ -181,10 +189,13 @@ impl<'a> CryptActivation<'a> {
                     None => ptr::null_mut(),
                 },
                 description_cstring.as_ptr(),
-                keyslot.unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
+                keyslot
+                    .map(|k| k as c_int)
+                    .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
                 flags.into(),
             )
         })
+        .map(|k| k as c_uint)
     }
 
     /// Deactivate crypt device

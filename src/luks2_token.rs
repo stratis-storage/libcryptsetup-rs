@@ -60,7 +60,8 @@ impl<'a> CryptLuks2Token<'a> {
                     .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
                 json_cstring.as_ptr(),
             )
-        }).map(|rc| rc as c_uint)
+        })
+        .map(|rc| rc as c_uint)
     }
 
     /// Get the token info for a specific token
@@ -96,7 +97,8 @@ impl<'a> CryptLuks2Token<'a> {
                     key_description: description_cstring.as_ptr(),
                 } as *const _,
             )
-        }).map(|rc| rc as c_uint)
+        })
+        .map(|rc| rc as c_uint)
     }
 
     /// Get LUKS2 keyring token description
@@ -215,10 +217,13 @@ impl<'a> CryptLuks2Token<'a> {
             libcryptsetup_rs_sys::crypt_activate_by_token(
                 self.reference.as_ptr(),
                 name_cstring.as_ptr(),
-                token.map(|t| t as c_int).unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
+                token
+                    .map(|t| t as c_int)
+                    .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
                 usrdata_ptr,
                 flags.into(),
             )
-        }).map(|rc| rc as c_uint)
+        })
+        .map(|rc| rc as c_uint)
     }
 }

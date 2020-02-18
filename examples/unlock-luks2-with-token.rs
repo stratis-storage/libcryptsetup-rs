@@ -13,7 +13,7 @@ fn usage() -> &'static str {
 
 fn parse_args() -> Result<(PathBuf, String), &'static str> {
     let args: Vec<_> = args().collect();
-    if args.len() != usage().split('\n').collect::<Vec<_>>().len() {
+    if args.len() != usage().split('\n').count() {
         println!("{}", usage());
         return Err("Incorrect arguments provided");
     }

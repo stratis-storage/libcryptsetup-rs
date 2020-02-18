@@ -2,11 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{
-    ffi::CString,
-    path::Path,
-    ptr,
-};
+use std::{ffi::CString, path::Path, ptr};
 
 use either::Either;
 use libc::{c_char, c_int, c_uint, c_void};
