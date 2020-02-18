@@ -4,14 +4,14 @@
 
 use std::{
     ffi::CString,
-    os::raw::{c_char, c_int, c_void},
     path::Path,
     ptr,
 };
 
-use libcryptsetup_rs_sys::crypt_device;
-
 use either::Either;
+use libc::{c_char, c_int, c_uint, c_void};
+
+use libcryptsetup_rs_sys::crypt_device;
 
 use crate::{
     activate::CryptActivation, backup::CryptBackup, context::CryptContext, debug::CryptDebug,
@@ -126,7 +126,7 @@ impl CryptDevice {
     }
 
     /// Get a keyslot option handle
-    pub fn keyslot_handle(&mut self, keyslot: Option<c_int>) -> CryptKeyslot {
+    pub fn keyslot_handle(&mut self, keyslot: Option<c_uint>) -> CryptKeyslot {
         CryptKeyslot::new(self, keyslot)
     }
 

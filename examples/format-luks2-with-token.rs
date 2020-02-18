@@ -5,7 +5,7 @@ use std::{
 };
 
 use libcryptsetup_rs::{
-    c_int, c_uint, CryptInit, CryptVolumeKeyFlags, EncryptionFormat, LibcryptErr,
+    c_uint, CryptInit, CryptVolumeKeyFlags, EncryptionFormat, LibcryptErr,
 };
 
 #[macro_use]
@@ -13,8 +13,9 @@ extern crate serde_json;
 use uuid::Uuid;
 
 fn usage() -> &'static str {
-    "Usage: format-luks2-with-token <DEVICE_PATH> <openable|unopenable>\n\
+    "Usage: format-luks2-with-token <DEVICE_PATH> <KEY_DESCRIPTION> <openable|unopenable>\n\
     \tDEVICE_PATH: Path to device to format\n\
+    \tKEY_DESCRIPTION: Kernel keyring key description\n\
     \topenable|unopenable: openable to write the openable LUKS2 token to the keyslot"
 }
 
@@ -35,58 +36,59 @@ impl TryFrom<&String> for Openable {
     }
 }
 
-fn parse_args() -> Result<(PathBuf, Openable), &'static str> {
+fn parse_args() -> Result<(PathBuf, String, Openable), &'static str> {
     let args: Vec<_> = args().collect();
-    if args.len() != 3 {
-        return Err(usage());
+    if args.len() != usage().split('\n').collect::<Vec<_>>().len() {
+        println!("{}", usage());
+        return Err("Incorrect arguments provided");
     }
 
     let device_string = args
         .get(1)
-        .ok_or("Could not get the device path for the  device node to be encrypted")?;
+        .ok_or("Could not get the device path for the device node to be encrypted")?;
     let device_path = PathBuf::from(device_string);
     if !device_path.exists() {
         return Err("Device does not exist");
     }
 
-    let openable_string = args
+    let key_description = args
         .get(2)
+        .ok_or("No kernel keyring key description was provided")?;
+
+    let openable_string = args
+        .get(3)
         .ok_or("Could not determine whether device should be openable or not")?;
     let openable = Openable::try_from(openable_string)?;
 
-    Ok((device_path, openable))
+    Ok((device_path, key_description.to_string(), openable))
 }
 
-fn format(dev: &Path) -> Result<(), LibcryptErr> {
+fn format(dev: &Path) -> Result<c_uint, LibcryptErr> {
     let mut device = CryptInit::init(dev)?;
-    let mut context_handle = device.context_handle();
-    context_handle.format::<()>(
+    device.context_handle().format::<()>(
         EncryptionFormat::Luks2,
         ("aes", "xts-plain"),
         None,
         libcryptsetup_rs::Either::Right(256 / 8),
         None,
     )?;
-    Ok(())
+    let keyslot = device.keyslot_handle(None).add_by_key(None, b"changeme", CryptVolumeKeyFlags::empty())?;
+
+    Ok(keyslot)
 }
 
-fn keyslot_handler(dev: &Path) -> Result<c_int, LibcryptErr> {
+fn luks2_token_handler(dev: &Path, key_description: &str, keyslot: c_uint) -> Result<(), LibcryptErr> {
     let mut device = CryptInit::init(dev)?;
-    let mut keyslot = device.keyslot_handle(None);
-    let keyslot_num = keyslot.add_by_key(None, b"changeme", CryptVolumeKeyFlags::empty())?;
-    Ok(keyslot_num)
-}
-
-fn luks2_token_handler(dev: &Path, keyslot: c_int) -> Result<(), LibcryptErr> {
-    let mut device = CryptInit::init(dev)?;
+    device.context_handle().load::<()>(EncryptionFormat::Luks2, None)?;
     let mut token = device.token_handle();
-    let token_num = token.luks2_keyring_set(None, "test-key")?;
+    let token_num = token.luks2_keyring_set(None, key_description)?;
     let _ = token.assign_keyslot(token_num as c_uint, Some(keyslot as c_uint))?;
     Ok(())
 }
 
-fn proto_token_handler(dev: &Path) -> Result<(), LibcryptErr> {
+fn proto_token_handler(dev: &Path, key_description: &str) -> Result<(), LibcryptErr> {
     let mut device = CryptInit::init(dev)?;
+    device.context_handle().load::<()>(EncryptionFormat::Luks2, None)?;
     let mut token = device.token_handle();
     let _ = token.json_set(
         None,
@@ -94,19 +96,18 @@ fn proto_token_handler(dev: &Path) -> Result<(), LibcryptErr> {
             "type": "proto",
             "keyslots": [],
             "a_uuid": Uuid::new_v4().to_simple().to_string(),
-            "key_description": "test-key"
+            "key_description": key_description
         }),
     );
     Ok(())
 }
 
 fn main() -> Result<(), String> {
-    let (path, openable) = parse_args()?;
-    format(&path).map_err(|e| e.to_string())?;
-    let keyslot = keyslot_handler(&path).map_err(|e| e.to_string())?;
-    luks2_token_handler(&path, keyslot).map_err(|e| e.to_string())?;
+    let (path, key_description, openable) = parse_args()?;
+    let keyslot = format(&path).map_err(|e| e.to_string())?;
+    luks2_token_handler(&path, &key_description, keyslot).map_err(|e| e.to_string())?;
     if let Openable::Yes = openable {
-        proto_token_handler(&path).map_err(|e| e.to_string())?;
+        proto_token_handler(&path, &key_description).map_err(|e| e.to_string())?;
     };
     Ok(())
 }

@@ -2,12 +2,11 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{
-    convert::TryFrom,
-    os::raw::{c_char, c_int, c_uint},
-};
+use std::{convert::TryFrom, ptr};
 
 use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr, Bool};
+
+use libc::{c_char, c_int, c_uint, c_void};
 
 consts_to_from_enum!(
     /// Wrapper enum for `CRYPT_TOKEN_*` values
@@ -203,17 +202,21 @@ impl<'a> CryptLuks2Token<'a> {
     pub fn activate_by_token<T>(
         &mut self,
         name: &str,
-        token: c_int,
-        usrdata: &mut T,
+        token: Option<c_uint>,
+        usrdata: Option<&mut T>,
         flags: CryptActivateFlags,
     ) -> Result<c_uint, LibcryptErr> {
         let name_cstring = to_cstring!(name)?;
+        let usrdata_ptr = match usrdata {
+            Some(reference) => reference as *mut _ as *mut c_void,
+            None => ptr::null_mut(),
+        };
         errno_int_success!(unsafe {
             libcryptsetup_rs_sys::crypt_activate_by_token(
                 self.reference.as_ptr(),
                 name_cstring.as_ptr(),
-                token,
-                usrdata as *mut _ as *mut std::os::raw::c_void,
+                token.map(|t| t as c_int).unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
+                usrdata_ptr,
                 flags.into(),
             )
         }).map(|rc| rc as c_uint)
