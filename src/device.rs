@@ -2,16 +2,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{
-    ffi::CString,
-    os::raw::{c_char, c_int, c_void},
-    path::Path,
-    ptr,
-};
-
-use libcryptsetup_rs_sys::crypt_device;
+use std::{ffi::CString, path::Path, ptr};
 
 use either::Either;
+use libc::{c_char, c_int, c_uint, c_void};
+
+use libcryptsetup_rs_sys::crypt_device;
 
 use crate::{
     activate::CryptActivation, backup::CryptBackup, context::CryptContext, debug::CryptDebug,
@@ -126,7 +122,7 @@ impl CryptDevice {
     }
 
     /// Get a keyslot option handle
-    pub fn keyslot_handle(&mut self, keyslot: Option<c_int>) -> CryptKeyslot {
+    pub fn keyslot_handle(&mut self, keyslot: Option<c_uint>) -> CryptKeyslot {
         CryptKeyslot::new(self, keyslot)
     }
 
@@ -176,8 +172,8 @@ impl CryptDevice {
     }
 
     /// Get crypt device LUKS2 token option handle
-    pub fn token_handle(&mut self, token: c_int) -> CryptLuks2Token {
-        CryptLuks2Token::new(self, token)
+    pub fn token_handle(&mut self) -> CryptLuks2Token {
+        CryptLuks2Token::new(self)
     }
 
     /// Get crypt device reencryption option handle

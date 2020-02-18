@@ -14,10 +14,10 @@ use crate::{
     keyslot::CryptVolumeKeyFlags, tests::loopback, Either,
 };
 
-use libc::c_int;
+use libc::c_uint;
 use rand::random;
 
-fn init(dev_path: &Path, passphrase: &str) -> Result<c_int, LibcryptErr> {
+fn init(dev_path: &Path, passphrase: &str) -> Result<c_uint, LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
     {
         let mut ctxt = dev.context_handle();
@@ -33,7 +33,7 @@ fn init(dev_path: &Path, passphrase: &str) -> Result<c_int, LibcryptErr> {
     keyslot.add_by_key(None, passphrase.as_bytes(), CryptVolumeKeyFlags::empty())
 }
 
-fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_int, LibcryptErr> {
+fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_uint, LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
     {
         let mut ctxt = dev.context_handle();
@@ -61,7 +61,7 @@ fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_int, Libcry
 fn activate_by_passphrase(
     dev_path: &Path,
     device_name: &'static str,
-    keyslot: c_int,
+    keyslot: c_uint,
     passphrase: &'static str,
 ) -> Result<(), LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
@@ -92,7 +92,7 @@ fn create_keyfile(loopback_file_path: &Path) -> Result<PathBuf, LibcryptErr> {
 fn activate_by_keyfile(
     dev_path: &Path,
     device_name: &'static str,
-    keyslot: c_int,
+    keyslot: c_uint,
     keyfile_path: &Path,
     keyfile_size: Option<crate::size_t>,
 ) -> Result<(), LibcryptErr> {

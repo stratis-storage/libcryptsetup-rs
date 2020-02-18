@@ -16,8 +16,6 @@
 
 pub use either::Either;
 
-use std::os::raw::c_int;
-
 #[macro_use]
 mod macros;
 
@@ -93,8 +91,8 @@ mod tests;
 mod wipe;
 pub use wipe::{CryptWipe, CryptWipePattern};
 
-/// Re-export of `libc::size_t`
-pub use libc::size_t;
+/// Re-exports `libc` types in API
+pub use libc::{c_int, c_uint, size_t};
 
 /// Boolean specifying yes or no
 #[derive(Debug, Eq, PartialEq)]
