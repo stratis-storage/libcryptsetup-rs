@@ -176,8 +176,8 @@ impl CryptDevice {
     }
 
     /// Get crypt device LUKS2 token option handle
-    pub fn token_handle(&mut self, token: c_int) -> CryptLuks2Token {
-        CryptLuks2Token::new(self, token)
+    pub fn token_handle(&mut self) -> CryptLuks2Token {
+        CryptLuks2Token::new(self)
     }
 
     /// Get crypt device reencryption option handle

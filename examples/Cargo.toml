@@ -8,9 +8,15 @@ edition = "2018"
 name = "cryptsetup-luks2"
 path = "cryptsetup-luks2.rs"
 
+[[bin]]
+name = "format-luks2-with-token"
+path = "format-luks2-with-token.rs"
+
 [dependencies.libcryptsetup-rs-sys]
 version = "0.1.0"
 path = "../libcryptsetup-rs-sys"
 
 [dependencies]
 libcryptsetup-rs = { path = ".." }
+serde_json = "*"
+uuid = {version = "*", features = ["v4"]}
