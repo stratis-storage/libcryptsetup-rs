@@ -25,11 +25,14 @@ fn build_safe_free() {
 }
 
 fn generate_bindings(safe_free_is_needed: bool) {
-    let mut builder = bindgen::Builder::default().header("header.h").size_t_is_usize(true);
-    if safe_free_is_needed {
-        builder = builder.header("safe_free.h");
-    }
-    let bindings = builder.generate()
+    let builder = bindgen::Builder::default().header("header.h").size_t_is_usize(true);
+    let builder_with_safe_free = if safe_free_is_needed {
+        builder.header("safe_free.h")
+    } else {
+        builder
+    };
+    let bindings = builder_with_safe_free
+        .generate()
         .expect("Unable to generate bindings");
 
     let out_path = PathBuf::from(env::var("OUT_DIR").unwrap());
