@@ -12,9 +12,9 @@ use uuid::Uuid;
 
 fn usage() -> &'static str {
     "Usage: format-luks2-with-token <DEVICE_PATH> <KEY_DESCRIPTION> <openable|unopenable>\n\
-    \tDEVICE_PATH: Path to device to format\n\
-    \tKEY_DESCRIPTION: Kernel keyring key description\n\
-    \topenable|unopenable: openable to write the openable LUKS2 token to the keyslot"
+     \tDEVICE_PATH: Path to device to format\n\
+     \tKEY_DESCRIPTION: Kernel keyring key description\n\
+     \topenable|unopenable: openable to write the openable LUKS2 token to the keyslot"
 }
 
 enum Openable {

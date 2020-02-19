@@ -7,8 +7,8 @@ use libcryptsetup_rs::{CryptActivateFlags, CryptInit, LibcryptErr};
 
 fn usage() -> &'static str {
     "Usage: format-luks2-with-token <DEVICE_PATH> <KEY_DESCRIPTION>\n\
-    \tDEVICE_PATH: Path to devices to unlock\n\
-    \tDEVICE_NAME: Name of activated device"
+     \tDEVICE_PATH: Path to devices to unlock\n\
+     \tDEVICE_NAME: Name of activated device"
 }
 
 fn parse_args() -> Result<(PathBuf, String), &'static str> {
