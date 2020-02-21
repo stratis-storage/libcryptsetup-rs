@@ -8,11 +8,7 @@ addons:
     packages:
       - libcryptsetup-dev
       - keyutils
-<<<<<<< HEAD
       - libkeyutils-dev
-=======
-      - keyutils-libs-devel
->>>>>>> Fix .travis.yml
 
 language: rust
 matrix:
