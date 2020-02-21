@@ -24,3 +24,4 @@ path = "../libcryptsetup-rs-sys"
 libcryptsetup-rs = { path = ".." }
 serde_json = "*"
 uuid = {version = "*", features = ["v4"]}
+keyutils = "0.2.1"
