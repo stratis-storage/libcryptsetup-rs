@@ -1,4 +1,4 @@
-use std::{fs::File, io::Write, path::PathBuf};
+use std::{env, fs::File, io::Write, path::PathBuf};
 
 use super::loopback;
 
@@ -11,15 +11,16 @@ pub fn test_keyfile_cleanup() {
         super::do_cleanup(),
         |dev_path, _file_path| {
             let mut device = CryptInit::init(dev_path)?;
-            let key_path = &PathBuf::from("/tmp/safe-free-test-keyfile");
-            let mut f = File::create(key_path).map_err(LibcryptErr::IOError)?;
+            let mut key_path = PathBuf::from(env::var("TEST_DIR").unwrap_or("/tmp".to_string()));
+            key_path.push("safe-free-test-keyfile");
+            let mut f = File::create(&key_path).map_err(LibcryptErr::IOError)?;
             f.write(b"this is a test password")
                 .map_err(LibcryptErr::IOError)?;
             let keyfile_contents =
                 device
                     .keyfile_handle()
-                    .device_read(key_path, 0, None, CryptKeyfileFlags::empty());
-            std::fs::remove_file(key_path).map_err(LibcryptErr::IOError)?;
+                    .device_read(&key_path, 0, None, CryptKeyfileFlags::empty());
+            std::fs::remove_file(&key_path).map_err(LibcryptErr::IOError)?;
             let (keyfile_ptr, keyfile_len) = {
                 let keyfile_contents = keyfile_contents?;
 
