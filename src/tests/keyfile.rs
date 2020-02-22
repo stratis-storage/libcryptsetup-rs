@@ -11,7 +11,8 @@ pub fn test_keyfile_cleanup() {
         super::do_cleanup(),
         |dev_path, _file_path| {
             let mut device = CryptInit::init(dev_path)?;
-            let mut key_path = PathBuf::from(env::var("TEST_DIR").unwrap_or("/tmp".to_string()));
+            let mut key_path =
+                PathBuf::from(env::var("TEST_DIR").unwrap_or_else(|_| "/tmp".to_string()));
             key_path.push("safe-free-test-keyfile");
             let mut f = File::create(&key_path).map_err(LibcryptErr::IOError)?;
             f.write(b"this is a test password")
