@@ -13,6 +13,7 @@ fn main() {
     let bindings = bindgen::Builder::default()
         .header("header.h")
         .header("safe_free.h")
+        .size_t_is_usize(true)
         .generate()
         .expect("Unable to generate bindings");
 
