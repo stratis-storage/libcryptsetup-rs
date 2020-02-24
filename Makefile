@@ -11,7 +11,7 @@ clippy:
 	cargo clippy --all-targets --all-features -- -D warnings -D clippy::needless_borrow
 
 docs-rust:
-	cargo doc --no-deps
+	cargo doc --no-deps --package libcryptsetup-rs --package libcryptsetup-rs-sys
 
 docs-travis: docs-rust
 
