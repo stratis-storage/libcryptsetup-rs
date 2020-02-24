@@ -1,0 +1,16 @@
+[package]
+name = "libcryptsetup-rs-examples"
+version = "0.1.0"
+authors = ["John Baublitz <jbaublitz@redhat.com>"]
+edition = "2018"
+
+[[bin]]
+name = "cryptsetup-luks2"
+path = "cryptsetup-luks2.rs"
+
+[dependencies.libcryptsetup-rs-sys]
+version = "0.1.0"
+path = "../libcryptsetup-rs-sys"
+
+[dependencies]
+libcryptsetup-rs = { path = ".." }
