@@ -8,7 +8,7 @@ addons:
     packages:
       - libcryptsetup-dev
       - keyutils
-      - libkeyutils
+      - libkeyutils-dev
 
 language: rust
 matrix:
