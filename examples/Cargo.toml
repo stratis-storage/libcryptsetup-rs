@@ -16,6 +16,10 @@ path = "format-luks2-with-token.rs"
 name = "unlock-luks2-with-token"
 path = "unlock-luks2-with-token.rs"
 
+[[bin]]
+name = "add-key-to-persistent-keyring"
+path = "add-key-to-persistent-keyring.rs"
+
 [dependencies.libcryptsetup-rs-sys]
 version = "0.1.0"
 path = "../libcryptsetup-rs-sys"
