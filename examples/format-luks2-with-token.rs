@@ -90,7 +90,7 @@ fn luks2_token_handler(
         .load::<()>(EncryptionFormat::Luks2, None)?;
     let mut token = device.token_handle();
     let token_num = token.luks2_keyring_set(None, key_description)?;
-    token.assign_keyslot(token_num as c_uint, Some(keyslot as c_uint))?;
+    token.assign_keyslot(token_num, Some(keyslot))?;
     Ok(())
 }
 

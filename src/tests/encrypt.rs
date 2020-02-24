@@ -116,7 +116,7 @@ fn activate_by_keyfile(
 fn mount(device: &Path, mount_point: &Path) -> Result<(), LibcryptErr> {
     assert!(device.exists());
 
-    std::process::Command::new("mkfs.ext4")
+    std::process::Command::new("/usr/sbin/mkfs.ext4")
         .arg(device)
         .output()
         .map_err(|e| LibcryptErr::Other(e.to_string()))?;
