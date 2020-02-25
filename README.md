@@ -8,7 +8,7 @@ This crate provides Rust bindings for libcryptsetup.
 
 ### API documentation
 
-The API documentation can be found [here](https://stratis-storage.github.io/libcryptsetup-rs/doc/libcryptsetup_rs/index.html)
+The API documentation can be found [here](https://stratis-storage.github.io/libcryptsetup-rs/doc/libcryptsetup_rs/index.html).
 
 ### Sanity testing bindings
 
