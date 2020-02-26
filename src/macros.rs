@@ -133,7 +133,7 @@ macro_rules! from_str_ptr_to_owned {
 macro_rules! consts_to_from_enum {
     ( #[$meta:meta] $flag_enum:ident, $flag_type:ty, $( $name:ident => $constant:expr ),* ) => {
         #[$meta]
-        #[derive(Copy, Clone)]
+        #[derive(Copy, Clone, Debug, PartialEq)]
         pub enum $flag_enum {
             $(
                 #[allow(missing_docs)]
@@ -387,6 +387,8 @@ macro_rules! c_token_handler_dump {
 
 #[cfg(test)]
 mod test {
+    use std::convert::TryFrom;
+
     use crate::{log::CryptLogLevel, Bool, Interrupt};
 
     fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u64>) -> Bool {
@@ -446,5 +448,23 @@ mod test {
         let ret = progress_callback(0, 0, &mut 0 as *mut _ as *mut std::os::raw::c_void);
         assert_eq!(0, ret);
         assert_eq!(Interrupt::No, Interrupt::from(ret));
+    }
+
+    consts_to_from_enum!(
+        /// An enum for testing `PartialEq`
+        PETestEnum,
+        u16,
+        This => 0,
+        Can => 1,
+        Use => 2,
+        PartialEq => 3
+    );
+
+    #[test]
+    fn test_enum_partial_eq() {
+        assert_eq!(PETestEnum::This, PETestEnum::try_from(0).unwrap());
+        assert_eq!(PETestEnum::Can, PETestEnum::try_from(1).unwrap());
+        assert_eq!(PETestEnum::Use, PETestEnum::try_from(2).unwrap());
+        assert_eq!(PETestEnum::PartialEq, PETestEnum::try_from(3).unwrap());
     }
 }
