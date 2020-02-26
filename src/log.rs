@@ -13,6 +13,7 @@ use crate::{device::CryptDevice, err::LibcryptErr};
 type LoggingCallback = unsafe extern "C" fn(level: c_int, msg: *const c_char, usrptr: *mut c_void);
 
 /// Logging levels
+#[derive(Debug, PartialEq)]
 pub enum CryptLogLevel {
     #[allow(missing_docs)]
     Normal = libcryptsetup_rs_sys::CRYPT_LOG_NORMAL as isize,

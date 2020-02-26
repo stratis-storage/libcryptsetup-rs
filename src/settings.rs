@@ -22,6 +22,7 @@ consts_to_from_enum!(
 );
 
 /// Rust representation of key generator enum
+#[derive(Debug, PartialEq)]
 pub enum CryptKdf {
     #[allow(missing_docs)]
     Pbkdf2,
@@ -174,6 +175,7 @@ impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
 }
 
 /// LUKS type (1 or 2)
+#[derive(Debug, PartialEq)]
 pub enum LuksType {
     #[allow(missing_docs)]
     Luks1,
@@ -192,6 +194,7 @@ impl LuksType {
 }
 
 /// State of memory lock
+#[derive(Debug, PartialEq)]
 pub enum LockState {
     #[allow(missing_docs)]
     Unlocked = 0,

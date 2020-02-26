@@ -33,6 +33,7 @@ bitflags_to_from_struct!(
 );
 
 /// Device formatting type options
+#[derive(Debug, PartialEq)]
 pub enum EncryptionFormat {
     #[allow(missing_docs)]
     Plain,
@@ -361,5 +362,16 @@ impl<'a> CryptFormat<'a> {
     /// Get the default formatting type
     pub fn get_default_type() -> Result<EncryptionFormat, LibcryptErr> {
         EncryptionFormat::from_ptr(unsafe { libcryptsetup_rs_sys::crypt_get_default_type() })
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::EncryptionFormat;
+
+    #[test]
+    fn test_encryption_format_partialeq() {
+        assert_eq!(EncryptionFormat::Luks1, EncryptionFormat::Luks1);
+        assert_ne!(EncryptionFormat::Luks1, EncryptionFormat::Luks2);
     }
 }
