@@ -10,6 +10,14 @@ This crate provides Rust bindings for libcryptsetup.
 
 The API documentation can be found [here](https://stratis-storage.github.io/libcryptsetup-rs/doc/libcryptsetup_rs/index.html).
 
+### Building
+
+The libcryptsetup bindings require some dependencies outside of cargo to build
+properly:
+1. cryptsetup (provided by `cryptsetup` on Fedora)
+2. cryptsetup development headers (provided by `cryptsetup-devel` on Fedora)
+3. libclang (provided by `clang` on Fedora)
+
 ### Sanity testing bindings
 
 There is one test that actually invokes libcryptsetup and can be used for basic sanity
