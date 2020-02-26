@@ -11,4 +11,5 @@ repository = "https://github.com/stratis-storage/libcryptsetup-rs"
 
 [build-dependencies]
 bindgen = "0.53.0"
+pkg-config = "0.3"
 cc = "1.0.45"

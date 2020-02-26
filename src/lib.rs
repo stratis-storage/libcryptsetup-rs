@@ -50,7 +50,7 @@ mod key;
 pub use key::CryptVolumeKey;
 
 mod keyfile;
-pub use keyfile::{CryptKeyfile, CryptKeyfileContents};
+pub use keyfile::{CryptKeyfile, CryptKeyfileContents, CryptKeyfileFlag, CryptKeyfileFlags};
 
 mod keyslot;
 pub use keyslot::{
@@ -150,5 +150,11 @@ mod test {
     #[test]
     fn test_unencrypted() {
         tests::encrypt::test_unecrypted();
+    }
+
+    #[ignore]
+    #[test]
+    fn test_crypt_setup_free_exists() {
+        tests::keyfile::test_keyfile_cleanup();
     }
 }
