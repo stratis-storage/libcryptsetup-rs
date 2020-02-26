@@ -5,6 +5,7 @@
 use std::env::var;
 
 pub mod encrypt;
+pub mod keyfile;
 pub mod loopback;
 
 fn format_with_zeros() -> bool {
