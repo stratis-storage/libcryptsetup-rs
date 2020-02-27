@@ -203,12 +203,15 @@ impl<'a> CryptLuks2Token<'a> {
     /// Activate device or check key using a token
     pub fn activate_by_token<T>(
         &mut self,
-        name: &str,
+        name: Option<&str>,
         token: Option<c_uint>,
         usrdata: Option<&mut T>,
         flags: CryptActivateFlags,
     ) -> Result<c_uint, LibcryptErr> {
-        let name_cstring = to_cstring!(name)?;
+        let name_cstring_option = match name {
+            Some(n) => Some(to_cstring!(n)?),
+            None => None,
+        };
         let usrdata_ptr = match usrdata {
             Some(reference) => reference as *mut _ as *mut c_void,
             None => ptr::null_mut(),
@@ -216,7 +219,10 @@ impl<'a> CryptLuks2Token<'a> {
         errno_int_success!(unsafe {
             libcryptsetup_rs_sys::crypt_activate_by_token(
                 self.reference.as_ptr(),
-                name_cstring.as_ptr(),
+                match name_cstring_option {
+                    Some(ref s) => s.as_ptr(),
+                    None => std::ptr::null(),
+                },
                 token
                     .map(|t| t as c_int)
                     .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
