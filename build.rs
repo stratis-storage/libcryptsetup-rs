@@ -1,13 +1,13 @@
 use pkg_config::Config;
 use semver::Version;
 
-static SUPPORTED_VERSIONS: &[&'static str] = &[
-    "2.2.0",
-    "2.3.0",
-];
+static SUPPORTED_VERSIONS: &[&str] = &["2.2.0", "2.3.0"];
 
 fn main() {
-    let version = match Config::new().atleast_version("2.2.0").probe("libcryptsetup") {
+    let version = match Config::new()
+        .atleast_version("2.2.0")
+        .probe("libcryptsetup")
+    {
         Ok(l) => Version::parse(&l.version).expect("Could not parse version"),
         Err(e) => panic!("Bindings require at least cryptsetup-2.2.0: {}", e),
     };
