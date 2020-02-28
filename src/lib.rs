@@ -73,7 +73,9 @@ pub use luks2_reencrypt::{
 mod luks2_token;
 pub use luks2_token::{CryptLuks2Token, CryptTokenInfo};
 
+#[cfg(cryptsetup23supported)]
 mod mem;
+#[cfg(cryptsetup23supported)]
 pub use mem::{SafeMemHandle, SafeMemZero};
 
 mod runtime;
