@@ -40,9 +40,12 @@ fn activate(devpath: &Path, name: &str) -> Result<(), LibcryptErr> {
     device
         .context_handle()
         .load::<()>(EncryptionFormat::Luks2, None)?;
-    device
-        .token_handle()
-        .activate_by_token::<()>(name, None, None, CryptActivateFlags::empty())?;
+    device.token_handle().activate_by_token::<()>(
+        Some(name),
+        None,
+        None,
+        CryptActivateFlags::empty(),
+    )?;
     Ok(())
 }
 
