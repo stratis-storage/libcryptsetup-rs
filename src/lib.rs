@@ -74,7 +74,7 @@ mod luks2_token;
 pub use luks2_token::{CryptLuks2Token, CryptTokenInfo};
 
 mod mem;
-pub use mem::{SafeMemZero, SafeMemHandle};
+pub use mem::{SafeMemHandle, SafeMemZero};
 
 mod runtime;
 pub use runtime::{ActiveDevice, CryptRuntime};

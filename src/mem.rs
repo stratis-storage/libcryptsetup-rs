@@ -14,8 +14,13 @@ use crate::Result;
 pub struct SafeMemZero(*mut c_void, usize);
 
 impl SafeMemZero {
-    /// Construct a safe memory handle from a pointer allocated by `libc::malloc`
-    /// or a `libc::free`-compatible function and a size.
+    /// Construct a safe memory handle from a pointer and a size.
+    ///
+    /// # Safety
+    ///
+    /// The pointer must point to memory allocated by `libc::malloc` or something
+    /// compatible with `libc::free`. See the struct-level security warning for more
+    /// information.
     pub unsafe fn from_ptr(ptr: *mut c_void, size: usize) -> Self {
         SafeMemZero(ptr, size)
     }
@@ -81,7 +86,7 @@ mod test {
     #[test]
     fn test_memzero() {
         let mut handle = SafeMemHandle::alloc(32).unwrap();
-        handle.as_mut().write(&[20; 32]).unwrap();
+        handle.as_mut().write_all(&[20; 32]).unwrap();
         assert_eq!(&[20; 32], handle.as_ref());
         handle.memzero();
         assert_eq!(&[0; 32], handle.as_ref());
