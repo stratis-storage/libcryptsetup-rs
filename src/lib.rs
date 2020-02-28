@@ -73,10 +73,10 @@ pub use luks2_reencrypt::{
 mod luks2_token;
 pub use luks2_token::{CryptLuks2Token, CryptTokenInfo};
 
-#[cfg(cryptsetup23supported)]
 mod mem;
+pub use mem::SafeMemHandle;
 #[cfg(cryptsetup23supported)]
-pub use mem::{SafeMemHandle, SafeMemZero};
+pub use mem::SafeMemZero;
 
 mod runtime;
 pub use runtime::{ActiveDevice, CryptRuntime};

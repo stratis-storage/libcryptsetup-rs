@@ -2,6 +2,7 @@ use std::slice;
 
 use libc::c_void;
 
+#[cfg(cryptsetup23supported)]
 use crate::Result;
 
 /// Handle for zeroing memory
@@ -11,8 +12,10 @@ use crate::Result;
 /// Any pointer used with this *must point to memory allocated by* `libc::malloc`
 /// or any other function compatible with `libc::free`. If it has not been,
 /// you could cause memory corruption and security problems.
+#[cfg(cryptsetup23supported)]
 pub struct SafeMemZero(*mut c_void, usize);
 
+#[cfg(cryptsetup23supported)]
 impl SafeMemZero {
     /// Construct a safe memory handle from a pointer and a size.
     ///
@@ -26,6 +29,7 @@ impl SafeMemZero {
     }
 }
 
+#[cfg(cryptsetup23supported)]
 impl Drop for SafeMemZero {
     fn drop(&mut self) {
         unsafe {
@@ -45,6 +49,7 @@ impl SafeMemHandle {
 
     /// Allocate a block of memory that will be safely zeroed when deallocated
     /// by the `Drop` trait.
+    #[cfg(cryptsetup23supported)]
     pub fn alloc(size: usize) -> Result<Self> {
         let ptr = ptr_to_result!(unsafe { libcryptsetup_rs_sys::crypt_safe_alloc(size) })?;
         Ok(SafeMemHandle(ptr, size))
@@ -54,6 +59,7 @@ impl SafeMemHandle {
     /// unless the user wants to reuse the buffer and reinitialize with zeros.
     /// This method is never needed before the value is dropped as `Drop` will
     /// safely zero the memory for the user.
+    #[cfg(cryptsetup23supported)]
     pub fn memzero(&mut self) {
         unsafe { libcryptsetup_rs_sys::crypt_safe_memzero(self.0, self.1) };
     }
@@ -77,7 +83,7 @@ impl AsMut<[u8]> for SafeMemHandle {
     }
 }
 
-#[cfg(test)]
+#[cfg(all(test, cryptsetup23supported))]
 mod test {
     use super::*;
 
