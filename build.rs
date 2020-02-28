@@ -3,6 +3,13 @@ use semver::Version;
 
 static SUPPORTED_VERSIONS: &[&str] = &["2.2.0", "2.3.0"];
 
+// This build script will set a cfg directive in the form of
+// "cryptsetup[MAJOR][MINOR]supported" for every version up until and including
+// the current system version installed. There is currently no good way to
+// compare whether a version is equal to or greater than from the macro
+// context of #[cfg(...)] so instead, the current best option is to enable all
+// minor versions corresponding to a major version that are less than or equal
+// to the current minor version.
 fn main() {
     let version = match Config::new()
         .atleast_version("2.2.0")
