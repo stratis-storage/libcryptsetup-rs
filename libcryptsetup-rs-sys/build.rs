@@ -3,25 +3,26 @@ use std::env;
 use bindgen;
 use cc;
 use pkg_config::Config;
+use semver::Version;
 
 use std::path::PathBuf;
 
-fn safe_free_is_needed() -> bool {
-    match Config::new().atleast_version("2.3.0").probe("libcryptsetup") {
-        Ok(_) => false,
-        Err(_) => {
-            match Config::new().atleast_version("2.2.0").probe("libcryptsetup") {
-                Ok(_) => true,
-                Err(e) => panic!("Bindings require at least cryptsetup-2.2: {}", e),
-            }
-        }
+fn get_version() -> Version {
+    match Config::new().atleast_version("2.2.0").probe("libcryptsetup") {
+        Ok(l) => Version::parse(&l.version).expect("Could not parse version"),
+        Err(e) => panic!("Bindings require at least cryptsetup-2.2.0: {}", e),
     }
 }
 
-fn build_safe_free() {
-    println!("cargo:rustc-link-lib=cryptsetup");
+fn safe_free_is_needed() -> bool {
+    let version = get_version();
+    version < Version::new(2, 3, 0)
+}
 
+fn build_safe_free() {
     cc::Build::new().file("safe_free.c").compile("safe_free");
+
+    println!("cargo:rustc-link-lib=cryptsetup");
 }
 
 fn generate_bindings(safe_free_is_needed: bool) {
