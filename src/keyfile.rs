@@ -6,30 +6,16 @@ use std::{path::Path, ptr};
 
 use libc::{c_char, c_void};
 
-use crate::{device::CryptDevice, err::LibcryptErr};
+use crate::{device::CryptDevice, err::LibcryptErr, mem::SafeMemHandle};
 
 /// Contents of a keyfile that have been read
 pub struct CryptKeyfileContents {
-    key: *mut c_char,
-    key_size: crate::size_t,
-}
-
-impl CryptKeyfileContents {
-    /// Expose keyfile contents as a pointer
-    pub fn as_ptr(&self) -> *const c_char {
-        self.key
-    }
+    key_mem: SafeMemHandle,
 }
 
 impl AsRef<[u8]> for CryptKeyfileContents {
     fn as_ref(&self) -> &[u8] {
-        unsafe { std::slice::from_raw_parts(self.key as *const u8, self.key_size) }
-    }
-}
-
-impl Drop for CryptKeyfileContents {
-    fn drop(&mut self) {
-        unsafe { libcryptsetup_rs_sys::crypt_safe_free(self.as_ptr() as *mut c_void) }
+        self.key_mem.as_ref()
     }
 }
 
@@ -89,8 +75,7 @@ impl<'a> CryptKeyfile<'a> {
             )
         })?;
         Ok(CryptKeyfileContents {
-            key,
-            key_size: size,
+            key_mem: unsafe { SafeMemHandle::from_ptr(key as *mut c_void, size) }
         })
     }
 }
