@@ -37,6 +37,7 @@ macro_rules! define_handle {
 
 macro_rules! memzero {
     ($name:ident) => {
+        #[cfg(cryptsetup23supported)]
         impl SafeMemzero for $name {
             fn safe_memzero(&mut self) {
                 unsafe { libcryptsetup_rs_sys::crypt_safe_memzero(self.0, self.1) }
@@ -61,12 +62,12 @@ macro_rules! as_ref {
     };
 }
 
+/// A trait to be implemented for a segment of memory that can be explicitly
+/// zeroed in a way that will not be optimized away by the compiler.
 #[cfg(cryptsetup23supported)]
 pub trait SafeMemzero {
-    /// Zero the data in the buffer. This is not necessary in most circumstances
-    /// unless the user wants to reuse the buffer and reinitialize with zeros.
-    /// This method is never needed before the value is dropped as `Drop` will
-    /// safely zero the memory for the user.
+    /// Zero the data in the buffer. To enable managed zeroing of a buffer,
+    /// call this in a `Drop` implementation.
     fn safe_memzero(&mut self);
 }
 
@@ -96,7 +97,6 @@ define_handle! {
         libc::free(self_.0);
     }
 }
-#[cfg(cryptsetup23supported)]
 memzero!(SafeOwnedMemZero);
 as_ref!(SafeOwnedMemZero);
 
@@ -115,7 +115,6 @@ define_handle! {
     /// or memory corruption could occur.
     from_ptr
 }
-#[cfg(cryptsetup23supported)]
 memzero!(SafeBorrowedMemZero);
 as_ref!(SafeBorrowedMemZero);
 
@@ -141,7 +140,6 @@ impl Drop for SafeMemHandle {
         unsafe { libcryptsetup_rs_sys::crypt_safe_free(self.0) }
     }
 }
-#[cfg(cryptsetup23supported)]
 memzero!(SafeMemHandle);
 as_ref!(SafeMemHandle);
 
