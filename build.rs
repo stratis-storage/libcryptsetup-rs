@@ -24,10 +24,7 @@ fn main() {
     }) {
         println!(
             "cargo:rustc-cfg=cryptsetup{}supported",
-            ver.split('.').take(2).fold(String::new(), |mut acc, next| {
-                acc.push_str(next);
-                acc
-            })
+            ver.split('.').take(2).collect::<Vec<_>>().join("")
         );
     }
 }
