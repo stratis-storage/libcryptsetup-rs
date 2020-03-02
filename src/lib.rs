@@ -76,7 +76,7 @@ pub use luks2_token::{CryptLuks2Token, CryptTokenInfo};
 mod mem;
 pub use mem::SafeMemHandle;
 #[cfg(cryptsetup23supported)]
-pub use mem::{SafeBorrowedMemZero, SafeOwnedMemZero, SafeMemzero};
+pub use mem::{SafeBorrowedMemZero, SafeMemzero, SafeOwnedMemZero};
 
 mod runtime;
 pub use runtime::{ActiveDevice, CryptRuntime};

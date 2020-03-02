@@ -98,6 +98,7 @@ define_handle! {
     }
 }
 memzero!(SafeOwnedMemZero);
+#[cfg(cryptsetup23supported)]
 as_ref!(SafeOwnedMemZero);
 
 define_handle! {
@@ -116,6 +117,7 @@ define_handle! {
     from_ptr
 }
 memzero!(SafeBorrowedMemZero);
+#[cfg(cryptsetup23supported)]
 as_ref!(SafeBorrowedMemZero);
 
 /// Handle to allocated memory from libcryptsetup
