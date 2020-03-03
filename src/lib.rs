@@ -73,6 +73,11 @@ pub use luks2_reencrypt::{
 mod luks2_token;
 pub use luks2_token::{CryptLuks2Token, CryptTokenInfo};
 
+mod mem;
+pub use mem::SafeMemHandle;
+#[cfg(cryptsetup23supported)]
+pub use mem::{SafeBorrowedMemZero, SafeMemzero, SafeOwnedMemZero};
+
 mod runtime;
 pub use runtime::{ActiveDevice, CryptRuntime};
 
@@ -93,6 +98,9 @@ pub use wipe::{CryptWipe, CryptWipePattern};
 
 /// Re-exports `libc` types in API
 pub use libc::{c_int, c_uint, size_t};
+
+/// Result type to be used with `libcryptsetup-rs`
+pub type Result<T> = std::result::Result<T, LibcryptErr>;
 
 /// Boolean specifying yes or no
 #[derive(Debug, Eq, PartialEq)]
