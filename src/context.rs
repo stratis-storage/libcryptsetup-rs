@@ -26,7 +26,7 @@ impl<'a> CryptContext<'a> {
     /// Format and encrypt the given device with the requested encryption
     /// algorithm and key or key length.
     ///
-    /// For `volume_key parameter`, either the volume key or the desired length of
+    /// For `volume_key` parameter, either the volume key or the desired length of
     /// the generated volume key can be specified.
     ///
     /// For the `volume_key` parameter, the value in `Either::Right` must be in
