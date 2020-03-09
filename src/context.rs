@@ -23,10 +23,15 @@ impl<'a> CryptContext<'a> {
         CryptContext { reference }
     }
 
-    /// Set encryption format
+    /// Format and encrypt the given device with the requested encryption
+    /// algorithm and key or key length.
     ///
-    /// For `volume_key parameter`, either the volume key or the desired length of the generated volume key
-    /// can be specified, not both at once
+    /// For `volume_key` parameter, either the volume key or the desired length of
+    /// the generated volume key can be specified.
+    ///
+    /// For the `volume_key` parameter, the value in `Either::Right` must be in
+    /// units of bytes. For a common key length such as 512 bits, the value passed
+    /// to the `Either::Right` variant would be `512 / 8`.
     pub fn format<T>(
         &mut self,
         type_: EncryptionFormat,
