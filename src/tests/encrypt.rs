@@ -30,7 +30,12 @@ fn init(dev_path: &Path, passphrase: &str) -> Result<c_uint, LibcryptErr> {
         )?;
     }
     let mut keyslot = dev.keyslot_handle();
-    keyslot.add_by_key(None, None, passphrase.as_bytes(), CryptVolumeKeyFlags::empty())
+    keyslot.add_by_key(
+        None,
+        None,
+        passphrase.as_bytes(),
+        CryptVolumeKeyFlags::empty(),
+    )
 }
 
 fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_uint, LibcryptErr> {
