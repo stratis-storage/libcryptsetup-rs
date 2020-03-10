@@ -70,7 +70,8 @@ fn format(dev: &Path) -> Result<c_uint, LibcryptErr> {
         libcryptsetup_rs::Either::Right(256 / 8),
         None,
     )?;
-    let keyslot = device.keyslot_handle(None).add_by_key(
+    let keyslot = device.keyslot_handle().add_by_key(
+        None,
         None,
         b"testpassword",
         CryptVolumeKeyFlags::empty(),

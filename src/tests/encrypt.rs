@@ -29,8 +29,8 @@ fn init(dev_path: &Path, passphrase: &str) -> Result<c_uint, LibcryptErr> {
             None,
         )?;
     }
-    let mut keyslot = dev.keyslot_handle(None);
-    keyslot.add_by_key(None, passphrase.as_bytes(), CryptVolumeKeyFlags::empty())
+    let mut keyslot = dev.keyslot_handle();
+    keyslot.add_by_key(None, None, passphrase.as_bytes(), CryptVolumeKeyFlags::empty())
 }
 
 fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_uint, LibcryptErr> {
@@ -49,8 +49,9 @@ fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_uint, Libcr
         let mut kf_handle = dev.keyfile_handle();
         kf_handle.device_read(keyfile_path, 0, None, CryptKeyfileFlags::empty())?
     };
-    let mut keyslot_handle = dev.keyslot_handle(None);
+    let mut keyslot_handle = dev.keyslot_handle();
     let keyslot = keyslot_handle.add_by_key(
+        None,
         None,
         keyfile_contents.as_ref(),
         CryptVolumeKeyFlags::empty(),

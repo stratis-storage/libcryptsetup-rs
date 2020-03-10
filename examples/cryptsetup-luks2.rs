@@ -73,8 +73,8 @@ fn encrypt(path: &Path) -> Result<(), LibcryptErr> {
         None,
     )?;
     device
-        .keyslot_handle(None)
-        .add_by_key(None, b"changeme", CryptVolumeKeyFlags::empty())?;
+        .keyslot_handle()
+        .add_by_key(None, None, b"changeme", CryptVolumeKeyFlags::empty())?;
     Ok(())
 }
 
