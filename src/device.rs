@@ -5,7 +5,7 @@
 use std::{ffi::CString, path::Path, ptr};
 
 use either::Either;
-use libc::{c_char, c_int, c_uint, c_void};
+use libc::{c_char, c_int, c_void};
 
 use libcryptsetup_rs_sys::crypt_device;
 
@@ -122,8 +122,8 @@ impl CryptDevice {
     }
 
     /// Get a keyslot option handle
-    pub fn keyslot_handle(&mut self, keyslot: Option<c_uint>) -> CryptKeyslot {
-        CryptKeyslot::new(self, keyslot)
+    pub fn keyslot_handle(&mut self) -> CryptKeyslot {
+        CryptKeyslot::new(self)
     }
 
     /// Get a runtime attribute option handle
