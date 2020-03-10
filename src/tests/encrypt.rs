@@ -19,18 +19,14 @@ use rand::random;
 
 fn init(dev_path: &Path, passphrase: &str) -> Result<c_uint, LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
-    {
-        let mut ctxt = dev.context_handle();
-        ctxt.format::<()>(
-            EncryptionFormat::Luks2,
-            ("aes", "xts-plain"),
-            None,
-            Either::Right(512 / 8),
-            None,
-        )?;
-    }
-    let mut keyslot = dev.keyslot_handle();
-    keyslot.add_by_key(
+    dev.context_handle().format::<()>(
+        EncryptionFormat::Luks2,
+        ("aes", "xts-plain"),
+        None,
+        Either::Right(512 / 8),
+        None,
+    )?;
+    dev.keyslot_handle().add_by_key(
         None,
         None,
         passphrase.as_bytes(),
@@ -40,28 +36,23 @@ fn init(dev_path: &Path, passphrase: &str) -> Result<c_uint, LibcryptErr> {
 
 fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_uint, LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
-    {
-        let mut ctxt = dev.context_handle();
-        ctxt.format::<()>(
-            EncryptionFormat::Luks2,
-            ("aes", "xts-plain"),
-            None,
-            Either::Right(512 / 8),
-            None,
-        )?;
-    }
+    dev.context_handle().format::<()>(
+        EncryptionFormat::Luks2,
+        ("aes", "xts-plain"),
+        None,
+        Either::Right(512 / 8),
+        None,
+    )?;
     let keyfile_contents = {
         let mut kf_handle = dev.keyfile_handle();
         kf_handle.device_read(keyfile_path, 0, None, CryptKeyfileFlags::empty())?
     };
-    let mut keyslot_handle = dev.keyslot_handle();
-    let keyslot = keyslot_handle.add_by_key(
+    Ok(dev.keyslot_handle().add_by_key(
         None,
         None,
         keyfile_contents.as_ref(),
         CryptVolumeKeyFlags::empty(),
-    )?;
-    Ok(keyslot)
+    )?)
 }
 
 fn activate_by_passphrase(
@@ -71,19 +62,14 @@ fn activate_by_passphrase(
     passphrase: &'static str,
 ) -> Result<(), LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
-    {
-        let mut context = dev.context_handle();
-        context.load::<()>(EncryptionFormat::Luks2, None)?;
-    }
-    {
-        let mut activation = dev.activate_handle();
-        activation.activate_by_passphrase(
-            Some(device_name),
-            Some(keyslot),
-            passphrase.as_bytes(),
-            CryptActivateFlags::empty(),
-        )?;
-    }
+    dev.context_handle()
+        .load::<()>(EncryptionFormat::Luks2, None)?;
+    dev.activate_handle().activate_by_passphrase(
+        Some(device_name),
+        Some(keyslot),
+        passphrase.as_bytes(),
+        CryptActivateFlags::empty(),
+    )?;
     Ok(())
 }
 
@@ -103,12 +89,9 @@ fn activate_by_keyfile(
     keyfile_size: Option<crate::size_t>,
 ) -> Result<(), LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
-    {
-        let mut context = dev.context_handle();
-        context.load::<()>(EncryptionFormat::Luks2, None)?;
-    }
-    let mut activation = dev.activate_handle();
-    activation.activate_by_keyfile_device_offset(
+    dev.context_handle()
+        .load::<()>(EncryptionFormat::Luks2, None)?;
+    dev.activate_handle().activate_by_keyfile_device_offset(
         Some(device_name),
         Some(keyslot),
         keyfile_path,
@@ -233,8 +216,8 @@ pub fn test_encrypt_by_keyfile() {
 
             if super::do_cleanup() {
                 let mut dev = CryptInit::init_by_name_and_header(device_name, None)?;
-                let mut activation = dev.activate_handle();
-                activation.deactivate(device_name, CryptDeactivateFlags::empty())?;
+                dev.activate_handle()
+                    .deactivate(device_name, CryptDeactivateFlags::empty())?;
                 std::fs::remove_file(keyfile_path).map_err(LibcryptErr::IOError)?;
             }
 
