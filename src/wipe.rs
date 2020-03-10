@@ -42,7 +42,7 @@ impl<'a> CryptWipe<'a> {
         wipe_block_size: crate::size_t,
         wipe_no_direct_io: bool,
         callback: Option<WipeProgressCallback>,
-        usrptr: &mut T,
+        usrptr: Option<&mut T>,
     ) -> Result<(), LibcryptErr> {
         let dev_path_cstring = path_to_cstring!(dev_path)?;
         errno!(unsafe {
@@ -59,7 +59,10 @@ impl<'a> CryptWipe<'a> {
                     0
                 },
                 callback,
-                usrptr as *mut _ as *mut c_void,
+                match usrptr {
+                    Some(up) => up as *mut _ as *mut c_void,
+                    None => std::ptr::null_mut(),
+                },
             )
         })
     }
