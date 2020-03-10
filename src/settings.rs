@@ -6,6 +6,7 @@ use std::{
     convert::{TryFrom, TryInto},
     ffi::{CStr, CString},
     marker::PhantomData,
+    ops::Deref,
     os::raw::{c_char, c_int},
 };
 
@@ -212,26 +213,26 @@ impl From<c_int> for LockState {
 }
 
 /// Size allocated for metadata
-#[derive(Debug, PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum MetadataSize {
     #[allow(missing_docs)]
-    Kb16 = 0x4_000,
+    Kb16,
     #[allow(missing_docs)]
-    Kb32 = 0x8_000,
+    Kb32,
     #[allow(missing_docs)]
-    Kb64 = 0x10_000,
+    Kb64,
     #[allow(missing_docs)]
-    Kb128 = 0x20_000,
+    Kb128,
     #[allow(missing_docs)]
-    Kb256 = 0x40_000,
+    Kb256,
     #[allow(missing_docs)]
-    Kb512 = 0x80_000,
+    Kb512,
     #[allow(missing_docs)]
-    Kb1024 = 0x100_000,
+    Kb1024,
     #[allow(missing_docs)]
-    Kb2048 = 0x200_000,
+    Kb2048,
     #[allow(missing_docs)]
-    Kb4096 = 0x400_000,
+    Kb4096,
 }
 
 impl TryFrom<u64> for MetadataSize {
@@ -239,36 +240,54 @@ impl TryFrom<u64> for MetadataSize {
 
     fn try_from(v: u64) -> Result<Self, Self::Error> {
         let size = match v {
-            i if i == MetadataSize::Kb16 as u64 => MetadataSize::Kb16,
-            i if i == MetadataSize::Kb32 as u64 => MetadataSize::Kb32,
-            i if i == MetadataSize::Kb64 as u64 => MetadataSize::Kb64,
-            i if i == MetadataSize::Kb128 as u64 => MetadataSize::Kb128,
-            i if i == MetadataSize::Kb256 as u64 => MetadataSize::Kb256,
-            i if i == MetadataSize::Kb512 as u64 => MetadataSize::Kb512,
-            i if i == MetadataSize::Kb1024 as u64 => MetadataSize::Kb1024,
-            i if i == MetadataSize::Kb2048 as u64 => MetadataSize::Kb2048,
-            i if i == MetadataSize::Kb4096 as u64 => MetadataSize::Kb4096,
+            i if i == *MetadataSize::Kb16 => MetadataSize::Kb16,
+            i if i == *MetadataSize::Kb32 => MetadataSize::Kb32,
+            i if i == *MetadataSize::Kb64 => MetadataSize::Kb64,
+            i if i == *MetadataSize::Kb128 => MetadataSize::Kb128,
+            i if i == *MetadataSize::Kb256 => MetadataSize::Kb256,
+            i if i == *MetadataSize::Kb512 => MetadataSize::Kb512,
+            i if i == *MetadataSize::Kb1024 => MetadataSize::Kb1024,
+            i if i == *MetadataSize::Kb2048 => MetadataSize::Kb2048,
+            i if i == *MetadataSize::Kb4096 => MetadataSize::Kb4096,
             _ => return Err(LibcryptErr::InvalidConversion),
         };
         Ok(size)
     }
 }
 
-/// Size in KB for the allocated keyslot
+impl Deref for MetadataSize {
+    type Target = u64;
+
+    fn deref(&self) -> &u64 {
+        match *self {
+            MetadataSize::Kb16 => &0x4_000,
+            MetadataSize::Kb32 => &0x8_000,
+            MetadataSize::Kb64 => &0x10_000,
+            MetadataSize::Kb128 => &0x20_000,
+            MetadataSize::Kb256 => &0x40_000,
+            MetadataSize::Kb512 => &0x80_000,
+            MetadataSize::Kb1024 => &0x100_000,
+            MetadataSize::Kb2048 => &0x200_000,
+            MetadataSize::Kb4096 => &0x400_000,
+        }
+    }
+}
+
+/// Size in 4KB blocks for the keyslots
 pub struct KeyslotsSize(u64);
 
-impl TryInto<u64> for KeyslotsSize {
-    type Error = LibcryptErr;
+impl KeyslotsSize {
+    // 4KB block size in bytes
+    const FOUR_KB: u64 = 1 << 12;
+    // 128MB max size in bytes
+    const MAX_MB: u64 = 1 << 27;
+}
 
-    fn try_into(self) -> Result<u64, Self::Error> {
-        if self.0 < 1 {
-            return Err(LibcryptErr::InvalidConversion);
-        }
-        let converted = self.0 * (2 << 21);
-        if converted > (2 << 26) {
-            return Err(LibcryptErr::InvalidConversion);
-        }
-        Ok(converted)
+impl Deref for KeyslotsSize {
+    type Target = u64;
+
+    fn deref(&self) -> &u64 {
+        &self.0
     }
 }
 
@@ -276,11 +295,14 @@ impl TryFrom<u64> for KeyslotsSize {
     type Error = LibcryptErr;
 
     fn try_from(v: u64) -> Result<Self, Self::Error> {
-        let kbs = v / (2 << 21);
-        if kbs > (2 << 26) || kbs < 1 {
+        // Must be divisible by 4KB and less than or equal to 128MB
+        if v > Self::MAX_MB || v % Self::FOUR_KB != 0 {
             return Err(LibcryptErr::InvalidConversion);
         }
-        Ok(KeyslotsSize(kbs))
+        // Number of 4k blocks
+        let four_k_blocks = v / Self::FOUR_KB;
+
+        Ok(KeyslotsSize(four_k_blocks))
     }
 }
 
@@ -383,8 +405,8 @@ impl<'a> CryptSettings<'a> {
         errno!(unsafe {
             libcryptsetup_rs_sys::crypt_set_metadata_size(
                 self.reference.as_ptr(),
-                metadata_size as u64,
-                keyslots_size.try_into()?,
+                *metadata_size,
+                *keyslots_size,
             )
         })
     }
@@ -419,13 +441,15 @@ mod test {
 
     #[test]
     fn test_keyslots_size() {
-        let size: u64 = KeyslotsSize(1).try_into().unwrap();
-        assert_eq!(size, 2 << 21);
-        let size: u64 = KeyslotsSize(5).try_into().unwrap();
-        assert_eq!(size, 5 * (2 << 21));
-        let ok: Result<u64, LibcryptErr> = KeyslotsSize(32).try_into();
-        assert!(ok.is_ok());
-        let not_ok: Result<u64, LibcryptErr> = KeyslotsSize(33).try_into();
-        assert!(not_ok.is_err());
+        // Exactly 128MB
+        assert!(KeyslotsSize::try_from(1 << 27).is_ok());
+        // Greater than 128MB
+        assert!(KeyslotsSize::try_from(1 << 28).is_err());
+        // Less than 4KB
+        assert!(KeyslotsSize::try_from(1 << 11).is_err());
+        // Exactly 4KB
+        assert!(KeyslotsSize::try_from(1 << 12).is_ok());
+        // Greater than 4KB and not divisible by 4KB
+        assert!(KeyslotsSize::try_from(4097).is_err());
     }
 }
