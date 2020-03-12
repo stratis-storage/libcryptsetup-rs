@@ -39,3 +39,4 @@ test-loopback:
 	fmt-travis
 	release
 	test
+	test-loopback
