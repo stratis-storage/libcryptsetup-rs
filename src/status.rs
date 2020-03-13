@@ -31,17 +31,6 @@ impl<'a> CryptDeviceStatus<'a> {
         CryptDeviceStatus { reference }
     }
 
-    /// Get status info from device name
-    pub fn status(&mut self, name: &str) -> Result<CryptStatusInfo, LibcryptErr> {
-        let name_cstring = to_cstring!(name)?;
-        try_int_to_return!(
-            unsafe {
-                libcryptsetup_rs_sys::crypt_status(self.reference.as_ptr(), name_cstring.as_ptr())
-            },
-            CryptStatusInfo
-        )
-    }
-
     /// Dump text info about device to log output
     pub fn dump(&mut self) -> Result<(), LibcryptErr> {
         errno!(unsafe { libcryptsetup_rs_sys::crypt_dump(self.reference.as_ptr()) })
@@ -162,4 +151,21 @@ impl<'a> CryptDeviceStatus<'a> {
         })
         .and_then(|_| CryptParamsIntegrity::try_from(&integrity))
     }
+}
+
+/// Get status info from device name
+pub fn status(device: Option<CryptDevice>, name: &str) -> Result<CryptStatusInfo, LibcryptErr> {
+    let name_cstring = to_cstring!(name)?;
+    try_int_to_return!(
+        unsafe {
+            libcryptsetup_rs_sys::crypt_status(
+                match device {
+                    Some(mut d) => d.as_ptr(),
+                    None => std::ptr::null_mut(),
+                },
+                name_cstring.as_ptr(),
+            )
+        },
+        CryptStatusInfo
+    )
 }
