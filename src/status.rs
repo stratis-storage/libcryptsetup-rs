@@ -154,13 +154,16 @@ impl<'a> CryptDeviceStatus<'a> {
 }
 
 /// Get status info from device name
-pub fn status(device: Option<CryptDevice>, name: &str) -> Result<CryptStatusInfo, LibcryptErr> {
+pub fn status(
+    device: Option<&mut CryptDevice>,
+    name: &str,
+) -> Result<CryptStatusInfo, LibcryptErr> {
     let name_cstring = to_cstring!(name)?;
     try_int_to_return!(
         unsafe {
             libcryptsetup_rs_sys::crypt_status(
                 match device {
-                    Some(mut d) => d.as_ptr(),
+                    Some(d) => d.as_ptr(),
                     None => std::ptr::null_mut(),
                 },
                 name_cstring.as_ptr(),
