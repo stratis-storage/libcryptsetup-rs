@@ -354,14 +354,16 @@ impl<'a> CryptFormat<'a> {
 
     /// Get the formatting type
     pub fn get_type(&mut self) -> Result<EncryptionFormat, LibcryptErr> {
-        EncryptionFormat::from_ptr(unsafe {
+        EncryptionFormat::from_ptr(ptr_to_result!(unsafe {
             libcryptsetup_rs_sys::crypt_get_type(self.reference.as_ptr())
-        })
+        })?)
     }
 
     /// Get the default formatting type
     pub fn get_default_type() -> Result<EncryptionFormat, LibcryptErr> {
-        EncryptionFormat::from_ptr(unsafe { libcryptsetup_rs_sys::crypt_get_default_type() })
+        EncryptionFormat::from_ptr(ptr_to_result!(unsafe {
+            libcryptsetup_rs_sys::crypt_get_default_type()
+        })?)
     }
 }
 
