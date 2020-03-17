@@ -21,7 +21,7 @@ fn parse_args() -> Result<CryptCommand, LibcryptErr> {
     let mut args = args();
     let _ = args.next();
     let command = args.next();
-    match command.as_ref().map(|s| s.as_str()) {
+    match command.as_deref() {
         Some("encrypt") => {
             let dev = PathBuf::from(match args.next() {
                 Some(p) => p,
