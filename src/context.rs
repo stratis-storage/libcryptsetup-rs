@@ -39,7 +39,7 @@ impl<'a> CryptContext<'a> {
         uuid: Option<Uuid>,
         volume_key: Either<&[u8], usize>,
         params: Option<&mut T>,
-    ) -> Result<&mut Self, LibcryptErr> {
+    ) -> Result<(), LibcryptErr> {
         let uuid_ptr = uuid
             .as_ref()
             .map(|u| u.as_bytes().as_ptr())
@@ -65,7 +65,7 @@ impl<'a> CryptContext<'a> {
                     .unwrap_or(ptr::null_mut()),
             )
         })?;
-        Ok(self)
+        Ok(())
     }
 
     /// Convert to new format type
@@ -125,7 +125,7 @@ impl<'a> CryptContext<'a> {
         &mut self,
         type_: EncryptionFormat,
         params: Option<&mut T>,
-    ) -> Result<&mut Self, LibcryptErr> {
+    ) -> Result<(), LibcryptErr> {
         errno!(unsafe {
             libcryptsetup_rs_sys::crypt_load(
                 self.reference.as_ptr(),
@@ -135,7 +135,7 @@ impl<'a> CryptContext<'a> {
                     .unwrap_or(ptr::null_mut()),
             )
         })?;
-        Ok(self)
+        Ok(())
     }
 
     /// Repair crypt device header if invalid
