@@ -273,7 +273,10 @@ impl Deref for MetadataSize {
     }
 }
 
-/// Size in 4KB blocks for the keyslots
+/// Size in bytes for the keyslots.
+///
+/// The value must be divisible by a 4KB block and no larger than
+/// 128MB.
 pub struct KeyslotsSize(u64);
 
 impl KeyslotsSize {
@@ -299,10 +302,8 @@ impl TryFrom<u64> for KeyslotsSize {
         if v > Self::MAX_MB || v % Self::FOUR_KB != 0 {
             return Err(LibcryptErr::InvalidConversion);
         }
-        // Number of 4k blocks
-        let four_k_blocks = v / Self::FOUR_KB;
 
-        Ok(KeyslotsSize(four_k_blocks))
+        Ok(KeyslotsSize(v))
     }
 }
 
@@ -451,5 +452,8 @@ mod test {
         assert!(KeyslotsSize::try_from(1 << 12).is_ok());
         // Greater than 4KB and not divisible by 4KB
         assert!(KeyslotsSize::try_from(4097).is_err());
+
+        // Assert that derefs are equal to the starting value
+        assert!(*KeyslotsSize::try_from(1 << 27).unwrap() == (1 << 27));
     }
 }
