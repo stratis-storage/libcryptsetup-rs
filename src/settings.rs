@@ -273,7 +273,10 @@ impl Deref for MetadataSize {
     }
 }
 
-/// Size in 4KB blocks for the keyslots
+/// Size in bytes for the keyslots.
+///
+/// The value must be divisible by a 4KB block and no larger than
+/// 128MB.
 pub struct KeyslotsSize(u64);
 
 impl KeyslotsSize {
