@@ -1,13 +1,13 @@
 [package]
 name = "libcryptsetup-rs"
-version = "0.2.0"
+version = "0.3.0"
 authors = ["John Baublitz <jbaublitz@redhat.com>"]
 edition = "2018"
 description = "High level Rust bindings for libcryptsetup"
 license = "MPL-2.0"
 documentation = "https://docs.rs/libcryptsetup-rs"
 homepage = "https://stratis-storage.github.io/"
-repository = "https://github.com/stratis-storage/libcryptsetup-rs-sys"
+repository = "https://github.com/stratis-storage/libcryptsetup-rs"
 build = "build.rs"
 
 [dependencies.libcryptsetup-rs-sys]
