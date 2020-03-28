@@ -39,7 +39,7 @@ fn activate(devpath: &Path, name: &str) -> Result<(), LibcryptErr> {
     let mut device = CryptInit::init(devpath)?;
     device
         .context_handle()
-        .load::<()>(EncryptionFormat::Luks2, None)?;
+        .load::<()>(Some(EncryptionFormat::Luks2), None)?;
     device.token_handle().activate_by_token::<()>(
         Some(name),
         None,

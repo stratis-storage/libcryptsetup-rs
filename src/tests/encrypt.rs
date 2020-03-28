@@ -55,6 +55,23 @@ fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_uint, Libcr
     )?)
 }
 
+fn activate_without_explicit_format(
+    dev_path: &Path,
+    device_name: &'static str,
+    keyslot: c_uint,
+    passphrase: &'static str,
+) -> Result<(), LibcryptErr> {
+    let mut dev = CryptInit::init(dev_path)?;
+    dev.context_handle().load::<()>(None, None)?;
+    dev.activate_handle().activate_by_passphrase(
+        Some(device_name),
+        Some(keyslot),
+        passphrase.as_bytes(),
+        CryptActivateFlags::empty(),
+    )?;
+    Ok(())
+}
+
 fn activate_by_passphrase(
     dev_path: &Path,
     device_name: &'static str,
@@ -63,7 +80,7 @@ fn activate_by_passphrase(
 ) -> Result<(), LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
     dev.context_handle()
-        .load::<()>(EncryptionFormat::Luks2, None)?;
+        .load::<()>(Some(EncryptionFormat::Luks2), None)?;
     dev.activate_handle().activate_by_passphrase(
         Some(device_name),
         Some(keyslot),
@@ -90,7 +107,7 @@ fn activate_by_keyfile(
 ) -> Result<(), LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
     dev.context_handle()
-        .load::<()>(EncryptionFormat::Luks2, None)?;
+        .load::<()>(Some(EncryptionFormat::Luks2), None)?;
     dev.activate_handle().activate_by_keyfile_device_offset(
         Some(device_name),
         Some(keyslot),
@@ -219,6 +236,39 @@ pub fn test_encrypt_by_keyfile() {
                 dev.activate_handle()
                     .deactivate(device_name, CryptDeactivateFlags::empty())?;
                 std::fs::remove_file(keyfile_path).map_err(LibcryptErr::IOError)?;
+            }
+
+            let file_contents = get_file_contents(file_path)?;
+            assert!(!file_contents.contains("I contain a test string"));
+
+            mount_umount_result
+        },
+    )
+    .expect("Should succeed");
+}
+
+pub fn test_encrypt_by_password_without_explicit_format() {
+    loopback::use_loopback(
+        1024 * 1024 * 1024,
+        super::format_with_zeros(),
+        super::do_cleanup(),
+        |dev_path, file_path| {
+            let device_name = "test-device";
+            let passphrase = "abadpassphrase";
+            let encrypted_device = PathBuf::from(format!("/dev/mapper/{}", device_name));
+
+            let keyslot = init(dev_path, passphrase)?;
+            activate_without_explicit_format(dev_path, device_name, keyslot, passphrase)?;
+
+            let mount_path = PathBuf::from(format!("{}-mount", file_path.display().to_string()));
+
+            let mount_umount_result =
+                mount_write_umount(encrypted_device.as_path(), mount_path.as_path());
+
+            if super::do_cleanup() {
+                let mut dev = CryptInit::init_by_name_and_header(device_name, None)?;
+                let mut activation = dev.activate_handle();
+                activation.deactivate(device_name, CryptDeactivateFlags::empty())?;
             }
 
             let file_contents = get_file_contents(file_path)?;
