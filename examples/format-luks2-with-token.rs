@@ -88,7 +88,7 @@ fn luks2_token_handler(
     let mut device = CryptInit::init(dev)?;
     device
         .context_handle()
-        .load::<()>(EncryptionFormat::Luks2, None)?;
+        .load::<()>(Some(EncryptionFormat::Luks2), None)?;
     let mut token = device.token_handle();
     let token_num = token.luks2_keyring_set(None, key_description)?;
     token.assign_keyslot(token_num, Some(keyslot))?;
@@ -99,7 +99,7 @@ fn proto_token_handler(dev: &Path, key_description: &str) -> Result<(), Libcrypt
     let mut device = CryptInit::init(dev)?;
     device
         .context_handle()
-        .load::<()>(EncryptionFormat::Luks2, None)?;
+        .load::<()>(Some(EncryptionFormat::Luks2), None)?;
     let mut token = device.token_handle();
     let _ = token.json_set(
         None,

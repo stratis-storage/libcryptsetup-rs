@@ -156,6 +156,12 @@ mod test {
 
     #[ignore]
     #[test]
+    fn test_encrypt_by_password_without_explicit_format() {
+        tests::encrypt::test_encrypt_by_password_without_explicit_format();
+    }
+
+    #[ignore]
+    #[test]
     fn test_unencrypted() {
         tests::encrypt::test_unecrypted();
     }

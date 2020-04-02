@@ -123,13 +123,13 @@ impl<'a> CryptContext<'a> {
     /// Load on-disk header parameters based on provided type
     pub fn load<T>(
         &mut self,
-        type_: EncryptionFormat,
+        type_: Option<EncryptionFormat>,
         params: Option<&mut T>,
     ) -> Result<(), LibcryptErr> {
         errno!(unsafe {
             libcryptsetup_rs_sys::crypt_load(
                 self.reference.as_ptr(),
-                type_.as_ptr(),
+                type_.map(|t| t.as_ptr()).unwrap_or(ptr::null()),
                 params
                     .map(|p| p as *mut _ as *mut c_void)
                     .unwrap_or(ptr::null_mut()),

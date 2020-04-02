@@ -82,7 +82,7 @@ fn activate(path: &Path, name: &str) -> Result<(), LibcryptErr> {
     let mut device = CryptInit::init(path)?;
     device
         .context_handle()
-        .load::<()>(EncryptionFormat::Luks2, None)?;
+        .load::<()>(Some(EncryptionFormat::Luks2), None)?;
     device.activate_handle().activate_by_passphrase(
         Some(name),
         None,
