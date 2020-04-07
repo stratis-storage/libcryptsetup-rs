@@ -137,31 +137,19 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_pbkdf_type> for CryptPbkdfType 
 pub struct CryptPbkdfTypeRef<'a> {
     /// Field containing a `crypt_pbkdf_type` that contains pointers valid for the supplied struct lifetime
     pub inner: crypt_pbkdf_type,
+    #[allow(dead_code)]
+    hash_cstring: CString,
     phantomdata: PhantomData<&'a ()>,
-}
-
-impl<'a> CryptPbkdfTypeRef<'a> {
-    /// Create a new `CryptPbkdfTypeRef` type
-    pub fn new(inner: crypt_pbkdf_type) -> Self {
-        CryptPbkdfTypeRef {
-            inner,
-            phantomdata: PhantomData,
-        }
-    }
 }
 
 impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<CryptPbkdfTypeRef<'a>, Self::Error> {
+        let hash_cstring = CString::new(self.hash.as_bytes()).map_err(LibcryptErr::NullError)?;
         let inner = libcryptsetup_rs_sys::crypt_pbkdf_type {
             type_: self.type_.as_ptr(),
-            hash: {
-                let bytes = self.hash.as_bytes();
-                CString::new(bytes)
-                    .map_err(LibcryptErr::NullError)?
-                    .as_ptr()
-            },
+            hash: hash_cstring.as_ptr(),
             time_ms: self.time_ms,
             iterations: self.iterations,
             max_memory_kb: self.max_memory_kb,
@@ -170,6 +158,7 @@ impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
         };
         Ok(CryptPbkdfTypeRef {
             inner,
+            hash_cstring,
             phantomdata: PhantomData,
         })
     }
