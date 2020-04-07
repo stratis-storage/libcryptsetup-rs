@@ -101,72 +101,99 @@ pub struct CryptParamsLuks2Ref<'a> {
     #[allow(missing_docs)]
     pub inner: libcryptsetup_rs_sys::crypt_params_luks2,
     #[allow(dead_code)]
-    reference: &'a CryptParamsLuks2,
+    pbkdf_type: Option<CryptPbkdfTypeRef<'a>>,
     #[allow(dead_code)]
-    pbkdf_type: CryptPbkdfTypeRef<'a>,
-    #[allow(dead_code)]
-    integrity_params: CryptParamsIntegrityRef<'a>,
+    integrity_params: Option<CryptParamsIntegrityRef<'a>>,
     #[allow(dead_code)]
     integrity_cstring_opt: Option<CString>,
     #[allow(dead_code)]
-    data_device_cstring: CString,
+    data_device_cstring: Option<CString>,
     #[allow(dead_code)]
-    label_cstring: CString,
+    label_cstring: Option<CString>,
     #[allow(dead_code)]
-    subsystem_cstring: CString,
+    subsystem_cstring: Option<CString>,
 }
 
 /// LUKS2-specific parameters
 pub struct CryptParamsLuks2 {
     #[allow(missing_docs)]
-    pub pbkdf: CryptPbkdfType,
+    pub pbkdf: Option<CryptPbkdfType>,
     #[allow(missing_docs)]
     pub integrity: Option<String>,
     #[allow(missing_docs)]
-    pub integrity_params: CryptParamsIntegrity,
+    pub integrity_params: Option<CryptParamsIntegrity>,
     #[allow(missing_docs)]
     pub data_alignment: crate::size_t,
     #[allow(missing_docs)]
-    pub data_device: PathBuf,
+    pub data_device: Option<PathBuf>,
     #[allow(missing_docs)]
     pub sector_size: u32,
     #[allow(missing_docs)]
-    pub label: String,
+    pub label: Option<String>,
     #[allow(missing_docs)]
-    pub subsystem: String,
+    pub subsystem: Option<String>,
 }
 
 impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<CryptParamsLuks2Ref<'a>, Self::Error> {
-        let pbkdf_type: CryptPbkdfTypeRef<'a> = (&self.pbkdf).try_into()?;
-        let integrity_params: CryptParamsIntegrityRef<'a> = (&self.integrity_params).try_into()?;
+        let pbkdf_type: Option<CryptPbkdfTypeRef<'a>> = match self.pbkdf {
+            Some(ref pbkdf) => Some(pbkdf.try_into()?),
+            None => None,
+        };
+        let integrity_params: Option<CryptParamsIntegrityRef<'a>> = match self.integrity_params {
+            Some(ref integrity) => Some(integrity.try_into()?),
+            None => None,
+        };
 
         let integrity_cstring_opt = match self.integrity {
             Some(ref intg) => Some(to_cstring!(intg)?),
             None => None,
         };
-        let data_device_cstring = path_to_cstring!(self.data_device.as_path())?;
-        let label_cstring = to_cstring!(self.label)?;
-        let subsystem_cstring = to_cstring!(self.subsystem)?;
+        let data_device_cstring = match self.data_device {
+            Some(ref dd) => Some(path_to_cstring!(dd)?),
+            None => None,
+        };
+        let label_cstring = match self.label {
+            Some(ref label) => Some(to_cstring!(label)?),
+            None => None,
+        };
+        let subsystem_cstring = match self.subsystem {
+            Some(ref subsystem) => Some(to_cstring!(subsystem)?),
+            None => None,
+        };
 
         let inner = libcryptsetup_rs_sys::crypt_params_luks2 {
-            pbkdf: &pbkdf_type.inner as *const _,
+            pbkdf: pbkdf_type
+                .as_ref()
+                .map(|pt| &pt.inner as *const _)
+                .unwrap_or(ptr::null()),
             integrity: integrity_cstring_opt
                 .as_ref()
                 .map(|cs| cs.as_ptr())
                 .unwrap_or(ptr::null()),
-            integrity_params: &integrity_params.inner as *const _,
+            integrity_params: integrity_params
+                .as_ref()
+                .map(|ip| &ip.inner as *const _)
+                .unwrap_or(ptr::null()),
             data_alignment: self.data_alignment,
-            data_device: data_device_cstring.as_ptr(),
+            data_device: data_device_cstring
+                .as_ref()
+                .map(|dd| dd.as_ptr())
+                .unwrap_or(ptr::null()),
             sector_size: self.sector_size,
-            label: label_cstring.as_ptr(),
-            subsystem: subsystem_cstring.as_ptr(),
+            label: label_cstring
+                .as_ref()
+                .map(|l| l.as_ptr())
+                .unwrap_or(ptr::null()),
+            subsystem: subsystem_cstring
+                .as_ref()
+                .map(|s| s.as_ptr())
+                .unwrap_or(ptr::null()),
         };
         Ok(CryptParamsLuks2Ref {
             inner,
-            reference: self,
             pbkdf_type,
             integrity_params,
             integrity_cstring_opt,
