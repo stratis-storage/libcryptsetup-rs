@@ -88,7 +88,7 @@ pub use settings::{
 };
 
 mod status;
-pub use status::{status, CryptDeviceStatus, CryptStatusInfo};
+pub use status::{get_sector_size, status, CryptDeviceStatus, CryptStatusInfo};
 
 #[cfg(test)]
 mod tests;
