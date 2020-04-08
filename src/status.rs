@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{convert::TryFrom, os::raw::c_int, path::Path, str::FromStr};
+use std::{convert::TryFrom, os::raw::c_int, path::Path, ptr, str::FromStr};
 
 use crate::{
     device::CryptDevice,
@@ -92,11 +92,6 @@ impl<'a> CryptDeviceStatus<'a> {
         unsafe { libcryptsetup_rs_sys::crypt_get_volume_key_size(self.reference.as_ptr()) }
     }
 
-    /// Get size of encryption sectors in bytes
-    pub fn get_sector_size(&mut self) -> c_int {
-        unsafe { libcryptsetup_rs_sys::crypt_get_sector_size(self.reference.as_ptr()) }
-    }
-
     /// Get Verity device parameters
     pub fn get_verity_info(&mut self) -> Result<CryptParamsVerity, LibcryptErr> {
         let mut verity = libcryptsetup_rs_sys::crypt_params_verity {
@@ -171,4 +166,13 @@ pub fn status(
         },
         CryptStatusInfo
     )
+}
+
+/// Get size of encryption sectors in bytes
+pub fn get_sector_size(device: Option<&mut CryptDevice>) -> c_int {
+    unsafe {
+        libcryptsetup_rs_sys::crypt_get_sector_size(
+            device.map(|d| d.as_ptr()).unwrap_or(ptr::null_mut()),
+        )
+    }
 }
