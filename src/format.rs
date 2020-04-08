@@ -5,6 +5,7 @@
 use std::{
     convert::{TryFrom, TryInto},
     ffi::{CStr, CString},
+    marker::PhantomData,
     os::raw::{c_char, c_uint},
     path::PathBuf,
     ptr,
@@ -95,7 +96,56 @@ impl EncryptionFormat {
     }
 }
 
-/// A struct representing a reference with a lifetime to a `CryptParamsLuks2Ref`
+/// A struct with a lifetime representing a reference to `CryptParamsLuks1`.
+pub struct CryptParamsLuks1Ref<'a> {
+    /// The struct containing data referenced from the corresponding
+    /// `CryptParamsLuks1`.
+    pub inner: libcryptsetup_rs_sys::crypt_params_luks1,
+    #[allow(dead_code)]
+    hash_cstring: CString,
+    #[allow(dead_code)]
+    data_device_cstring: Option<CString>,
+    data: PhantomData<&'a ()>,
+}
+
+/// A struct representing LUKS1 specific parameters.
+pub struct CryptParamsLuks1 {
+    #[allow(missing_docs)]
+    pub hash: String,
+    #[allow(missing_docs)]
+    pub data_alignment: usize,
+    #[allow(missing_docs)]
+    pub data_device: Option<PathBuf>,
+}
+
+impl<'a> TryInto<CryptParamsLuks1Ref<'a>> for &'a CryptParamsLuks1 {
+    type Error = LibcryptErr;
+
+    fn try_into(self) -> Result<CryptParamsLuks1Ref<'a>, Self::Error> {
+        let hash_cstring = to_cstring!(self.hash)?;
+        let data_device_cstring = match self.data_device {
+            Some(ref dd) => Some(path_to_cstring!(dd)?),
+            None => None,
+        };
+
+        let inner = libcryptsetup_rs_sys::crypt_params_luks1 {
+            hash: hash_cstring.as_ptr(),
+            data_alignment: self.data_alignment,
+            data_device: data_device_cstring
+                .as_ref()
+                .map(|dd| dd.as_ptr())
+                .unwrap_or(ptr::null()),
+        };
+        Ok(CryptParamsLuks1Ref {
+            inner,
+            hash_cstring,
+            data_device_cstring,
+            data: PhantomData,
+        })
+    }
+}
+
+/// A struct representing a reference with a lifetime to a `CryptParamsLuks2`
 /// struct
 pub struct CryptParamsLuks2Ref<'a> {
     #[allow(missing_docs)]
