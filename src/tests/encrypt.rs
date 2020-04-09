@@ -170,7 +170,6 @@ fn test_existance(file_path: &Path, buffer: &[u8]) -> Result<bool, io::Error> {
         .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
     let fdev = unsafe { libc::open(file_path_cstring.as_ptr(), libc::O_RDONLY) };
     if fdev < 0 {
-        println!("Failed to open file_path");
         return Err(io::Error::last_os_error());
     }
     let mut stat: MaybeUninit<libc::stat> = MaybeUninit::zeroed();
