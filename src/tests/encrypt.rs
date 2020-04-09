@@ -3,6 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use std::{
+    ffi::CString,
     fs::{File, OpenOptions},
     io::{self, Read, Write},
     mem::MaybeUninit,
@@ -162,15 +163,12 @@ fn write_random(device_name: &str) -> Result<Box<[u8]>, io::Error> {
 }
 
 fn test_existance(file_path: &Path, buffer: &[u8]) -> Result<bool, io::Error> {
-    let fdev = unsafe {
-        libc::open(
-            file_path
-                .to_str()
-                .ok_or_else(|| io::Error::new(io::ErrorKind::Other, "Failed to get device name"))?
-                .as_ptr() as *const libc::c_char,
-            libc::O_RDONLY,
-        )
-    };
+    let file_path_cstring =
+        CString::new(file_path.to_str().ok_or_else(|| {
+            io::Error::new(io::ErrorKind::Other, "Failed to convert path to string")
+        })?)
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+    let fdev = unsafe { libc::open(file_path_cstring.as_ptr(), libc::O_RDONLY) };
     if fdev < 0 {
         println!("Failed to open file_path");
         return Err(io::Error::last_os_error());
