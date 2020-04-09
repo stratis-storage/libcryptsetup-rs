@@ -28,7 +28,7 @@ test:
 	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test
 
 test-loopback:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test -- --ignored
+	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test -- --ignored --nocapture
 
 .PHONY:
 	build
