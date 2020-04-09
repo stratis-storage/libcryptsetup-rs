@@ -168,12 +168,12 @@ fn test_existance(file_path: &Path, buffer: &[u8]) -> Result<bool, io::Error> {
             io::Error::new(io::ErrorKind::Other, "Failed to convert path to string")
         })?)
         .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
-    let fdev = unsafe { libc::open(file_path_cstring.as_ptr(), libc::O_RDONLY) };
-    if fdev < 0 {
+    let fd = unsafe { libc::open(file_path_cstring.as_ptr(), libc::O_RDONLY) };
+    if fd < 0 {
         return Err(io::Error::last_os_error());
     }
     let mut stat: MaybeUninit<libc::stat> = MaybeUninit::zeroed();
-    let fstat_result = unsafe { libc::fstat(fdev, stat.as_mut_ptr()) };
+    let fstat_result = unsafe { libc::fstat(fd, stat.as_mut_ptr()) };
     if fstat_result < 0 {
         return Err(io::Error::last_os_error());
     }
@@ -184,7 +184,7 @@ fn test_existance(file_path: &Path, buffer: &[u8]) -> Result<bool, io::Error> {
             device_size,
             libc::PROT_READ,
             libc::MAP_SHARED,
-            fdev,
+            fd,
             0,
         )
     };
@@ -194,8 +194,17 @@ fn test_existance(file_path: &Path, buffer: &[u8]) -> Result<bool, io::Error> {
     let disk_bytes = unsafe { slice::from_raw_parts(mapped_ptr as *const u8, device_size) };
     for chunk in disk_bytes.windows(WINDOW_SIZE) {
         if chunk == buffer {
+            unsafe {
+                libc::munmap(mapped_ptr, device_size);
+                libc::close(fd);
+            }
             return Ok(true);
         }
+    }
+
+    unsafe {
+        libc::munmap(mapped_ptr, device_size);
+        libc::close(fd);
     }
     Ok(false)
 }
