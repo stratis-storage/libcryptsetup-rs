@@ -191,14 +191,17 @@ fn test_existance(file_path: &Path, buffer: &[u8]) -> Result<bool, io::Error> {
     if mapped_ptr.is_null() {
         return Err(io::Error::new(io::ErrorKind::Other, "mmap failed"));
     }
-    let disk_bytes = unsafe { slice::from_raw_parts(mapped_ptr as *const u8, device_size) };
-    for chunk in disk_bytes.windows(WINDOW_SIZE) {
-        if chunk == buffer {
-            unsafe {
-                libc::munmap(mapped_ptr, device_size);
-                libc::close(fd);
+
+    {
+        let disk_bytes = unsafe { slice::from_raw_parts(mapped_ptr as *const u8, device_size) };
+        for chunk in disk_bytes.windows(WINDOW_SIZE) {
+            if chunk == buffer {
+                unsafe {
+                    libc::munmap(mapped_ptr, device_size);
+                    libc::close(fd);
+                }
+                return Ok(true);
             }
-            return Ok(true);
         }
     }
 
