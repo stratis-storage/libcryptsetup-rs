@@ -3,9 +3,12 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use std::{
-    fs::File,
-    io::{Read, Write},
+    ffi::CString,
+    fs::{File, OpenOptions},
+    io::{self, Read, Write},
+    mem::MaybeUninit,
     path::{Path, PathBuf},
+    ptr, slice,
 };
 
 use crate::{
@@ -16,6 +19,10 @@ use crate::{
 
 use libc::c_uint;
 use rand::random;
+
+/// Size of the sliding window used to search for random bytes on encrypted
+/// and unencrypted devices.
+const WINDOW_SIZE: usize = 1024 * 1024;
 
 fn init(dev_path: &Path, passphrase: &str) -> Result<c_uint, LibcryptErr> {
     let mut dev = CryptInit::init(dev_path)?;
@@ -32,6 +39,21 @@ fn init(dev_path: &Path, passphrase: &str) -> Result<c_uint, LibcryptErr> {
         passphrase.as_bytes(),
         CryptVolumeKeyFlags::empty(),
     )
+}
+
+/// This method initializes the device with no encryption as a way to test
+/// that the plaintext can be read vs. the plaintext not being found due to
+/// proper encryption in the other tests.
+fn init_null_cipher(dev_path: &Path) -> Result<c_uint, LibcryptErr> {
+    let mut dev = CryptInit::init(dev_path)?;
+    dev.context_handle().format::<()>(
+        EncryptionFormat::Luks1,
+        ("cipher_null", "ecb"),
+        None,
+        Either::Right(32),
+        None,
+    )?;
+    dev.keyslot_handle().add_by_passphrase(None, b"", b"")
 }
 
 fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_uint, LibcryptErr> {
@@ -119,65 +141,91 @@ fn activate_by_keyfile(
     Ok(())
 }
 
-fn mount(device: &Path, mount_point: &Path) -> Result<(), LibcryptErr> {
-    assert!(device.exists());
-
-    std::process::Command::new("mkfs.ext4")
-        .arg(device)
-        .output()
-        .map_err(|e| LibcryptErr::Other(e.to_string()))?;
-
-    let mkdir_res = nix::unistd::mkdir(mount_point, nix::sys::stat::Mode::empty())
-        .map_err(|e| LibcryptErr::Other(e.to_string()));
-
-    assert!(mount_point.exists() && mount_point.is_dir());
-
-    let data: Option<&str> = None;
-    let mount_res = nix::mount::mount(
-        Some(device),
-        mount_point,
-        Some("ext4"),
-        nix::mount::MsFlags::empty(),
-        data,
-    )
-    .map_err(|e| LibcryptErr::Other(e.to_string()));
-
-    mkdir_res.and(mount_res)
+fn activate_null_cipher(dev_path: &Path, device_name: &'static str) -> Result<(), LibcryptErr> {
+    let mut dev = CryptInit::init(dev_path)?;
+    dev.context_handle().load::<()>(None, None)?;
+    dev.activate_handle().activate_by_passphrase(
+        Some(device_name),
+        None,
+        b"",
+        CryptActivateFlags::empty(),
+    )?;
+    Ok(())
 }
 
-pub fn umount(mount_point: &Path) -> Result<(), LibcryptErr> {
-    let umount_res = nix::mount::umount(mount_point).map_err(|e| LibcryptErr::Other(e.to_string()));
-
-    let rmdir_res = std::fs::remove_dir(mount_point).map_err(LibcryptErr::IOError);
-    umount_res.and(rmdir_res)
+fn write_random(device_name: &str) -> Result<Box<[u8]>, io::Error> {
+    let mapped_device_path = PathBuf::from(format!("/dev/mapper/{}", device_name));
+    let mut random_buffer = Box::new([0; WINDOW_SIZE]);
+    File::open("/dev/urandom")?.read_exact(&mut (*random_buffer))?;
+    let mut device = OpenOptions::new().write(true).open(&mapped_device_path)?;
+    device.write_all(random_buffer.as_ref())?;
+    Ok(random_buffer)
 }
 
-fn mount_write_umount(device_path: &Path, mount_path: &Path) -> Result<(), LibcryptErr> {
-    let mount_result = mount(device_path, mount_path);
-
-    if mount_result.is_ok() {
-        let mut file_path = PathBuf::from(mount_path);
-        file_path.push("file");
-        let mut file = File::create(file_path).map_err(LibcryptErr::IOError)?;
-        file.write(b"I contain a test string")
-            .map_err(LibcryptErr::IOError)?;
+fn test_existance(file_path: &Path, buffer: &[u8]) -> Result<bool, io::Error> {
+    let file_path_cstring =
+        CString::new(file_path.to_str().ok_or_else(|| {
+            io::Error::new(io::ErrorKind::Other, "Failed to convert path to string")
+        })?)
+        .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?;
+    let fd = unsafe { libc::open(file_path_cstring.as_ptr(), libc::O_RDONLY) };
+    if fd < 0 {
+        return Err(io::Error::last_os_error());
+    }
+    let mut stat: MaybeUninit<libc::stat> = MaybeUninit::zeroed();
+    let fstat_result = unsafe { libc::fstat(fd, stat.as_mut_ptr()) };
+    if fstat_result < 0 {
+        return Err(io::Error::last_os_error());
+    }
+    let device_size = unsafe { stat.assume_init() }.st_size as usize;
+    let mapped_ptr = unsafe {
+        libc::mmap(
+            ptr::null_mut(),
+            device_size,
+            libc::PROT_READ,
+            libc::MAP_SHARED,
+            fd,
+            0,
+        )
+    };
+    if mapped_ptr.is_null() {
+        return Err(io::Error::new(io::ErrorKind::Other, "mmap failed"));
     }
 
-    let umount_result = if super::do_cleanup() {
-        umount(mount_path)
-    } else {
-        Ok(())
-    };
-    mount_result.and(umount_result)
+    {
+        let disk_bytes = unsafe { slice::from_raw_parts(mapped_ptr as *const u8, device_size) };
+        for chunk in disk_bytes.windows(WINDOW_SIZE) {
+            if chunk == buffer {
+                unsafe {
+                    libc::munmap(mapped_ptr, device_size);
+                    libc::close(fd);
+                }
+                return Ok(true);
+            }
+        }
+    }
+
+    unsafe {
+        libc::munmap(mapped_ptr, device_size);
+        libc::close(fd);
+    }
+    Ok(false)
 }
 
-fn get_file_contents(file_path: &Path) -> Result<String, LibcryptErr> {
-    let mut file = File::open(file_path).map_err(LibcryptErr::IOError)?;
-    let mut file_bytes = Vec::new();
-    file.read_to_end(&mut file_bytes)
-        .map_err(LibcryptErr::IOError)?;
-    let cow = String::from_utf8_lossy(file_bytes.as_slice());
-    Ok(cow.into_owned())
+/// Run a test on whether the plaintext could be found or not. Return a boolean
+/// as we actually want to see the plaintext in some cases and not in others.
+fn run_plaintext_test(dev_path: &Path, device_name: &str) -> Result<bool, LibcryptErr> {
+    let write_result = write_random(device_name);
+
+    if super::do_cleanup() {
+        let mut dev = CryptInit::init_by_name_and_header(device_name, None)?;
+        dev.activate_handle()
+            .deactivate(device_name, CryptDeactivateFlags::empty())?;
+    }
+
+    let buffer = write_result.map_err(|e| LibcryptErr::Other(e.to_string()))?;
+
+    test_existance(dev_path, &buffer).map_err(|e| LibcryptErr::Other(e.to_string()))
 }
 
 pub fn test_encrypt_by_password() {
@@ -188,26 +236,14 @@ pub fn test_encrypt_by_password() {
         |dev_path, file_path| {
             let device_name = "test-device";
             let passphrase = "abadpassphrase";
-            let encrypted_device = PathBuf::from(format!("/dev/mapper/{}", device_name));
 
             let keyslot = init(dev_path, passphrase)?;
             activate_by_passphrase(dev_path, device_name, keyslot, passphrase)?;
-
-            let mount_path = PathBuf::from(format!("{}-mount", file_path.display().to_string()));
-
-            let mount_umount_result =
-                mount_write_umount(encrypted_device.as_path(), mount_path.as_path());
-
-            if super::do_cleanup() {
-                let mut dev = CryptInit::init_by_name_and_header(device_name, None)?;
-                let mut activation = dev.activate_handle();
-                activation.deactivate(device_name, CryptDeactivateFlags::empty())?;
+            if run_plaintext_test(file_path, device_name)? {
+                return Err(LibcryptErr::Other("Should not find plaintext".to_string()));
             }
 
-            let file_contents = get_file_contents(file_path)?;
-            assert!(!file_contents.contains("I contain a test string"));
-
-            mount_umount_result
+            Ok(())
         },
     )
     .expect("Should succeed");
@@ -220,28 +256,15 @@ pub fn test_encrypt_by_keyfile() {
         super::do_cleanup(),
         |dev_path, file_path| {
             let device_name = "test-device";
-            let encrypted_device = PathBuf::from(format!("/dev/mapper/{}", device_name));
 
             let keyfile_path = create_keyfile(file_path)?;
             let keyslot = init_by_keyfile(dev_path, keyfile_path.as_path())?;
             activate_by_keyfile(dev_path, device_name, keyslot, keyfile_path.as_path(), None)?;
-
-            let mount_path = PathBuf::from(format!("{}-mount", file_path.display().to_string(),));
-
-            let mount_umount_result =
-                mount_write_umount(encrypted_device.as_path(), mount_path.as_path());
-
-            if super::do_cleanup() {
-                let mut dev = CryptInit::init_by_name_and_header(device_name, None)?;
-                dev.activate_handle()
-                    .deactivate(device_name, CryptDeactivateFlags::empty())?;
-                std::fs::remove_file(keyfile_path).map_err(LibcryptErr::IOError)?;
+            if run_plaintext_test(file_path, device_name)? {
+                return Err(LibcryptErr::Other("Should not find plaintext".to_string()));
             }
 
-            let file_contents = get_file_contents(file_path)?;
-            assert!(!file_contents.contains("I contain a test string"));
-
-            mount_umount_result
+            Ok(())
         },
     )
     .expect("Should succeed");
@@ -255,26 +278,14 @@ pub fn test_encrypt_by_password_without_explicit_format() {
         |dev_path, file_path| {
             let device_name = "test-device";
             let passphrase = "abadpassphrase";
-            let encrypted_device = PathBuf::from(format!("/dev/mapper/{}", device_name));
 
             let keyslot = init(dev_path, passphrase)?;
             activate_without_explicit_format(dev_path, device_name, keyslot, passphrase)?;
-
-            let mount_path = PathBuf::from(format!("{}-mount", file_path.display().to_string()));
-
-            let mount_umount_result =
-                mount_write_umount(encrypted_device.as_path(), mount_path.as_path());
-
-            if super::do_cleanup() {
-                let mut dev = CryptInit::init_by_name_and_header(device_name, None)?;
-                let mut activation = dev.activate_handle();
-                activation.deactivate(device_name, CryptDeactivateFlags::empty())?;
+            if run_plaintext_test(file_path, device_name)? {
+                return Err(LibcryptErr::Other("Should not find plaintext".to_string()));
             }
 
-            let file_contents = get_file_contents(file_path)?;
-            assert!(!file_contents.contains("I contain a test string"));
-
-            mount_umount_result
+            Ok(())
         },
     )
     .expect("Should succeed");
@@ -286,14 +297,15 @@ pub fn test_unecrypted() {
         super::format_with_zeros(),
         super::do_cleanup(),
         |dev_path, file_path| {
-            let mount_path = PathBuf::from(format!("{}-mount", file_path.display().to_string()));
+            let device_name = "test-device";
 
-            let mount_umount_result = mount_write_umount(dev_path, mount_path.as_path());
+            init_null_cipher(dev_path)?;
+            activate_null_cipher(dev_path, device_name)?;
+            if !run_plaintext_test(file_path, device_name)? {
+                return Err(LibcryptErr::Other("Should find plaintext".to_string()));
+            }
 
-            let file_contents = get_file_contents(file_path)?;
-            assert!(file_contents.contains("I contain a test string"));
-
-            mount_umount_result
+            Ok(())
         },
     )
     .expect("Should succeed");
