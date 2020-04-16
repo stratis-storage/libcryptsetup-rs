@@ -39,7 +39,6 @@ matrix:
           env: TASK=test
         - name: "run Rust loopback unit tests using stable tool chain"
           rust: stable
-          sudo: required
           script: sudo TEST_DIR=${TRAVIS_HOME} PATH=${TRAVIS_HOME}/.cargo/bin:$PATH make -f Makefile test-loopback
         - name: "build release using stable tool chain"
           rust: stable
