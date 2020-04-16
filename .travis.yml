@@ -11,7 +11,7 @@ addons:
       - libkeyutils-dev
 
 language: rust
-matrix:
+jobs:
     include:
 
         # MANDATORY CHECKS USING CURRENT DEVELOPMENT TOOLCHAIN
