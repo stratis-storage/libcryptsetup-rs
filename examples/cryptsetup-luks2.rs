@@ -9,12 +9,14 @@ use std::{
 };
 
 use libcryptsetup_rs::{
-    CryptActivateFlags, CryptInit, CryptVolumeKeyFlags, EncryptionFormat, LibcryptErr,
+    CryptActivateFlags, CryptDeactivateFlags, CryptInit, CryptVolumeKeyFlags, EncryptionFormat,
+    LibcryptErr,
 };
 
 enum CryptCommand {
     Encrypt(PathBuf),
     Open(PathBuf, String),
+    Deactivate(PathBuf, String),
 }
 
 fn parse_args() -> Result<CryptCommand, LibcryptErr> {
@@ -44,7 +46,7 @@ fn parse_args() -> Result<CryptCommand, LibcryptErr> {
                 Some(p) => p,
                 None => {
                     return Err(LibcryptErr::Other(
-                        "Device path for device to be encrypted is required".to_string(),
+                        "Device path for device to be opened is required".to_string(),
                     ))
                 }
             });
@@ -57,6 +59,25 @@ fn parse_args() -> Result<CryptCommand, LibcryptErr> {
                 LibcryptErr::Other("Name for mapped device is required".to_string())
             })?;
             Ok(CryptCommand::Open(dev, name))
+        }
+        Some("close") => {
+            let dev = PathBuf::from(match args.next() {
+                Some(p) => p,
+                None => {
+                    return Err(LibcryptErr::Other(
+                        "Device path for device to be closed is required".to_string(),
+                    ))
+                }
+            });
+            if !dev.exists() {
+                return Err(LibcryptErr::IOError(io::Error::from(
+                    io::ErrorKind::NotFound,
+                )));
+            }
+            let name = args.next().ok_or_else(|| {
+                LibcryptErr::Other("Name for mapped device is required".to_string())
+            })?;
+            Ok(CryptCommand::Deactivate(dev, name))
         }
         Some(s) => Err(LibcryptErr::Other(format!("Unrecognized command {}", s))),
         None => Err(LibcryptErr::Other("Missing command".to_string())),
@@ -92,12 +113,25 @@ fn activate(path: &Path, name: &str) -> Result<(), LibcryptErr> {
     Ok(())
 }
 
+fn deactivate(path: &Path, name: &str) -> Result<(), LibcryptErr> {
+    let mut device = CryptInit::init(path)?;
+    device
+        .context_handle()
+        .load::<()>(Some(EncryptionFormat::Luks2), None)?;
+    device
+        .activate_handle()
+        .deactivate(name, CryptDeactivateFlags::empty())?;
+    Ok(())
+}
+
 fn main() -> Result<(), LibcryptErr> {
     let args = parse_args()?;
     if let CryptCommand::Encrypt(ref path) = args {
         encrypt(path)?;
     } else if let CryptCommand::Open(ref path, ref name) = args {
         activate(path, name)?;
+    } else if let CryptCommand::Deactivate(ref path, ref name) = args {
+        deactivate(path, name)?;
     }
     Ok(())
 }
