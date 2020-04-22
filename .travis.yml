@@ -50,9 +50,3 @@ branches:
     - master
 
 script: make -f Makefile $TASK
-
-branches:
-  only:
-    - master
-
-script: make -f Makefile $TASK
