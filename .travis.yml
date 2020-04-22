@@ -12,6 +12,8 @@ addons:
 
 language: rust
 jobs:
+    allow_failures:
+          rust: beta
     include:
 
         # MANDATORY CHECKS USING CURRENT DEVELOPMENT TOOLCHAIN
