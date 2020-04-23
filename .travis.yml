@@ -53,6 +53,12 @@ jobs:
       rust: stable
       env: TASK=release
 
+    - name: "run yamllint 1.20.0 on .travis.yml"
+      language: python
+      python: "3.7.6"
+      install: pip3 install yamllint==1.20.0
+      script: yamllint --strict .travis.yml
+
 branches:
   only:
     - master
