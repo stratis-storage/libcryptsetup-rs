@@ -30,6 +30,9 @@ test:
 test-loopback:
 	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test -- --ignored
 
+yamllint:
+	yamllint --strict .travis.yml
+
 .PHONY:
 	build
 	clippy
@@ -40,3 +43,4 @@ test-loopback:
 	release
 	test
 	test-loopback
+	yamllint
