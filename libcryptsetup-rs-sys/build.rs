@@ -1,7 +1,5 @@
 use std::env;
 
-use bindgen;
-use cc;
 use pkg_config::Config;
 use semver::Version;
 
