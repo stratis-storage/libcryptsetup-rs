@@ -2,23 +2,81 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{convert::TryFrom, ptr};
+use std::ptr;
 
 use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr, Bool};
 
 use libc::{c_char, c_int, c_uint, c_void};
 
-consts_to_from_enum!(
-    /// Wrapper enum for `CRYPT_TOKEN_*` values
-    CryptTokenInfo,
-    u32,
-    Invalid => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INVALID,
-    Inactive => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INACTIVE,
-    Internal => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INTERNAL,
-    InternalUnknown => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INTERNAL_UNKNOWN,
-    External => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_EXTERNAL,
-    ExternalUnknown => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_EXTERNAL_UNKNOWN
-);
+/// Type representing the token status. This type wraps the `CRYPT_TOKEN_*` values and the optional corresponding token type as a string.
+pub enum CryptTokenInfo {
+    /// Token invalid
+    Invalid,
+    /// Token is free (empty)
+    Inactive,
+    /// Active internal token with driver
+    Internal(String),
+    /// Active internal token (reserved name) with missing token driver
+    InternalUnknown(String),
+    /// Active external (user defined) token with driver
+    External(String),
+    /// Active external (user defined) token with missing token driver
+    ExternalUnknown(String),
+}
+
+impl CryptTokenInfo {
+    /// Convert a token status code into `CryptTokenInfo`
+    pub fn from_status(code: c_uint, type_: Option<String>) -> Result<Self, LibcryptErr> {
+        Ok(match code {
+            libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INVALID => CryptTokenInfo::Invalid,
+            libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INACTIVE => CryptTokenInfo::Inactive,
+            libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INTERNAL => {
+                CryptTokenInfo::Internal(type_.ok_or(LibcryptErr::InvalidConversion)?)
+            }
+            libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INTERNAL_UNKNOWN => {
+                CryptTokenInfo::InternalUnknown(type_.ok_or(LibcryptErr::InvalidConversion)?)
+            }
+            libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_EXTERNAL => {
+                CryptTokenInfo::External(type_.ok_or(LibcryptErr::InvalidConversion)?)
+            }
+            libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_EXTERNAL_UNKNOWN => {
+                CryptTokenInfo::ExternalUnknown(type_.ok_or(LibcryptErr::InvalidConversion)?)
+            }
+            _ => return Err(LibcryptErr::InvalidConversion),
+        })
+    }
+}
+
+impl Into<u32> for CryptTokenInfo {
+    fn into(self) -> u32 {
+        match self {
+            CryptTokenInfo::Invalid => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INVALID,
+            CryptTokenInfo::Inactive => libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INACTIVE,
+            CryptTokenInfo::Internal(_) => {
+                libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INTERNAL
+            }
+            CryptTokenInfo::InternalUnknown(_) => {
+                libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_INTERNAL_UNKNOWN
+            }
+            CryptTokenInfo::External(_) => {
+                libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_EXTERNAL
+            }
+            CryptTokenInfo::ExternalUnknown(_) => {
+                libcryptsetup_rs_sys::crypt_token_info_CRYPT_TOKEN_EXTERNAL_UNKNOWN
+            }
+        }
+    }
+}
+
+/// Token input for `CryptLuks2Token::json_set`
+pub enum TokenInput<'a> {
+    /// Add a new token to any free slot
+    AddToken(&'a serde_json::Value),
+    /// Replace the specified token
+    ReplaceToken(c_uint, &'a serde_json::Value),
+    /// Remove the specified token
+    RemoveToken(c_uint),
+}
 
 /// Handle for LUKS2 token operations
 pub struct CryptLuks2Token<'a> {
@@ -45,39 +103,50 @@ impl<'a> CryptLuks2Token<'a> {
     }
 
     /// Set contents of a token in JSON format
-    pub fn json_set(
-        &mut self,
-        token: Option<c_uint>,
-        json: &serde_json::Value,
-    ) -> Result<c_uint, LibcryptErr> {
-        let json_cstring =
-            to_cstring!(serde_json::to_string(json).map_err(LibcryptErr::JsonError)?)?;
+    pub fn json_set(&mut self, input: TokenInput) -> Result<c_uint, LibcryptErr> {
+        let (token, json) = match input {
+            TokenInput::AddToken(json) => (libcryptsetup_rs_sys::CRYPT_ANY_TOKEN, Some(json)),
+            TokenInput::ReplaceToken(token, json) => (token as i32, Some(json)),
+            TokenInput::RemoveToken(token) => (token as i32, None),
+        };
+        let json_cstring = match json {
+            Some(j) => Some(
+                serde_json::to_string(j)
+                    .map_err(LibcryptErr::JsonError)
+                    .and_then(|s| to_cstring!(s))?,
+            ),
+            None => None,
+        };
         errno_int_success!(unsafe {
             libcryptsetup_rs_sys::crypt_token_json_set(
                 self.reference.as_ptr(),
-                token
-                    .map(|t| t as c_int)
-                    .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
-                json_cstring.as_ptr(),
+                token,
+                json_cstring
+                    .as_ref()
+                    .map(|cs| cs.as_ptr())
+                    .unwrap_or(ptr::null()),
             )
         })
         .map(|rc| rc as c_uint)
     }
 
     /// Get the token info for a specific token
-    pub fn status(&mut self, token: c_uint) -> Result<(CryptTokenInfo, String), LibcryptErr> {
+    pub fn status(&mut self, token: c_uint) -> Result<CryptTokenInfo, LibcryptErr> {
         let mut ptr: *const c_char = std::ptr::null();
-        try_int_to_return!(
-            unsafe {
-                libcryptsetup_rs_sys::crypt_token_status(
-                    self.reference.as_ptr(),
-                    token as c_int,
-                    &mut ptr as *mut _,
-                )
+        let code = unsafe {
+            libcryptsetup_rs_sys::crypt_token_status(
+                self.reference.as_ptr(),
+                token as c_int,
+                &mut ptr as *mut _,
+            )
+        };
+        CryptTokenInfo::from_status(
+            code,
+            match ptr_to_option!(ptr) {
+                Some(p) => Some(from_str_ptr_to_owned!(p)?),
+                None => None,
             },
-            CryptTokenInfo
         )
-        .and_then(|cti| from_str_ptr_to_owned!(ptr).map(|s| (cti, s)))
     }
 
     /// Create new LUKS2 keyring token
