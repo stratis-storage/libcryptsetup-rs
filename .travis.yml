@@ -53,6 +53,15 @@ jobs:
       rust: stable
       env: TASK=release
 
+    # INTERMITTENTLY ALLOWED FAILURES
+    # Allowed if a failure occurs after a new Rust release until the
+    # failure is addressed.
+    - name: "Run clippy on beta toolchain"
+      rust: beta
+      before_script:
+        - rustup component add clippy
+      env: TASK=clippy
+
     # VERIFICATION OF TEST INFRASTRUCTURE
     - name: "run yamllint 1.20.0 on .travis.yml"
       language: python
