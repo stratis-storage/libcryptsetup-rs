@@ -4,7 +4,9 @@ use std::{
     path::{Path, PathBuf},
 };
 
-use libcryptsetup_rs::{c_uint, CryptInit, CryptVolumeKeyFlags, EncryptionFormat, LibcryptErr};
+use libcryptsetup_rs::{
+    c_uint, CryptInit, CryptVolumeKeyFlags, EncryptionFormat, LibcryptErr, TokenInput,
+};
 
 #[macro_use]
 extern crate serde_json;
@@ -101,15 +103,12 @@ fn proto_token_handler(dev: &Path, key_description: &str) -> Result<(), Libcrypt
         .context_handle()
         .load::<()>(Some(EncryptionFormat::Luks2), None)?;
     let mut token = device.token_handle();
-    let _ = token.json_set(
-        None,
-        &json!({
-            "type": "proto",
-            "keyslots": [],
-            "a_uuid": Uuid::new_v4().to_simple().to_string(),
-            "key_description": key_description
-        }),
-    );
+    let _ = token.json_set(TokenInput::AddToken(&json!({
+        "type": "proto",
+        "keyslots": [],
+        "a_uuid": Uuid::new_v4().to_simple().to_string(),
+        "key_description": key_description
+    })));
     Ok(())
 }
 

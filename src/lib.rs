@@ -72,7 +72,7 @@ pub use luks2_reencrypt::{
 };
 
 mod luks2_token;
-pub use luks2_token::{CryptLuks2Token, CryptTokenInfo};
+pub use luks2_token::{CryptLuks2Token, CryptTokenInfo, TokenInput};
 
 mod mem;
 pub use mem::SafeMemHandle;
