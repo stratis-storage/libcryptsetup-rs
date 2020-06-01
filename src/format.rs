@@ -5,10 +5,9 @@
 use std::{
     convert::{TryFrom, TryInto},
     ffi::{CStr, CString},
-    marker::PhantomData,
     os::raw::{c_char, c_uint},
     path::PathBuf,
-    ptr,
+    ptr, slice,
 };
 
 use crate::{
@@ -32,6 +31,28 @@ bitflags_to_from_struct!(
     CryptVerityFlag,
     u32
 );
+
+struct_ref_to_bitflags!(CryptVerityFlags, CryptVerityFlag, u32);
+
+consts_to_from_enum!(
+    /// tcrypt format flags
+    CryptTcryptFlag,
+    u32,
+    LegacyModes => libcryptsetup_rs_sys::CRYPT_TCRYPT_LEGACY_MODES,
+    HiddenHeader => libcryptsetup_rs_sys::CRYPT_TCRYPT_HIDDEN_HEADER,
+    BackupHeader => libcryptsetup_rs_sys::CRYPT_TCRYPT_BACKUP_HEADER,
+    SystemHeader => libcryptsetup_rs_sys::CRYPT_TCRYPT_SYSTEM_HEADER,
+    VeraModes => libcryptsetup_rs_sys::CRYPT_TCRYPT_VERA_MODES
+);
+
+bitflags_to_from_struct!(
+    /// Set of flags for tcrypt format
+    CryptTcryptFlags,
+    CryptTcryptFlag,
+    u32
+);
+
+struct_ref_to_bitflags!(CryptTcryptFlags, CryptTcryptFlag, u32);
 
 /// Device formatting type options
 #[derive(Debug, PartialEq)]
@@ -102,10 +123,11 @@ pub struct CryptParamsLuks1Ref<'a> {
     /// `CryptParamsLuks1`.
     pub inner: libcryptsetup_rs_sys::crypt_params_luks1,
     #[allow(dead_code)]
+    reference: &'a CryptParamsLuks1,
+    #[allow(dead_code)]
     hash_cstring: CString,
     #[allow(dead_code)]
     data_device_cstring: Option<CString>,
-    data: PhantomData<&'a ()>,
 }
 
 /// A struct representing LUKS1 specific parameters.
@@ -116,6 +138,21 @@ pub struct CryptParamsLuks1 {
     pub data_alignment: usize,
     #[allow(missing_docs)]
     pub data_device: Option<PathBuf>,
+}
+
+impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_luks1> for CryptParamsLuks1 {
+    type Error = LibcryptErr;
+
+    fn try_from(v: &'a libcryptsetup_rs_sys::crypt_params_luks1) -> Result<Self, Self::Error> {
+        Ok(CryptParamsLuks1 {
+            hash: from_str_ptr_to_owned!(v.hash)?,
+            data_alignment: v.data_alignment,
+            data_device: match ptr_to_option!(v.data_device) {
+                Some(s) => Some(PathBuf::from(from_str_ptr_to_owned!(s)?)),
+                None => None,
+            },
+        })
+    }
 }
 
 impl<'a> TryInto<CryptParamsLuks1Ref<'a>> for &'a CryptParamsLuks1 {
@@ -138,9 +175,9 @@ impl<'a> TryInto<CryptParamsLuks1Ref<'a>> for &'a CryptParamsLuks1 {
         };
         Ok(CryptParamsLuks1Ref {
             inner,
+            reference: self,
             hash_cstring,
             data_device_cstring,
-            data: PhantomData,
         })
     }
 }
@@ -150,6 +187,8 @@ impl<'a> TryInto<CryptParamsLuks1Ref<'a>> for &'a CryptParamsLuks1 {
 pub struct CryptParamsLuks2Ref<'a> {
     #[allow(missing_docs)]
     pub inner: libcryptsetup_rs_sys::crypt_params_luks2,
+    #[allow(dead_code)]
+    reference: &'a CryptParamsLuks2,
     #[allow(dead_code)]
     pbkdf_type: Option<CryptPbkdfTypeRef<'a>>,
     #[allow(dead_code)]
@@ -182,6 +221,41 @@ pub struct CryptParamsLuks2 {
     pub label: Option<String>,
     #[allow(missing_docs)]
     pub subsystem: Option<String>,
+}
+
+impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_luks2> for CryptParamsLuks2 {
+    type Error = LibcryptErr;
+
+    fn try_from(v: &'a libcryptsetup_rs_sys::crypt_params_luks2) -> Result<Self, Self::Error> {
+        Ok(CryptParamsLuks2 {
+            pbkdf: match ptr_to_option_with_reference!(v.pbkdf) {
+                Some(reference) => Some(CryptPbkdfType::try_from(reference)?),
+                None => None,
+            },
+            integrity: match ptr_to_option!(v.integrity) {
+                Some(ptr) => Some(from_str_ptr_to_owned!(ptr)?),
+                None => None,
+            },
+            integrity_params: match ptr_to_option_with_reference!(v.integrity_params) {
+                Some(ptr) => Some(CryptParamsIntegrity::try_from(ptr)?),
+                None => None,
+            },
+            data_alignment: v.data_alignment,
+            data_device: match ptr_to_option!(v.data_device) {
+                Some(ptr) => Some(PathBuf::from(from_str_ptr_to_owned!(ptr)?)),
+                None => None,
+            },
+            sector_size: v.sector_size,
+            label: match ptr_to_option!(v.label) {
+                Some(ptr) => Some(from_str_ptr_to_owned!(ptr)?),
+                None => None,
+            },
+            subsystem: match ptr_to_option!(v.subsystem) {
+                Some(ptr) => Some(from_str_ptr_to_owned!(ptr)?),
+                None => None,
+            },
+        })
+    }
 }
 
 impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
@@ -244,6 +318,7 @@ impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
         };
         Ok(CryptParamsLuks2Ref {
             inner,
+            reference: self,
             pbkdf_type,
             integrity_params,
             integrity_cstring_opt,
@@ -252,6 +327,22 @@ impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
             subsystem_cstring,
         })
     }
+}
+
+/// Reference to parameters specific to Verity
+pub struct CryptParamsVerityRef<'a> {
+    /// C representation of the struct to use with FFI
+    pub inner: libcryptsetup_rs_sys::crypt_params_verity,
+    #[allow(dead_code)]
+    reference: &'a CryptParamsVerity,
+    #[allow(dead_code)]
+    hash_name_cstring: CString,
+    #[allow(dead_code)]
+    data_device_cstring: CString,
+    #[allow(dead_code)]
+    hash_device_cstring: CString,
+    #[allow(dead_code)]
+    fec_device_cstring: CString,
 }
 
 /// Parameters specific to Verity
@@ -304,6 +395,89 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_verity> for CryptParamsV
             fec_area_offset: v.fec_area_offset,
             fec_roots: v.fec_roots,
             flags: CryptVerityFlags::try_from(v.flags)?,
+        })
+    }
+}
+
+impl<'a> TryInto<CryptParamsVerityRef<'a>> for &'a CryptParamsVerity {
+    type Error = LibcryptErr;
+
+    fn try_into(self) -> Result<CryptParamsVerityRef<'a>, Self::Error> {
+        let hash_name_cstring = to_cstring!(self.hash_name)?;
+        let data_device_cstring = path_to_cstring!(self.data_device)?;
+        let hash_device_cstring = path_to_cstring!(self.hash_device)?;
+        let fec_device_cstring = path_to_cstring!(self.fec_device)?;
+        Ok(CryptParamsVerityRef {
+            inner: libcryptsetup_rs_sys::crypt_params_verity {
+                hash_name: hash_name_cstring.as_ptr(),
+                data_device: data_device_cstring.as_ptr(),
+                hash_device: hash_device_cstring.as_ptr(),
+                fec_device: fec_device_cstring.as_ptr(),
+                salt: self.salt.as_ptr() as *const libc::c_char,
+                salt_size: self.salt.len() as u32,
+                hash_type: self.hash_type,
+                data_block_size: self.data_block_size,
+                hash_block_size: self.hash_block_size,
+                data_size: self.data_size,
+                hash_area_offset: self.hash_area_offset,
+                fec_area_offset: self.fec_area_offset,
+                fec_roots: self.fec_roots,
+                flags: (&self.flags).into(),
+            },
+            reference: self,
+            hash_name_cstring,
+            data_device_cstring,
+            hash_device_cstring,
+            fec_device_cstring,
+        })
+    }
+}
+
+/// C-compatible reference to a `CryptParamsLoopaes` struct
+pub struct CryptParamsLoopaesRef<'a> {
+    /// C representation of the struct to use with FFI
+    pub inner: libcryptsetup_rs_sys::crypt_params_loopaes,
+    #[allow(dead_code)]
+    reference: &'a CryptParamsLoopaes,
+    #[allow(dead_code)]
+    hash_cstring: CString,
+}
+
+/// Parameters for formatting a loop AES device
+pub struct CryptParamsLoopaes {
+    #[allow(missing_docs)]
+    pub hash: String,
+    #[allow(missing_docs)]
+    pub offset: u64,
+    #[allow(missing_docs)]
+    pub skip: u64,
+}
+
+impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_loopaes> for CryptParamsLoopaes {
+    type Error = LibcryptErr;
+
+    fn try_from(v: &'a libcryptsetup_rs_sys::crypt_params_loopaes) -> Result<Self, Self::Error> {
+        Ok(CryptParamsLoopaes {
+            hash: from_str_ptr_to_owned!(v.hash)?,
+            offset: v.offset,
+            skip: v.skip,
+        })
+    }
+}
+
+impl<'a> TryInto<CryptParamsLoopaesRef<'a>> for &'a CryptParamsLoopaes {
+    type Error = LibcryptErr;
+
+    fn try_into(self) -> Result<CryptParamsLoopaesRef<'a>, Self::Error> {
+        let hash_cstring = to_cstring!(self.hash)?;
+        Ok(CryptParamsLoopaesRef {
+            inner: libcryptsetup_rs_sys::crypt_params_loopaes {
+                hash: hash_cstring.as_ptr(),
+                offset: self.offset,
+                skip: self.skip,
+            },
+            reference: self,
+            hash_cstring,
         })
     }
 }
@@ -415,6 +589,173 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_integrity> for CryptPara
                     v.journal_crypt_key_size as usize,
                 )
             }),
+        })
+    }
+}
+
+/// Represents a reference to a `CryptParamsPlain` struct
+pub struct CryptParamsPlainRef<'a> {
+    /// C FFI-compatible field
+    pub inner: libcryptsetup_rs_sys::crypt_params_plain,
+    #[allow(dead_code)]
+    reference: &'a CryptParamsPlain,
+    #[allow(dead_code)]
+    hash_cstring: CString,
+}
+
+/// Struct representing plain cryptsetup format parameters
+pub struct CryptParamsPlain {
+    /// Password hash function
+    pub hash: String,
+    /// Offset in sectors
+    pub offset: u64,
+    /// Sector size in bytes
+    pub sector_size: u32,
+    /// Size of mapped device
+    pub size: u64,
+    /// IV offset
+    pub skip: u64,
+}
+
+impl<'a> TryInto<CryptParamsPlainRef<'a>> for &'a CryptParamsPlain {
+    type Error = LibcryptErr;
+
+    fn try_into(self) -> Result<CryptParamsPlainRef<'a>, Self::Error> {
+        let hash_cstring = to_cstring!(self.hash)?;
+        Ok(CryptParamsPlainRef {
+            inner: libcryptsetup_rs_sys::crypt_params_plain {
+                hash: hash_cstring.as_ptr(),
+                offset: self.offset,
+                sector_size: self.sector_size,
+                size: self.size,
+                skip: self.skip,
+            },
+            reference: self,
+            hash_cstring,
+        })
+    }
+}
+
+impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_plain> for CryptParamsPlain {
+    type Error = LibcryptErr;
+
+    fn try_from(v: &'a libcryptsetup_rs_sys::crypt_params_plain) -> Result<Self, Self::Error> {
+        Ok(CryptParamsPlain {
+            hash: from_str_ptr_to_owned!(v.hash)?,
+            offset: v.offset,
+            sector_size: v.sector_size,
+            size: v.size,
+            skip: v.skip,
+        })
+    }
+}
+
+/// Reference to a `CryptParamsTcrypt` struct
+pub struct CryptParamsTcryptRef<'a> {
+    /// FFI compatible representation of `CryptParamsTcrypt`
+    pub inner: libcryptsetup_rs_sys::crypt_params_tcrypt,
+    #[allow(dead_code)]
+    reference: &'a CryptParamsTcrypt,
+    #[allow(dead_code)]
+    keyfiles_cstrings: Vec<CString>,
+    #[allow(dead_code)]
+    keyfiles_ptrs: Vec<*const libc::c_char>,
+    #[allow(dead_code)]
+    hash_name_cstring: CString,
+    #[allow(dead_code)]
+    cipher_cstring: CString,
+    #[allow(dead_code)]
+    mode_cstring: CString,
+}
+
+/// Parameters for tcrypt operations
+pub struct CryptParamsTcrypt {
+    #[allow(missing_docs)]
+    pub passphrase: Option<Vec<u8>>,
+    #[allow(missing_docs)]
+    pub keyfiles: Option<Vec<PathBuf>>,
+    #[allow(missing_docs)]
+    pub hash_name: String,
+    #[allow(missing_docs)]
+    pub cipher: String,
+    #[allow(missing_docs)]
+    pub mode: String,
+    #[allow(missing_docs)]
+    pub key_size: usize,
+    #[allow(missing_docs)]
+    pub flags: CryptTcryptFlags,
+    #[allow(missing_docs)]
+    pub veracrypt_pim: u32,
+}
+
+impl<'a> TryInto<CryptParamsTcryptRef<'a>> for &'a CryptParamsTcrypt {
+    type Error = LibcryptErr;
+
+    fn try_into(self) -> Result<CryptParamsTcryptRef<'a>, Self::Error> {
+        let mut keyfiles_cstrings = Vec::new();
+        if let Some(ref keyfiles) = self.keyfiles {
+            for keyfile in keyfiles.iter() {
+                keyfiles_cstrings.push(path_to_cstring!(keyfile)?);
+            }
+        }
+        let mut keyfiles_ptrs: Vec<*const libc::c_char> =
+            keyfiles_cstrings.iter().map(|cs| cs.as_ptr()).collect();
+        let hash_name_cstring = to_cstring!(self.hash_name)?;
+        let cipher_cstring = to_cstring!(self.cipher)?;
+        let mode_cstring = to_cstring!(self.mode)?;
+        Ok(CryptParamsTcryptRef {
+            inner: libcryptsetup_rs_sys::crypt_params_tcrypt {
+                passphrase: match self.passphrase {
+                    Some(ref pass) => pass.as_ptr() as *const libc::c_char,
+                    None => std::ptr::null(),
+                },
+                passphrase_size: match self.passphrase {
+                    Some(ref pass) => pass.len(),
+                    None => 0,
+                },
+                keyfiles: keyfiles_ptrs.as_mut_ptr(),
+                keyfiles_count: keyfiles_cstrings.len() as u32,
+                hash_name: hash_name_cstring.as_ptr(),
+                cipher: cipher_cstring.as_ptr(),
+                mode: mode_cstring.as_ptr(),
+                flags: (&self.flags).into(),
+                key_size: self.key_size,
+                veracrypt_pim: self.veracrypt_pim,
+            },
+            reference: self,
+            keyfiles_cstrings,
+            keyfiles_ptrs,
+            hash_name_cstring,
+            cipher_cstring,
+            mode_cstring,
+        })
+    }
+}
+
+impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_tcrypt> for CryptParamsTcrypt {
+    type Error = LibcryptErr;
+
+    fn try_from(v: &'a libcryptsetup_rs_sys::crypt_params_tcrypt) -> Result<Self, Self::Error> {
+        let mut keyfiles = Vec::new();
+        let keyfiles_ptrs = unsafe { slice::from_raw_parts(v.keyfiles, v.keyfiles_count as usize) };
+        for keyfile_ptr in keyfiles_ptrs {
+            keyfiles.push(PathBuf::from(from_str_ptr_to_owned!(*keyfile_ptr)?));
+        }
+        Ok(CryptParamsTcrypt {
+            passphrase: ptr_to_option!(v.passphrase).map(|p| {
+                unsafe { slice::from_raw_parts(p as *const u8, v.passphrase_size) }.to_vec()
+            }),
+            keyfiles: if keyfiles.is_empty() {
+                None
+            } else {
+                Some(keyfiles)
+            },
+            hash_name: from_str_ptr_to_owned!(v.hash_name)?,
+            cipher: from_str_ptr_to_owned!(v.cipher)?,
+            mode: from_str_ptr_to_owned!(v.mode)?,
+            flags: CryptTcryptFlags::try_from(v.flags)?,
+            key_size: v.key_size,
+            veracrypt_pim: v.veracrypt_pim,
         })
     }
 }

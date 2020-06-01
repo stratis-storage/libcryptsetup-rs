@@ -42,9 +42,11 @@ pub use err::LibcryptErr;
 
 mod format;
 pub use format::{
-    CryptFormat, CryptParamsIntegrity, CryptParamsIntegrityRef, CryptParamsLuks1,
-    CryptParamsLuks1Ref, CryptParamsLuks2, CryptParamsLuks2Ref, CryptParamsVerity, CryptVerityFlag,
-    CryptVerityFlags, EncryptionFormat,
+    CryptFormat, CryptParamsIntegrity, CryptParamsIntegrityRef, CryptParamsLoopaes,
+    CryptParamsLoopaesRef, CryptParamsLuks1, CryptParamsLuks1Ref, CryptParamsLuks2,
+    CryptParamsLuks2Ref, CryptParamsPlain, CryptParamsPlainRef, CryptParamsTcrypt,
+    CryptParamsTcryptRef, CryptParamsVerity, CryptParamsVerityRef, CryptTcryptFlag,
+    CryptTcryptFlags, CryptVerityFlag, CryptVerityFlags, EncryptionFormat,
 };
 
 mod key;
