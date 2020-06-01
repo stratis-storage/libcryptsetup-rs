@@ -57,6 +57,14 @@ macro_rules! ptr_to_option {
     }};
 }
 
+/// Convert a pointer to a `Option` containing a reference
+macro_rules! ptr_to_option_with_reference {
+    ( $ptr:expr ) => {{
+        let p = $ptr;
+        unsafe { p.as_ref() }
+    }};
+}
+
 /// Convert a pointer to an `Result` containing a pointer
 macro_rules! ptr_to_result {
     ( $ptr:expr ) => {{
