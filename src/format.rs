@@ -650,7 +650,9 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_plain> for CryptParamsPl
     }
 }
 
+/// Reference to a `CryptParamsTcrypt` struct
 pub struct CryptParamsTcryptRef<'a> {
+    /// FFI compatible representation of `CryptParamsTcrypt`
     pub inner: libcryptsetup_rs_sys::crypt_params_tcrypt,
     #[allow(dead_code)]
     reference: &'a CryptParamsTcrypt,
@@ -666,14 +668,23 @@ pub struct CryptParamsTcryptRef<'a> {
     mode_cstring: CString,
 }
 
+/// Parameters for tcrypt operations
 pub struct CryptParamsTcrypt {
+    #[allow(missing_docs)]
     pub passphrase: Option<Vec<u8>>,
+    #[allow(missing_docs)]
     pub keyfiles: Option<Vec<PathBuf>>,
+    #[allow(missing_docs)]
     pub hash_name: String,
+    #[allow(missing_docs)]
     pub cipher: String,
+    #[allow(missing_docs)]
     pub mode: String,
+    #[allow(missing_docs)]
     pub key_size: usize,
+    #[allow(missing_docs)]
     pub flags: CryptTcryptFlags,
+    #[allow(missing_docs)]
     pub veracrypt_pim: u32,
 }
 
