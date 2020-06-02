@@ -13,6 +13,10 @@ addons:
 
 language: rust
 jobs:
+  allow_failures:
+    # Temporarily allow beta lint task to fail
+    - env: TASK=clippy
+      rust: beta
   include:
 
     # MANDATORY CHECKS USING CURRENT DEVELOPMENT TOOLCHAIN
