@@ -1,6 +1,6 @@
 [![Build Status](https://travis-ci.org/stratis-storage/libcryptsetup-rs.svg?branch=master)](https://travis-ci.org/stratis-storage/libcryptsetup-rs)
 [![Latest Version](https://img.shields.io/crates/v/libcryptsetup-rs.svg)](https://crates.io/crates/libcryptsetup-rs)
-[![Documentation](https://docs.rs/libcryptsetup-rs/badge.svg)](https://stratis-storage.github.io/libcryptsetup-rs/doc/libcryptsetup_rs/index.html)
+[![Documentation](https://docs.rs/libcryptsetup-rs/badge.svg)](https://docs.rs/libcryptsetup-rs/)
 
 # libcryptsetup-rs
 
