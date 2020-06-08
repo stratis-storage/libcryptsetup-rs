@@ -97,19 +97,20 @@ impl EncryptionFormat {
 
     /// Get `EncryptionFormat` from a char pointer
     fn from_ptr(p: *const c_char) -> Result<Self, LibcryptErr> {
-        if libcryptsetup_rs_sys::CRYPT_PLAIN == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        let p_bytes = unsafe { CStr::from_ptr(p) }.to_bytes_with_nul();
+        if libcryptsetup_rs_sys::CRYPT_PLAIN == p_bytes {
             Ok(EncryptionFormat::Plain)
-        } else if libcryptsetup_rs_sys::CRYPT_LUKS1 == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_LUKS1 == p_bytes {
             Ok(EncryptionFormat::Luks1)
-        } else if libcryptsetup_rs_sys::CRYPT_LUKS2 == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_LUKS2 == p_bytes {
             Ok(EncryptionFormat::Luks2)
-        } else if libcryptsetup_rs_sys::CRYPT_LOOPAES == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_LOOPAES == p_bytes {
             Ok(EncryptionFormat::Loopaes)
-        } else if libcryptsetup_rs_sys::CRYPT_VERITY == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_VERITY == p_bytes {
             Ok(EncryptionFormat::Verity)
-        } else if libcryptsetup_rs_sys::CRYPT_TCRYPT == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_TCRYPT == p_bytes {
             Ok(EncryptionFormat::Tcrypt)
-        } else if libcryptsetup_rs_sys::CRYPT_INTEGRITY == unsafe { CStr::from_ptr(p) }.to_bytes() {
+        } else if libcryptsetup_rs_sys::CRYPT_INTEGRITY == p_bytes {
             Ok(EncryptionFormat::Integrity)
         } else {
             Err(LibcryptErr::InvalidConversion)
@@ -793,5 +794,23 @@ mod test {
     fn test_encryption_format_partialeq() {
         assert_eq!(EncryptionFormat::Luks1, EncryptionFormat::Luks1);
         assert_ne!(EncryptionFormat::Luks1, EncryptionFormat::Luks2);
+    }
+
+    #[test]
+    fn test_encryption_format_from_ptr() {
+        for format in &[
+            EncryptionFormat::Integrity,
+            EncryptionFormat::Tcrypt,
+            EncryptionFormat::Verity,
+            EncryptionFormat::Luks2,
+            EncryptionFormat::Loopaes,
+            EncryptionFormat::Luks1,
+            EncryptionFormat::Plain,
+        ] {
+            assert_eq!(
+                EncryptionFormat::from_ptr(format.as_ptr()).unwrap(),
+                *format
+            );
+        }
     }
 }
