@@ -2,15 +2,6 @@
 os: linux
 dist: bionic
 
-addons:
-  apt:
-    sources:
-      - sourceline: 'deb http://us.archive.ubuntu.com/ubuntu/ eoan main'
-    packages:
-      - libcryptsetup-dev
-      - keyutils
-      - libkeyutils-dev
-
 language: rust
 jobs:
   include:
@@ -26,20 +17,49 @@ jobs:
       rust: 1.44.1
       before_script:
         - rustup component add clippy
+        - >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+        - sudo apt-get install libcryptsetup-dev
       env: TASK=clippy
 
     # MANDATORY TESTING ON STABLE
     - name: "build using stable toolchain"
       rust: stable
+      before_script:
+        - >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+        - sudo apt-get install libcryptsetup-dev
       env: TASK=build
     - name: "build Rust docs using stable toolchain"
       rust: stable
+      before_script:
+        - >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+        - sudo apt-get install libcryptsetup-dev
       env: TASK=docs-travis
     - name: "run Rust unit tests using stable tool chain"
       rust: stable
+      before_script:
+        - >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+        - sudo apt-get install libcryptsetup-dev libkeyutils-dev
       env: TASK=test
     - name: "run Rust loopback unit tests using stable tool chain"
       rust: stable
+      before_script:
+        - >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+        - sudo apt-get install libcryptsetup-dev libkeyutils-dev
       script:
         - >
           sudo
@@ -51,6 +71,12 @@ jobs:
           test-loopback
     - name: "build release using stable tool chain"
       rust: stable
+      before_script:
+        - >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+        - sudo apt-get install libcryptsetup-dev
       env: TASK=release
 
     # INTERMITTENTLY ALLOWED FAILURES
@@ -60,6 +86,11 @@ jobs:
       rust: beta
       before_script:
         - rustup component add clippy
+        - >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+        - sudo apt-get install libcryptsetup-dev
       env: TASK=clippy
 
     # VERIFICATION OF TEST INFRASTRUCTURE
