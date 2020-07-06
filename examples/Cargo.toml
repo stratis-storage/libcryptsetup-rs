@@ -20,12 +20,9 @@ path = "unlock-luks2-with-token.rs"
 name = "add-key-to-persistent-keyring"
 path = "add-key-to-persistent-keyring.rs"
 
-[dependencies.libcryptsetup-rs-sys]
-version = "0.1.0"
-path = "../libcryptsetup-rs-sys"
-
 [dependencies]
 libcryptsetup-rs = { path = ".." }
+libcryptsetup-rs-sys = { path = "../libcryptsetup-rs-sys" }
 serde_json = "1.0"
 uuid = {version = "0.7", features = ["v4"]}
-keyutils = "0.2.1"
+libc = "0.2.68"
