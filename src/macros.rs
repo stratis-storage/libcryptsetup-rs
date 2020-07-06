@@ -399,21 +399,21 @@ mod test {
 
     use crate::{log::CryptLogLevel, Bool, Interrupt};
 
-    fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u64>) -> Bool {
+    fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u32>) -> Bool {
         Bool::from(*usrdata.unwrap() as i32)
     }
 
-    c_confirm_callback!(confirm_callback, u64, safe_confirm_callback);
+    c_confirm_callback!(confirm_callback, u32, safe_confirm_callback);
 
-    fn safe_logging_callback(_level: CryptLogLevel, _msg: &str, _usrdata: Option<&mut u64>) {}
+    fn safe_logging_callback(_level: CryptLogLevel, _msg: &str, _usrdata: Option<&mut u32>) {}
 
-    c_logging_callback!(logging_callback, u64, safe_logging_callback);
+    c_logging_callback!(logging_callback, u32, safe_logging_callback);
 
-    fn safe_progress_callback(_size: u64, _offset: u64, usrdata: Option<&mut u64>) -> Interrupt {
+    fn safe_progress_callback(_size: u64, _offset: u64, usrdata: Option<&mut u32>) -> Interrupt {
         Interrupt::from(*usrdata.unwrap() as i32)
     }
 
-    c_progress_callback!(progress_callback, u64, safe_progress_callback);
+    c_progress_callback!(progress_callback, u32, safe_progress_callback);
 
     #[test]
     fn test_c_confirm_callback() {

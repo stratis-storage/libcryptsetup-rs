@@ -1,9 +1,10 @@
 use std::{
     env::args,
+    io,
     path::{Path, PathBuf},
 };
 
-use keyutils::Keyring;
+use libc::syscall;
 use libcryptsetup_rs::{CryptActivateFlags, CryptInit, EncryptionFormat, LibcryptErr};
 
 fn usage() -> &'static str {
@@ -35,6 +36,20 @@ fn parse_args() -> Result<(PathBuf, String), &'static str> {
     Ok((device_path, device_name))
 }
 
+fn attach_persistent_keyring() -> Result<(), io::Error> {
+    match unsafe {
+        syscall(
+            libc::SYS_keyctl,
+            libc::KEYCTL_GET_PERSISTENT,
+            0,
+            libc::KEY_SPEC_SESSION_KEYRING,
+        )
+    } {
+        i if i < 0 => Err(io::Error::last_os_error()),
+        _ => Ok(()),
+    }
+}
+
 fn activate(devpath: &Path, name: &str) -> Result<(), LibcryptErr> {
     let mut device = CryptInit::init(devpath)?;
     device
@@ -51,9 +66,7 @@ fn activate(devpath: &Path, name: &str) -> Result<(), LibcryptErr> {
 
 fn main() -> Result<(), String> {
     let (device_path, device_name) = parse_args()?;
-    let mut keyring =
-        Keyring::attach(keyutils::SpecialKeyring::SessionKeyring).map_err(|e| e.to_string())?;
-    keyring.attach_persistent().map_err(|e| e.to_string())?;
+    attach_persistent_keyring().map_err(|e| e.to_string())?;
     activate(&device_path, &device_name).map_err(|e| e.to_string())?;
     Ok(())
 }

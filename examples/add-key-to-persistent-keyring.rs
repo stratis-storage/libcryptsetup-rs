@@ -1,6 +1,6 @@
-use std::env::args;
+use std::{env::args, ffi::CString, io};
 
-use keyutils::{Keyring, SpecialKeyring};
+use libc::syscall;
 
 fn usage() -> &'static str {
     "Usage: add-to-persistent-keyring <KEY_DESCRIPTION> <KEY_DATA>\n\
@@ -22,12 +22,37 @@ fn parse_args() -> Result<(String, String), &'static str> {
     Ok((key_desc.to_owned(), key_data.to_owned()))
 }
 
-fn add_to_persistent_keyring(key_desc: String, key_data: String) -> Result<(), keyutils::Error> {
-    let mut session_keyring = Keyring::attach(SpecialKeyring::SessionKeyring)?;
-    session_keyring.attach_persistent()?;
-    session_keyring.clear()?;
-    session_keyring.add_key(&key_desc, key_data.as_bytes())?;
-    Ok(())
+fn add_to_persistent_keyring(key_desc: String, key_data: String) -> Result<(), io::Error> {
+    let persistent_id = match unsafe {
+        syscall(
+            libc::SYS_keyctl,
+            libc::KEYCTL_GET_PERSISTENT,
+            0,
+            libc::KEY_SPEC_SESSION_KEYRING,
+        )
+    } {
+        i if i < 0 => return Err(io::Error::last_os_error()),
+        i => i,
+    };
+    if unsafe { syscall(libc::SYS_keyctl, libc::KEYCTL_CLEAR, persistent_id) } < 0 {
+        return Err(io::Error::last_os_error());
+    }
+    let key_desc_cstring = CString::new(key_desc)?;
+    if unsafe {
+        libc::syscall(
+            libc::SYS_add_key,
+            concat!("user", "\0").as_ptr(),
+            key_desc_cstring.as_ptr(),
+            key_data.as_ptr(),
+            key_data.len(),
+            persistent_id,
+        )
+    } < 0
+    {
+        Err(io::Error::last_os_error())
+    } else {
+        Ok(())
+    }
 }
 
 fn main() -> Result<(), String> {
