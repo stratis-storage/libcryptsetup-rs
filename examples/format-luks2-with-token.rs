@@ -16,6 +16,7 @@ fn usage() -> &'static str {
     "Usage: format-luks2-with-token <DEVICE_PATH> <KEY_DESCRIPTION> <openable|unopenable>\n\
      \tDEVICE_PATH: Path to device to format\n\
      \tKEY_DESCRIPTION: Kernel keyring key description\n\
+     \tKEY_DATA: Kernel keyring key data\n\
      \topenable|unopenable: openable to write the openable LUKS2 token to the keyslot"
 }
 
@@ -36,7 +37,7 @@ impl TryFrom<&String> for Openable {
     }
 }
 
-fn parse_args() -> Result<(PathBuf, String, Openable), &'static str> {
+fn parse_args() -> Result<(PathBuf, String, String, Openable), &'static str> {
     let args: Vec<_> = args().collect();
     if args.len() != usage().split('\n').count() {
         println!("{}", usage());
@@ -55,15 +56,24 @@ fn parse_args() -> Result<(PathBuf, String, Openable), &'static str> {
         .get(2)
         .ok_or("No kernel keyring key description was provided")?;
 
-    let openable_string = args
+    let key_data = args
         .get(3)
+        .ok_or("No kernel keyring key data was provided")?;
+
+    let openable_string = args
+        .get(4)
         .ok_or("Could not determine whether device should be openable or not")?;
     let openable = Openable::try_from(openable_string)?;
 
-    Ok((device_path, key_description.to_string(), openable))
+    Ok((
+        device_path,
+        key_description.to_string(),
+        key_data.to_string(),
+        openable,
+    ))
 }
 
-fn format(dev: &Path) -> Result<c_uint, LibcryptErr> {
+fn format(dev: &Path, key_data: &str) -> Result<c_uint, LibcryptErr> {
     let mut device = CryptInit::init(dev)?;
     device.context_handle().format::<()>(
         EncryptionFormat::Luks2,
@@ -75,7 +85,7 @@ fn format(dev: &Path) -> Result<c_uint, LibcryptErr> {
     let keyslot = device.keyslot_handle().add_by_key(
         None,
         None,
-        b"testpassword",
+        key_data.as_bytes(),
         CryptVolumeKeyFlags::empty(),
     )?;
 
@@ -113,8 +123,8 @@ fn proto_token_handler(dev: &Path, key_description: &str) -> Result<(), Libcrypt
 }
 
 fn main() -> Result<(), String> {
-    let (path, key_description, openable) = parse_args()?;
-    let keyslot = format(&path).map_err(|e| e.to_string())?;
+    let (path, key_description, key_data, openable) = parse_args()?;
+    let keyslot = format(&path, &key_data).map_err(|e| e.to_string())?;
     luks2_token_handler(&path, &key_description, keyslot).map_err(|e| e.to_string())?;
     if let Openable::Yes = openable {
         proto_token_handler(&path, &key_description).map_err(|e| e.to_string())?;
