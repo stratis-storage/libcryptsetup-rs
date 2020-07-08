@@ -419,14 +419,14 @@ mod test {
     fn test_c_confirm_callback() {
         let ret = confirm_callback(
             "".as_ptr() as *const std::os::raw::c_char,
-            &mut 1 as *mut _ as *mut std::os::raw::c_void,
+            &mut 1u32 as *mut _ as *mut std::os::raw::c_void,
         );
         assert_eq!(1, ret);
         assert_eq!(Bool::Yes, Bool::from(ret));
 
         let ret = confirm_callback(
             "".as_ptr() as *const std::os::raw::c_char,
-            &mut 0 as *mut _ as *mut std::os::raw::c_void,
+            &mut 0u32 as *mut _ as *mut std::os::raw::c_void,
         );
         assert_eq!(0, ret);
         assert_eq!(Bool::No, Bool::from(ret));
@@ -437,23 +437,23 @@ mod test {
         logging_callback(
             libcryptsetup_rs_sys::CRYPT_LOG_ERROR as i32,
             "".as_ptr() as *const std::os::raw::c_char,
-            &mut 1 as *mut _ as *mut std::os::raw::c_void,
+            &mut 1u32 as *mut _ as *mut std::os::raw::c_void,
         );
 
         logging_callback(
             libcryptsetup_rs_sys::CRYPT_LOG_DEBUG as i32,
             "".as_ptr() as *const std::os::raw::c_char,
-            &mut 0 as *mut _ as *mut std::os::raw::c_void,
+            &mut 0u32 as *mut _ as *mut std::os::raw::c_void,
         );
     }
 
     #[test]
     fn test_c_progress_callback() {
-        let ret = progress_callback(0, 0, &mut 1 as *mut _ as *mut std::os::raw::c_void);
+        let ret = progress_callback(0, 0, &mut 1u32 as *mut _ as *mut std::os::raw::c_void);
         assert_eq!(1, ret);
         assert_eq!(Interrupt::Yes, Interrupt::from(ret));
 
-        let ret = progress_callback(0, 0, &mut 0 as *mut _ as *mut std::os::raw::c_void);
+        let ret = progress_callback(0, 0, &mut 0u32 as *mut _ as *mut std::os::raw::c_void);
         assert_eq!(0, ret);
         assert_eq!(Interrupt::No, Interrupt::from(ret));
     }
