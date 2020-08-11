@@ -12,9 +12,14 @@ use std::{
 };
 
 use crate::{
-    activate::CryptActivateFlags, activate::CryptDeactivateFlags, device::CryptInit,
-    err::LibcryptErr, format::EncryptionFormat, keyfile::CryptKeyfileFlags,
-    keyslot::CryptVolumeKeyFlags, tests::loopback, Either,
+    activate::{CryptActivateFlags, CryptDeactivateFlags},
+    device::CryptInit,
+    err::LibcryptErr,
+    format::EncryptionFormat,
+    keyfile::CryptKeyfileFlags,
+    keyslot::CryptVolumeKeyFlags,
+    tests::loopback,
+    Either,
 };
 
 use libc::c_uint;
