@@ -83,6 +83,17 @@ jobs:
         - sudo apt-get install libcryptsetup-dev
       env: TASK=release
 
+    # MANDATORY TESTING USING LOWEST SUPPORTED TOOLCHAIN
+    - name: "Build using lowest supported toolchain"
+      rust: 1.45.0
+      before_script:
+        - >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+        - sudo apt-get install libcryptsetup-dev
+      env: TASK=build
+
     # ALLOWED FAILURES
     # Allowed because a failure may occur after a new Rust stable
     # version is released.
