@@ -10,7 +10,6 @@ use std::{
     str::Utf8Error,
 };
 
-use uuid::parser::ParseError;
 
 #[derive(Debug)]
 /// Error returned from any libcryptsetup-rs function
@@ -18,7 +17,7 @@ pub enum LibcryptErr {
     /// Wrapper for `io::Error`
     IOError(io::Error),
     /// Wrapper for `uuid::parser::ParseError`
-    UuidError(ParseError),
+    UuidError(uuid::Error),
     /// Wrapper for `ffi::NulError`
     NullError(NulError),
     /// Wrapper for `str::Utf8Error`
