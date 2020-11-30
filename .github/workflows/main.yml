@@ -21,9 +21,9 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           components: rustfmt
-          toolchain: $TOOLCHAIN
+          toolchain: ${{ TOOLCHAIN }}
           override: true
-      - name: Test format on $TOOLCHAIN toolchain
+      - name: Test format on ${{ TOOLCHAIN }} toolchain
         run: make -f Makefile $TASK
   lint:
     env:
@@ -35,33 +35,41 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           components: clippy
-          toolchain: $TOOLCHAIN
+          toolchain: ${{ TOOLCHAIN }}
           override: true
       - name: Install dependencies
         run: |
           sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
           sudo apt-get install libcryptsetup-dev
-      - name: Test linting on $TOOLCHAIN toolchain
+      - name: Test linting on ${{ TOOLCHAIN }} toolchain
         run: make -f Makefile $TASK
 
-  # BUILD WITH LOWEST SUPPORTED TOOLCHAIN AND STABLE
-  build:
+  # MANDATORY TESTING ON STABLE
+  stable:
     env:
-      TASK: build
+      TOOLCHAIN: stable
     strategy:
       matrix:
-        rust: [stable, 1.45.0]
+        include:
+          - task: make -f Makefile build
+            dependencies: libcryptsetup-dev
+          - task: make -f Makefile docs-travis
+            dependencies: libcryptsetup-dev
+          - task: make -f Makefile test
+            dependencies: libcryptsetup-dev libkeyutils-dev
+          - task: sudo TEST_DIR=$GITHUB_WORKSPACE PATH=$GITHUB_WORKSPACE/.cargo/bin:$PATH make -f Makefile test-loopback
+            dependencies: libcryptsetup-dev libkeyutils-dev
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: ${{ matrix.rust }}
+          toolchain: $TOOLCHAIN
           override: true
       - name: Install dependencies
         run: |
           sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
-          sudo apt-get install libcryptsetup-dev
-      - name: Test build on ${{ matrix.rust }} toolchain
-        run: make -f Makefile $TASK
+          sudo apt-get install ${{ matrix.dependencies }}
+      - name: Test build on ${{ TOOLCHAIN }} toolchain
+        run: ${{ matrix.task }}
