@@ -11,7 +11,38 @@ on:
 
 jobs:
   # MANDATORY CHECKS USING CURRENT DEVELOPMENT TOOLCHAIN:
-  # TODO
+  format:
+    env:
+      TASK: fmt-travis
+      TOOLCHAIN: 1.47.0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          components: rustfmt
+          toolchain: $TOOLCHAIN
+          override: true
+      - name: Test format on $TOOLCHAIN toolchain
+        run: make -f Makefile $TASK
+  lint:
+    env:
+      TASK: clippy
+      TOOLCHAIN: 1.47.0
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          components: clippy
+          toolchain: $TOOLCHAIN
+          override: true
+      - name: Install dependencies
+        run: |
+          sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+          sudo apt-get install libcryptsetup-dev
+      - name: Test linting on $TOOLCHAIN toolchain
+        run: make -f Makefile $TASK
 
   # BUILD WITH LOWEST SUPPORTED TOOLCHAIN AND STABLE
   build:
