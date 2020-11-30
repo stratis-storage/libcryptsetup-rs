@@ -59,6 +59,8 @@ jobs:
             dependencies: libcryptsetup-dev libkeyutils-dev
           - task: sudo TEST_DIR=$GITHUB_WORKSPACE PATH=$GITHUB_WORKSPACE/.cargo/bin:$PATH make -f Makefile test-loopback
             dependencies: libcryptsetup-dev libkeyutils-dev
+          - task: make -f Makefile release
+            dependencies: libcryptsetup-dev
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -73,3 +75,41 @@ jobs:
           sudo apt-get install ${{ matrix.dependencies }}
       - name: Test build on ${{ env.TOOLCHAIN }} toolchain
         run: ${{ matrix.task }}
+
+  # ALLOWED FAILURES
+  # Allowed because a failure may occur after a new Rust stable
+  # version is released.
+  allowed_failures:
+    env:
+      TASK: clippy
+      TOOLCHAIN: stable
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          components: clippy
+          toolchain: ${{ env.TOOLCHAIN }}
+          override: true
+      - name: Install dependencies
+        run: |
+          sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+          sudo apt-get install libcryptsetup-dev
+      - name: Test linting on ${{ env.TOOLCHAIN }} toolchain
+        run: make -f Makefile $TASK
+
+  # VERIFICATION OF TEST INFRASTRUCTURE
+  yamllint:
+    env:
+      TASK: yamllint
+      PYTHON: 3.7.6
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions/setup-python@v2
+        with:
+          python-version: ${{ env.PYTHON }}
+      - name: Install dependencies
+        run: pip3 install yamllint==1.23.0
+      - name: Run yamllint
+        run: make -f Makefile $TASK
