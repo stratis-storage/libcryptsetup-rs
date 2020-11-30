@@ -21,9 +21,9 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           components: rustfmt
-          toolchain: ${{ TOOLCHAIN }}
+          toolchain: ${{ env.TOOLCHAIN }}
           override: true
-      - name: Test format on ${{ TOOLCHAIN }} toolchain
+      - name: Test format on ${{ env.TOOLCHAIN }} toolchain
         run: make -f Makefile $TASK
   lint:
     env:
@@ -35,13 +35,13 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           components: clippy
-          toolchain: ${{ TOOLCHAIN }}
+          toolchain: ${{ env.TOOLCHAIN }}
           override: true
       - name: Install dependencies
         run: |
           sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
           sudo apt-get install libcryptsetup-dev
-      - name: Test linting on ${{ TOOLCHAIN }} toolchain
+      - name: Test linting on ${{ env.TOOLCHAIN }} toolchain
         run: make -f Makefile $TASK
 
   # MANDATORY TESTING ON STABLE
@@ -65,11 +65,11 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
-          toolchain: $TOOLCHAIN
+          toolchain: ${{ env.TOOLCHAIN }}
           override: true
       - name: Install dependencies
         run: |
           sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
           sudo apt-get install ${{ matrix.dependencies }}
-      - name: Test build on ${{ TOOLCHAIN }} toolchain
+      - name: Test build on ${{ env.TOOLCHAIN }} toolchain
         run: ${{ matrix.task }}
