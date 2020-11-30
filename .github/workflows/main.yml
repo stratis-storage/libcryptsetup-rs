@@ -80,6 +80,7 @@ jobs:
   # Allowed because a failure may occur after a new Rust stable
   # version is released.
   allowed_failures:
+    continue-on-error: true
     env:
       TASK: clippy
       TOOLCHAIN: stable
