@@ -31,7 +31,7 @@ test-loopback:
 	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test -- --ignored
 
 yamllint:
-	yamllint --strict .travis.yml
+	yamllint --strict .github/workflows/main.yml
 
 .PHONY:
 	build
