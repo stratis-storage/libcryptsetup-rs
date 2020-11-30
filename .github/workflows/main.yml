@@ -40,11 +40,12 @@ jobs:
           toolchain: ${{ env.TOOLCHAIN }}
           override: true
       - name: Install dependencies
-        run: |
-          >
-            sudo
-            add-apt-repository
-            "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+        run: >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+      - name: Install dependencies
+        run: >
           sudo apt-get install libcryptsetup-dev
       - name: Test linting on ${{ env.TOOLCHAIN }} toolchain
         run: make -f Makefile $TASK
@@ -79,11 +80,12 @@ jobs:
           toolchain: ${{ env.TOOLCHAIN }}
           override: true
       - name: Install dependencies
-        run: |
-          >
-            sudo
-            add-apt-repository
-            "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+        run: >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+      - name: Install dependencies
+        run: >
           sudo apt-get install ${{ matrix.dependencies }}
       - name: Test build on ${{ env.TOOLCHAIN }} toolchain
         run: ${{ matrix.task }}
@@ -105,12 +107,12 @@ jobs:
           toolchain: ${{ env.TOOLCHAIN }}
           override: true
       - name: Install dependencies
-        run: |
-          >
-            sudo
-            add-apt-repository
-            "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
-          sudo apt-get install libcryptsetup-dev
+        run: >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+      - name: Install dependencies
+        run: sudo apt-get install libcryptsetup-dev
       - name: Test linting on ${{ env.TOOLCHAIN }} toolchain
         run: make -f Makefile $TASK
 
