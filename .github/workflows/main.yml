@@ -1,10 +1,12 @@
-name: libcryptsetup-CI
+---
+name: libcryptsetup CI
 
+# yamllint disable-line rule:truthy
 on:
   push:
-    branches: [ master ]
+    branches: [master]
   pull_request:
-    branches: [ master ]
+    branches: [master]
 
   # Allows you to run this workflow manually from the Actions tab
   workflow_dispatch:
@@ -39,7 +41,10 @@ jobs:
           override: true
       - name: Install dependencies
         run: |
-          sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+          >
+            sudo
+            add-apt-repository
+            "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
           sudo apt-get install libcryptsetup-dev
       - name: Test linting on ${{ env.TOOLCHAIN }} toolchain
         run: make -f Makefile $TASK
@@ -57,7 +62,11 @@ jobs:
             dependencies: libcryptsetup-dev
           - task: make -f Makefile test
             dependencies: libcryptsetup-dev libkeyutils-dev
-          - task: sudo TEST_DIR=$GITHUB_WORKSPACE PATH=$GITHUB_WORKSPACE/.cargo/bin:$PATH make -f Makefile test-loopback
+          - task: >
+              sudo
+              TEST_DIR=$GITHUB_WORKSPACE
+              PATH=$GITHUB_WORKSPACE/.cargo/bin:$PATH
+              make -f Makefile test-loopback
             dependencies: libcryptsetup-dev libkeyutils-dev
           - task: make -f Makefile release
             dependencies: libcryptsetup-dev
@@ -71,7 +80,10 @@ jobs:
           override: true
       - name: Install dependencies
         run: |
-          sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+          >
+            sudo
+            add-apt-repository
+            "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
           sudo apt-get install ${{ matrix.dependencies }}
       - name: Test build on ${{ env.TOOLCHAIN }} toolchain
         run: ${{ matrix.task }}
@@ -94,7 +106,10 @@ jobs:
           override: true
       - name: Install dependencies
         run: |
-          sudo add-apt-repository "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+          >
+            sudo
+            add-apt-repository
+            "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
           sudo apt-get install libcryptsetup-dev
       - name: Test linting on ${{ env.TOOLCHAIN }} toolchain
         run: make -f Makefile $TASK
