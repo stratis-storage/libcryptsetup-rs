@@ -43,7 +43,7 @@ jobs:
         run: >
           sudo
           add-apt-repository
-          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+          "deb http://us.archive.ubuntu.com/ubuntu/ focal main"
       - name: Install dependencies
         run: >
           sudo apt-get install libcryptsetup-dev
@@ -83,7 +83,7 @@ jobs:
         run: >
           sudo
           add-apt-repository
-          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+          "deb http://us.archive.ubuntu.com/ubuntu/ focal main"
       - name: Install dependencies
         run: >
           sudo apt-get install ${{ matrix.dependencies }}
@@ -110,7 +110,7 @@ jobs:
         run: >
           sudo
           add-apt-repository
-          "deb http://us.archive.ubuntu.com/ubuntu/ eoan main"
+          "deb http://us.archive.ubuntu.com/ubuntu/ focal main"
       - name: Install dependencies
         run: sudo apt-get install libcryptsetup-dev
       - name: Test linting on ${{ env.TOOLCHAIN }} toolchain
