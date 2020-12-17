@@ -90,6 +90,40 @@ jobs:
       - name: Test build on ${{ env.TOOLCHAIN }} toolchain
         run: ${{ matrix.task }}
 
+  # MANDATORY TESTING USING LOWEST SUPPORTED TOOLCHAIN
+  lowest_supported:
+    env:
+      TOOLCHAIN: 1.47.0
+    strategy:
+      matrix:
+        include:
+          - task: make -f Makefile test
+            dependencies: libcryptsetup-dev libkeyutils-dev
+          - task: >
+              sudo
+              TEST_DIR=$GITHUB_WORKSPACE
+              PATH=$GITHUB_WORKSPACE/.cargo/bin:$PATH
+              make -f Makefile test-loopback
+            dependencies: libcryptsetup-dev libkeyutils-dev
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.TOOLCHAIN }}
+          override: true
+      - name: Install dependencies
+        run: >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ focal main"
+      - name: Install dependencies
+        run: >
+          sudo apt-get install ${{ matrix.dependencies }}
+      - name: Test build on ${{ env.TOOLCHAIN }} toolchain
+        run: ${{ matrix.task }}
+
   # ALLOWED FAILURES
   # Allowed because a failure may occur after a new Rust stable
   # version is released.
