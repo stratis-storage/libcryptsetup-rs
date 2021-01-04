@@ -249,15 +249,15 @@ impl Deref for MetadataSize {
 
     fn deref(&self) -> &u64 {
         match *self {
-            MetadataSize::Kb16 => &0x4_000,
-            MetadataSize::Kb32 => &0x8_000,
-            MetadataSize::Kb64 => &0x10_000,
-            MetadataSize::Kb128 => &0x20_000,
-            MetadataSize::Kb256 => &0x40_000,
-            MetadataSize::Kb512 => &0x80_000,
-            MetadataSize::Kb1024 => &0x100_000,
-            MetadataSize::Kb2048 => &0x200_000,
-            MetadataSize::Kb4096 => &0x400_000,
+            MetadataSize::Kb16 => &0x4000,
+            MetadataSize::Kb32 => &0x8000,
+            MetadataSize::Kb64 => &0x10000,
+            MetadataSize::Kb128 => &0x20000,
+            MetadataSize::Kb256 => &0x40000,
+            MetadataSize::Kb512 => &0x80000,
+            MetadataSize::Kb1024 => &0x100000,
+            MetadataSize::Kb2048 => &0x200000,
+            MetadataSize::Kb4096 => &0x400000,
         }
     }
 }
