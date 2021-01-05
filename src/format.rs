@@ -792,7 +792,10 @@ mod test {
 
     #[test]
     fn test_encryption_format_partialeq() {
-        assert_eq!(EncryptionFormat::Luks1, EncryptionFormat::Luks1);
+        #[allow(clippy::eq_op)]
+        {
+            assert_eq!(EncryptionFormat::Luks1, EncryptionFormat::Luks1);
+        }
         assert_ne!(EncryptionFormat::Luks1, EncryptionFormat::Luks2);
     }
 
