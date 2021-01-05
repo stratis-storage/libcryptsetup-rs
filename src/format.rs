@@ -791,7 +791,6 @@ mod test {
     use super::EncryptionFormat;
 
     #[test]
-    #[allow(clippy::eq_op)]
     fn test_encryption_format_partialeq() {
         #[allow(clippy::eq_op)]
         {
