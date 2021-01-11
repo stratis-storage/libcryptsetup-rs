@@ -16,7 +16,7 @@ jobs:
   format:
     env:
       TASK: fmt-travis
-      TOOLCHAIN: 1.48.0
+      TOOLCHAIN: 1.49.0
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -30,7 +30,7 @@ jobs:
   lint:
     env:
       TASK: clippy
-      TOOLCHAIN: 1.48.0
+      TOOLCHAIN: 1.49.0
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
