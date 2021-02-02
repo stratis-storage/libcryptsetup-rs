@@ -13,7 +13,7 @@ macro_rules! mutex {
             Ok(l) => Some(l),
             Err(e) => {
                 log::warn!(
-                    "The synchronization mutex can not longer be locked! \
+                    "The synchronization mutex can no longer be locked! \
                     Locking failed with error: {}; see Rust's documentation \
                     on Mutex poisoning here to decide how to proceed: \
                     https://doc.rust-lang.org/std/sync/struct.Mutex.html#errors",
