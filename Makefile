@@ -27,8 +27,14 @@ release:
 test:
 	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test
 
+test-mutex:
+	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test --features=mutex
+
 test-loopback:
 	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test -- --ignored
+
+test-loopback-mutex:
+	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex -- --ignored
 
 yamllint:
 	yamllint --strict .github/workflows/main.yml
