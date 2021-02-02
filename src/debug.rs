@@ -18,6 +18,6 @@ pub struct CryptDebug;
 impl CryptDebug {
     /// Set library debug level
     pub fn set_debug_level(level: CryptDebugLevel) {
-        unsafe { libcryptsetup_rs_sys::crypt_set_debug_level(level.into()) }
+        mutex!(unsafe { libcryptsetup_rs_sys::crypt_set_debug_level(level.into()) })
     }
 }

@@ -56,13 +56,13 @@ impl<'a> CryptLog<'a> {
     /// Generate a log entry
     pub fn log(&mut self, level: CryptLogLevel, msg: &str) -> Result<(), LibcryptErr> {
         let msg_cstring = to_cstring!(msg)?;
-        unsafe {
+        mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_log(
                 self.reference.as_ptr(),
                 level as c_int,
                 msg_cstring.as_ptr(),
             )
-        };
+        });
         Ok(())
     }
 
@@ -72,7 +72,7 @@ impl<'a> CryptLog<'a> {
         callback: Option<LoggingCallback>,
         usrdata: Option<&mut T>,
     ) {
-        unsafe {
+        mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_set_log_callback(
                 self.reference.as_ptr(),
                 callback,
@@ -81,6 +81,6 @@ impl<'a> CryptLog<'a> {
                     None => ptr::null_mut(),
                 },
             )
-        }
+        })
     }
 }

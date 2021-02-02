@@ -33,7 +33,9 @@ impl<'a> CryptDeviceStatus<'a> {
 
     /// Dump text info about device to log output
     pub fn dump(&mut self) -> Result<(), LibcryptErr> {
-        errno!(unsafe { libcryptsetup_rs_sys::crypt_dump(self.reference.as_ptr()) })
+        errno!(mutex!(unsafe {
+            libcryptsetup_rs_sys::crypt_dump(self.reference.as_ptr())
+        }))
     }
 
     /// Get cipher used by device
@@ -68,9 +70,9 @@ impl<'a> CryptDeviceStatus<'a> {
 
     /// Get path to detached metadata device or `None` if it is attached
     pub fn get_metadata_device_path(&mut self) -> Result<Option<&Path>, LibcryptErr> {
-        let ptr = unsafe {
+        let ptr = mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_get_metadata_device_name(self.reference.as_ptr())
-        };
+        });
         if ptr.is_null() {
             return Ok(None);
         }
@@ -79,17 +81,17 @@ impl<'a> CryptDeviceStatus<'a> {
 
     /// Get offset in 512-byte sectors where real data starts
     pub fn get_data_offset(&mut self) -> u64 {
-        unsafe { libcryptsetup_rs_sys::crypt_get_data_offset(self.reference.as_ptr()) }
+        mutex!(unsafe { libcryptsetup_rs_sys::crypt_get_data_offset(self.reference.as_ptr()) })
     }
 
     /// Get IV location offset in 512-byte sectors
     pub fn get_iv_offset(&mut self) -> u64 {
-        unsafe { libcryptsetup_rs_sys::crypt_get_iv_offset(self.reference.as_ptr()) }
+        mutex!(unsafe { libcryptsetup_rs_sys::crypt_get_iv_offset(self.reference.as_ptr()) })
     }
 
     /// Get size in bytes of volume key
     pub fn get_volume_key_size(&mut self) -> c_int {
-        unsafe { libcryptsetup_rs_sys::crypt_get_volume_key_size(self.reference.as_ptr()) }
+        mutex!(unsafe { libcryptsetup_rs_sys::crypt_get_volume_key_size(self.reference.as_ptr()) })
     }
 
     /// Get Verity device parameters
@@ -110,12 +112,12 @@ impl<'a> CryptDeviceStatus<'a> {
             fec_roots: 0,
             flags: 0,
         };
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_get_verity_info(
                 self.reference.as_ptr(),
                 &mut verity as *mut _,
             )
-        })
+        }))
         .and_then(|_| CryptParamsVerity::try_from(&verity))
     }
 
@@ -138,12 +140,12 @@ impl<'a> CryptDeviceStatus<'a> {
             journal_crypt_key: std::ptr::null(),
             journal_crypt_key_size: 0,
         };
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_get_integrity_info(
                 self.reference.as_ptr(),
                 &mut integrity as *mut _,
             )
-        })
+        }))
         .and_then(|_| CryptParamsIntegrity::try_from(&integrity))
     }
 }
@@ -155,7 +157,7 @@ pub fn status(
 ) -> Result<CryptStatusInfo, LibcryptErr> {
     let name_cstring = to_cstring!(name)?;
     try_int_to_return!(
-        unsafe {
+        mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_status(
                 match device {
                     Some(d) => d.as_ptr(),
@@ -163,16 +165,16 @@ pub fn status(
                 },
                 name_cstring.as_ptr(),
             )
-        },
+        }),
         CryptStatusInfo
     )
 }
 
 /// Get size of encryption sectors in bytes
 pub fn get_sector_size(device: Option<&mut CryptDevice>) -> c_int {
-    unsafe {
+    mutex!(unsafe {
         libcryptsetup_rs_sys::crypt_get_sector_size(
             device.map(|d| d.as_ptr()).unwrap_or(ptr::null_mut()),
         )
-    }
+    })
 }

@@ -82,7 +82,7 @@ impl<'a> CryptActivation<'a> {
             Some(n) => Some(to_cstring!(n)?),
             None => None,
         };
-        errno_int_success!(unsafe {
+        errno_int_success!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_activate_by_passphrase(
                 self.reference.as_ptr(),
                 match name_cstring_option {
@@ -96,7 +96,7 @@ impl<'a> CryptActivation<'a> {
                 passphrase.len(),
                 flags.into(),
             )
-        })
+        }))
         .map(|k| k as c_uint)
     }
 
@@ -115,7 +115,7 @@ impl<'a> CryptActivation<'a> {
             None => None,
         };
         let keyfile_cstring = path_to_cstring!(keyfile)?;
-        errno_int_success!(unsafe {
+        errno_int_success!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_activate_by_keyfile_device_offset(
                 self.reference.as_ptr(),
                 match name_cstring_option {
@@ -135,7 +135,7 @@ impl<'a> CryptActivation<'a> {
                 keyfile_offset,
                 flags.into(),
             )
-        })
+        }))
         .map(|k| k as c_uint)
     }
 
@@ -154,7 +154,7 @@ impl<'a> CryptActivation<'a> {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (ptr::null(), 0),
         };
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_activate_by_volume_key(
                 self.reference.as_ptr(),
                 match name_cstring_option {
@@ -165,7 +165,7 @@ impl<'a> CryptActivation<'a> {
                 volume_key_len,
                 flags.into(),
             )
-        })
+        }))
     }
 
     /// Activeate device using passphrase in kernel keyring
@@ -181,7 +181,7 @@ impl<'a> CryptActivation<'a> {
             None => None,
         };
         let description_cstring = to_cstring!(key_description)?;
-        errno_int_success!(unsafe {
+        errno_int_success!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_activate_by_keyring(
                 self.reference.as_ptr(),
                 match name_cstring_option {
@@ -194,7 +194,7 @@ impl<'a> CryptActivation<'a> {
                     .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
                 flags.into(),
             )
-        })
+        }))
         .map(|k| k as c_uint)
     }
 
@@ -205,12 +205,12 @@ impl<'a> CryptActivation<'a> {
         flags: CryptDeactivateFlags,
     ) -> Result<(), LibcryptErr> {
         let name_cstring = to_cstring!(name)?;
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_deactivate_by_name(
                 self.reference.as_ptr(),
                 name_cstring.as_ptr(),
                 flags.into(),
             )
-        })
+        }))
     }
 }

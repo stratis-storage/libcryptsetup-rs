@@ -61,7 +61,7 @@ pub use keyslot::{
 };
 
 mod log;
-pub use log::{CryptLog, CryptLogLevel};
+pub use crate::log::{CryptLog, CryptLogLevel};
 
 mod luks2_flags;
 pub use luks2_flags::{CryptLuks2Flags, CryptRequirementFlag, CryptRequirementFlags};
@@ -104,6 +104,11 @@ pub use libc::{c_int, c_uint, size_t};
 
 /// Result type to be used with `libcryptsetup-rs`
 pub type Result<T> = std::result::Result<T, LibcryptErr>;
+
+#[cfg(feature = "mutex")]
+lazy_static::lazy_static! {
+    static ref MUTEX: std::sync::Mutex<()> = std::sync::Mutex::new(());
+}
 
 /// Boolean specifying yes or no
 #[derive(Debug, Eq, PartialEq)]

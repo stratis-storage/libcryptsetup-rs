@@ -68,7 +68,7 @@ impl<'a> CryptKeyslot<'a> {
         passphrase: &[u8],
         new_passphrase: &[u8],
     ) -> Result<c_uint, LibcryptErr> {
-        errno_int_success!(unsafe {
+        errno_int_success!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_add_by_passphrase(
                 self.reference.as_ptr(),
                 keyslot
@@ -79,7 +79,7 @@ impl<'a> CryptKeyslot<'a> {
                 to_byte_ptr!(new_passphrase),
                 new_passphrase.len(),
             )
-        })
+        }))
         .map(|k| k as c_uint)
     }
 
@@ -91,7 +91,7 @@ impl<'a> CryptKeyslot<'a> {
         passphrase: &[u8],
         new_passphrase: &[u8],
     ) -> Result<c_int, LibcryptErr> {
-        errno_int_success!(unsafe {
+        errno_int_success!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_change_by_passphrase(
                 self.reference.as_ptr(),
                 keyslot_old
@@ -105,7 +105,7 @@ impl<'a> CryptKeyslot<'a> {
                 to_byte_ptr!(new_passphrase),
                 new_passphrase.len(),
             )
-        })
+        }))
     }
 
     /// Add key slot using key file
@@ -121,7 +121,7 @@ impl<'a> CryptKeyslot<'a> {
         let (new_keyfile, new_keyfile_size) = new_keyfile_and_size;
         let keyfile_cstring = path_to_cstring!(keyfile)?;
         let new_keyfile_cstring = path_to_cstring!(new_keyfile)?;
-        errno_int_success!(unsafe {
+        errno_int_success!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_add_by_keyfile_device_offset(
                 self.reference.as_ptr(),
                 keyslot
@@ -134,7 +134,7 @@ impl<'a> CryptKeyslot<'a> {
                 new_keyfile_size,
                 new_keyfile_offset,
             )
-        })
+        }))
         .map(|k| k as c_uint)
     }
 
@@ -150,7 +150,7 @@ impl<'a> CryptKeyslot<'a> {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
             None => (std::ptr::null(), 0),
         };
-        errno_int_success!(unsafe {
+        errno_int_success!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_add_by_key(
                 self.reference.as_ptr(),
                 keyslot
@@ -162,26 +162,26 @@ impl<'a> CryptKeyslot<'a> {
                 passphrase.len(),
                 flags.into(),
             )
-        })
+        }))
         .map(|k| k as c_uint)
     }
 
     /// Destroy key slot
     pub fn destroy(&mut self, keyslot: c_uint) -> Result<(), LibcryptErr> {
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_destroy(self.reference.as_ptr(), keyslot as c_int)
-        })
+        }))
     }
 
     /// Get keyslot status
     pub fn status(&mut self, keyslot: c_uint) -> Result<KeyslotInfo, LibcryptErr> {
         try_int_to_return!(
-            unsafe {
+            mutex!(unsafe {
                 libcryptsetup_rs_sys::crypt_keyslot_status(
                     self.reference.as_ptr(),
                     keyslot as c_int,
                 )
-            },
+            }),
             KeyslotInfo
         )
     }
@@ -189,12 +189,12 @@ impl<'a> CryptKeyslot<'a> {
     /// Get keyslot priority (LUKS2 specific)
     pub fn get_priority(&mut self, keyslot: c_uint) -> Result<KeyslotPriority, LibcryptErr> {
         try_int_to_return!(
-            unsafe {
+            mutex!(unsafe {
                 libcryptsetup_rs_sys::crypt_keyslot_get_priority(
                     self.reference.as_ptr(),
                     keyslot as c_int,
                 )
-            },
+            }),
             KeyslotPriority
         )
     }
@@ -205,45 +205,47 @@ impl<'a> CryptKeyslot<'a> {
         keyslot: c_uint,
         priority: KeyslotPriority,
     ) -> Result<(), LibcryptErr> {
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_set_priority(
                 self.reference.as_ptr(),
                 keyslot as c_int,
                 priority.into(),
             )
-        })
+        }))
     }
 
     /// Get maximum keyslots supported for device type
     pub fn max_keyslots(fmt: EncryptionFormat) -> Result<c_uint, LibcryptErr> {
-        errno_int_success!(unsafe { libcryptsetup_rs_sys::crypt_keyslot_max(fmt.as_ptr()) })
-            .map(|k| k as c_uint)
+        errno_int_success!(mutex!(unsafe {
+            libcryptsetup_rs_sys::crypt_keyslot_max(fmt.as_ptr())
+        }))
+        .map(|k| k as c_uint)
     }
 
     /// Get keyslot area pointers
     pub fn area(&mut self, keyslot: c_uint) -> Result<(u64, u64), LibcryptErr> {
         let mut offset = 0u64;
         let mut length = 0u64;
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_area(
                 self.reference.as_ptr(),
                 keyslot as c_int,
                 &mut offset as *mut u64,
                 &mut length as *mut u64,
             )
-        })
+        }))
         .map(|_| (offset, length))
     }
 
     /// Get size of key in keyslot - only different from `crypt_get_volume_key_size()` binding
     /// in the case of LUKS2 using unbound keyslots
     pub fn get_key_size(&mut self, keyslot: c_uint) -> Result<c_uint, LibcryptErr> {
-        errno_int_success!(unsafe {
+        errno_int_success!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_get_key_size(
                 self.reference.as_ptr(),
                 keyslot as c_int,
             )
-        })
+        }))
         .map(|k| k as c_uint)
     }
 
@@ -253,7 +255,7 @@ impl<'a> CryptKeyslot<'a> {
         keyslot: Option<c_uint>,
     ) -> Result<(&str, crate::size_t), LibcryptErr> {
         let mut key_size: crate::size_t = 0;
-        ptr_to_result!(unsafe {
+        ptr_to_result!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_get_encryption(
                 self.reference.as_ptr(),
                 keyslot
@@ -261,7 +263,7 @@ impl<'a> CryptKeyslot<'a> {
                     .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
                 &mut key_size as *mut crate::size_t,
             )
-        })
+        }))
         .and_then(|ptr| from_str_ptr!(ptr))
         .map(|st| (st, key_size))
     }
@@ -277,13 +279,13 @@ impl<'a> CryptKeyslot<'a> {
             parallel_threads: 0,
             flags: 0,
         };
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_get_pbkdf(
                 self.reference.as_ptr(),
                 keyslot as c_int,
                 &mut type_ as *mut _,
             )
-        })
+        }))
         .and_then(|_| CryptPbkdfType::try_from(type_))
     }
 
@@ -294,18 +296,18 @@ impl<'a> CryptKeyslot<'a> {
         key_size: crate::size_t,
     ) -> Result<(), LibcryptErr> {
         let cipher_cstring = to_cstring!(cipher)?;
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyslot_set_encryption(
                 self.reference.as_ptr(),
                 cipher_cstring.as_ptr(),
                 key_size,
             )
-        })
+        }))
     }
 
     /// Get directory where crypt devices are mapped
     pub fn get_dir() -> Result<Box<Path>, LibcryptErr> {
-        ptr_to_result!(unsafe { libcryptsetup_rs_sys::crypt_get_dir() })
+        ptr_to_result!(mutex!(unsafe { libcryptsetup_rs_sys::crypt_get_dir() }))
             .and_then(|s| from_str_ptr_to_owned!(s))
             .map(PathBuf::from)
             .map(|b| b.into_boxed_path())

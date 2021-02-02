@@ -45,7 +45,7 @@ impl<'a> CryptWipe<'a> {
         usrptr: Option<&mut T>,
     ) -> Result<(), LibcryptErr> {
         let dev_path_cstring = path_to_cstring!(dev_path)?;
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_wipe(
                 self.reference.as_ptr(),
                 dev_path_cstring.as_ptr(),
@@ -64,6 +64,6 @@ impl<'a> CryptWipe<'a> {
                     None => std::ptr::null_mut(),
                 },
             )
-        })
+        }))
     }
 }

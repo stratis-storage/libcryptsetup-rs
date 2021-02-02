@@ -63,7 +63,7 @@ impl<'a> CryptKeyfile<'a> {
 
         let mut key: *mut c_char = ptr::null_mut();
         let mut size: crate::size_t = 0;
-        errno!(unsafe {
+        errno!(mutex!(unsafe {
             libcryptsetup_rs_sys::crypt_keyfile_device_read(
                 self.reference.as_ptr(),
                 keyfile_cstring.as_ptr(),
@@ -73,7 +73,7 @@ impl<'a> CryptKeyfile<'a> {
                 keyfile_size,
                 flags.into(),
             )
-        })?;
+        }))?;
         Ok(CryptKeyfileContents {
             key_mem: unsafe { SafeMemHandle::from_ptr(key as *mut c_void, size) },
         })
