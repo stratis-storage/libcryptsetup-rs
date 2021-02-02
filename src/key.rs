@@ -26,27 +26,23 @@ impl<'a> CryptVolumeKey<'a> {
     ) -> Result<(c_int, crate::size_t), LibcryptErr> {
         let mut volume_key_size_t = volume_key.len();
         let passphrase_cstring = to_cstring!(passphrase)?;
-        errno_int_success!(unsafe {
-            libcryptsetup_rs_sys::crypt_volume_key_get(
-                self.reference.as_ptr(),
-                keyslot,
-                to_mut_byte_ptr!(volume_key),
-                &mut volume_key_size_t as *mut _,
-                passphrase_cstring.as_ptr(),
-                passphrase.len(),
-            )
-        })
+        errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_volume_key_get(
+            self.reference.as_ptr(),
+            keyslot,
+            to_mut_byte_ptr!(volume_key),
+            &mut volume_key_size_t as *mut _,
+            passphrase_cstring.as_ptr(),
+            passphrase.len(),
+        )))
         .map(|i| (i, volume_key_size_t))
     }
 
     /// Verify that volume key is valid for crypt device
     pub fn verify(&mut self, volume_key: &[u8]) -> Result<(), LibcryptErr> {
-        errno!(unsafe {
-            libcryptsetup_rs_sys::crypt_volume_key_verify(
-                self.reference.as_ptr(),
-                to_byte_ptr!(volume_key),
-                volume_key.len(),
-            )
-        })
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_volume_key_verify(
+            self.reference.as_ptr(),
+            to_byte_ptr!(volume_key),
+            volume_key.len(),
+        )))
     }
 }

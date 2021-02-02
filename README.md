@@ -5,6 +5,21 @@
 
 This crate provides Rust bindings for libcryptsetup.
 
+### Note on thread-safety
+
+libcryptsetup is *not* thread-safe and also depends on libraries that are not
+thread-safe. Any use of libcryptsetup by default in a multithreaded environment will
+result in undefined behavior.
+
+As a workaround, this library provides a feature (`mutex`) to cause all calls to
+libcryptsetup to acquire a crate-level mutex. This will enforce single threaded
+access to all invocations of the libcryptsetup API.
+
+Rust's decision to make pointers `!Send` should be respected. Any data structure that
+contains a pointer is *not* safe to send across threads. Providing an `unsafe
+impl Send {}` for any data structure provided by libcryptsetup-rs that is not `Send`
+may result in undefined behavior.
+
 ### API documentation
 
 The API documentation can be found [here](https://stratis-storage.github.io/libcryptsetup-rs/doc/libcryptsetup_rs/index.html).

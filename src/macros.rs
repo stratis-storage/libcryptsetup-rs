@@ -2,6 +2,31 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+/// Wrap all libcryptsetup_rs_sys calls in the macro. It will expand to a
+/// feature-flagged mutex lock call. If the `mutex` feature is not enabled, it is
+/// a no-op.
+macro_rules! mutex {
+    ( $libcryptsetup_call:expr ) => {{
+        #[cfg(feature = "mutex")]
+        #[allow(unused_variables)]
+        let lock = match $crate::MUTEX.lock() {
+            Ok(l) => Some(l),
+            Err(e) => {
+                log::warn!(
+                    "The synchronization mutex can no longer be locked! \
+                    Locking failed with error: {}; see Rust's documentation \
+                    on Mutex poisoning here to decide how to proceed: \
+                    https://doc.rust-lang.org/std/sync/struct.Mutex.html#errors",
+                    e,
+                );
+                None
+            }
+        };
+
+        unsafe { $libcryptsetup_call }
+    }};
+}
+
 /// Convert an errno-zero-success return pattern into a `Result<(), LibcryptErr>`
 macro_rules! errno {
     ( $rc:expr ) => {

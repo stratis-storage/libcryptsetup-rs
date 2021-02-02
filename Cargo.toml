@@ -23,12 +23,23 @@ serde_json = "1.0"
 version = "0.8"
 features = ["v4"]
 
+[dependencies.lazy_static]
+version = "1"
+optional = true
+
+[dependencies.log]
+version = "0.4"
+optional = true
+
 [build-dependencies]
 pkg-config = "0.3"
-semver = "0.9"
+semver = "0.11"
 
 [dev-dependencies]
-base64 = "0.12"
+base64 = "0.13"
 loopdev = "0.2"
-nix = "0.18"
-rand = "0.7"
+nix = "0.19"
+rand = "0.8"
+
+[features]
+mutex = ["lazy_static", "log"]
