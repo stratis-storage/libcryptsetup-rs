@@ -159,7 +159,7 @@ impl<'a> CryptLuks2Reencrypt<'a> {
 
         let cipher_cstring = to_cstring!(cipher)?;
         let cipher_mode_cstring = to_cstring!(cipher_mode)?;
-        errno_int_success!(mutex!(unsafe {
+        errno_int_success!(mutex!(
             libcryptsetup_rs_sys::crypt_reencrypt_init_by_passphrase(
                 self.reference.as_ptr(),
                 name_cstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
@@ -171,7 +171,7 @@ impl<'a> CryptLuks2Reencrypt<'a> {
                 cipher_mode_cstring.as_ptr(),
                 &params_reencrypt.inner as *const _,
             )
-        }))
+        ))
     }
 
     /// Initialize reencryption metadata on a device by passphrase in a keyring
@@ -194,7 +194,7 @@ impl<'a> CryptLuks2Reencrypt<'a> {
         let description_cstring = to_cstring!(key_description)?;
         let cipher_cstring = to_cstring!(cipher)?;
         let cipher_mode_cstring = to_cstring!(cipher_mode)?;
-        errno_int_success!(mutex!(unsafe {
+        errno_int_success!(mutex!(
             libcryptsetup_rs_sys::crypt_reencrypt_init_by_keyring(
                 self.reference.as_ptr(),
                 name_cstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
@@ -205,14 +205,15 @@ impl<'a> CryptLuks2Reencrypt<'a> {
                 cipher_mode_cstring.as_ptr(),
                 &params_reencrypt.inner as *const _,
             )
-        }))
+        ))
     }
 
     /// Run data reencryption
     pub fn reencrypt(&mut self, progress: Option<ReencryptProgress>) -> Result<(), LibcryptErr> {
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_reencrypt(self.reference.as_ptr(), progress)
-        }))
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_reencrypt(
+            self.reference.as_ptr(),
+            progress
+        )))
     }
 
     /// LUKS2 reencryption status
@@ -222,12 +223,10 @@ impl<'a> CryptLuks2Reencrypt<'a> {
     ) -> Result<CryptReencryptInfo, LibcryptErr> {
         let mut params_reencrypt: CryptParamsReencryptRef<'_> = (&params).try_into()?;
         try_int_to_return!(
-            mutex!(mutex!(unsafe {
-                libcryptsetup_rs_sys::crypt_reencrypt_status(
-                    self.reference.as_ptr(),
-                    &mut params_reencrypt.inner as *mut _,
-                )
-            })),
+            mutex!(libcryptsetup_rs_sys::crypt_reencrypt_status(
+                self.reference.as_ptr(),
+                &mut params_reencrypt.inner as *mut _,
+            )),
             CryptReencryptInfo
         )
     }

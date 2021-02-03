@@ -45,13 +45,11 @@ impl<'a> CryptLuks2Flags<'a, CryptActivateFlags> {
     /// Implementation for setting persistent flags for activation
     pub fn persistent_flags_set(&mut self, flags: CryptActivateFlags) -> Result<(), LibcryptErr> {
         let flags_u32: u32 = flags.into();
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_persistent_flags_set(
-                self.reference.as_ptr(),
-                CryptFlagsType::Activation as u32,
-                flags_u32,
-            )
-        }))
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_persistent_flags_set(
+            self.reference.as_ptr(),
+            CryptFlagsType::Activation as u32,
+            flags_u32,
+        )))
     }
 
     /// Implementation for getting persistent flags for activation

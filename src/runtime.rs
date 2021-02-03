@@ -51,24 +51,22 @@ impl<'a> CryptRuntime<'a> {
             flags: 0,
         };
         let name_cstring = to_cstring!(self.name)?;
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_get_active_device(
-                self.reference.as_ptr(),
-                name_cstring.as_ptr(),
-                &mut cad as *mut _,
-            )
-        }))
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_get_active_device(
+            self.reference.as_ptr(),
+            name_cstring.as_ptr(),
+            &mut cad as *mut _,
+        )))
         .and_then(|_| ActiveDevice::try_from(&cad))
     }
 
     /// Get detected number of integrity failures
     pub fn get_active_integrity_failures(&mut self) -> Result<u64, LibcryptErr> {
         let name_cstring = to_cstring!(self.name)?;
-        Ok(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_get_active_integrity_failures(
+        Ok(
+            mutex!(libcryptsetup_rs_sys::crypt_get_active_integrity_failures(
                 self.reference.as_ptr(),
                 name_cstring.as_ptr(),
-            )
-        }) as u64)
+            )) as u64,
+        )
     }
 }

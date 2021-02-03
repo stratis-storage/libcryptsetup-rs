@@ -45,25 +45,23 @@ impl<'a> CryptWipe<'a> {
         usrptr: Option<&mut T>,
     ) -> Result<(), LibcryptErr> {
         let dev_path_cstring = path_to_cstring!(dev_path)?;
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_wipe(
-                self.reference.as_ptr(),
-                dev_path_cstring.as_ptr(),
-                pattern.into(),
-                offset,
-                length,
-                wipe_block_size,
-                if wipe_no_direct_io {
-                    libcryptsetup_rs_sys::CRYPT_WIPE_NO_DIRECT_IO
-                } else {
-                    0
-                },
-                callback,
-                match usrptr {
-                    Some(up) => up as *mut _ as *mut c_void,
-                    None => std::ptr::null_mut(),
-                },
-            )
-        }))
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_wipe(
+            self.reference.as_ptr(),
+            dev_path_cstring.as_ptr(),
+            pattern.into(),
+            offset,
+            length,
+            wipe_block_size,
+            if wipe_no_direct_io {
+                libcryptsetup_rs_sys::CRYPT_WIPE_NO_DIRECT_IO
+            } else {
+                0
+            },
+            callback,
+            match usrptr {
+                Some(up) => up as *mut _ as *mut c_void,
+                None => std::ptr::null_mut(),
+            },
+        )))
     }
 }

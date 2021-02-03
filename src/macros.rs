@@ -23,7 +23,7 @@ macro_rules! mutex {
             }
         };
 
-        $libcryptsetup_call
+        unsafe { $libcryptsetup_call }
     }};
 }
 

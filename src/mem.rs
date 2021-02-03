@@ -40,7 +40,7 @@ macro_rules! memzero {
         #[cfg(cryptsetup23supported)]
         impl SafeMemzero for $name {
             fn safe_memzero(&mut self) {
-                mutex!(unsafe { libcryptsetup_rs_sys::crypt_safe_memzero(self.0, self.1) })
+                mutex!(libcryptsetup_rs_sys::crypt_safe_memzero(self.0, self.1))
             }
         }
     };
@@ -132,16 +132,14 @@ impl SafeMemHandle {
     /// by the `Drop` trait.
     #[cfg(cryptsetup23supported)]
     pub fn alloc(size: usize) -> Result<Self> {
-        let ptr = ptr_to_result!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_safe_alloc(size)
-        }))?;
+        let ptr = ptr_to_result!(mutex!(libcryptsetup_rs_sys::crypt_safe_alloc(size)))?;
         Ok(SafeMemHandle(ptr, size))
     }
 }
 
 impl Drop for SafeMemHandle {
     fn drop(&mut self) {
-        mutex!(unsafe { libcryptsetup_rs_sys::crypt_safe_free(self.0) })
+        mutex!(libcryptsetup_rs_sys::crypt_safe_free(self.0))
     }
 }
 memzero!(SafeMemHandle);

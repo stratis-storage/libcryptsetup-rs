@@ -91,13 +91,11 @@ impl<'a> CryptLuks2Token<'a> {
     /// Get contents of a token in JSON format
     pub fn json_get(&mut self, token: c_uint) -> Result<serde_json::Value, LibcryptErr> {
         let mut ptr: *const c_char = std::ptr::null();
-        errno_int_success!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_token_json_get(
-                self.reference.as_ptr(),
-                token as c_int,
-                &mut ptr as *mut _,
-            )
-        }))
+        errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_token_json_get(
+            self.reference.as_ptr(),
+            token as c_int,
+            &mut ptr as *mut _,
+        )))
         .and_then(|_| from_str_ptr!(ptr))
         .and_then(|s| serde_json::from_str(s).map_err(LibcryptErr::JsonError))
     }
@@ -117,29 +115,25 @@ impl<'a> CryptLuks2Token<'a> {
             ),
             None => None,
         };
-        errno_int_success!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_token_json_set(
-                self.reference.as_ptr(),
-                token,
-                json_cstring
-                    .as_ref()
-                    .map(|cs| cs.as_ptr())
-                    .unwrap_or(ptr::null()),
-            )
-        }))
+        errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_token_json_set(
+            self.reference.as_ptr(),
+            token,
+            json_cstring
+                .as_ref()
+                .map(|cs| cs.as_ptr())
+                .unwrap_or(ptr::null()),
+        )))
         .map(|rc| rc as c_uint)
     }
 
     /// Get the token info for a specific token
     pub fn status(&mut self, token: c_uint) -> Result<CryptTokenInfo, LibcryptErr> {
         let mut ptr: *const c_char = std::ptr::null();
-        let code = mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_token_status(
-                self.reference.as_ptr(),
-                token as c_int,
-                &mut ptr as *mut _,
-            )
-        });
+        let code = mutex!(libcryptsetup_rs_sys::crypt_token_status(
+            self.reference.as_ptr(),
+            token as c_int,
+            &mut ptr as *mut _,
+        ));
         CryptTokenInfo::from_status(
             code,
             match ptr_to_option!(ptr) {
@@ -156,17 +150,15 @@ impl<'a> CryptLuks2Token<'a> {
         key_description: &str,
     ) -> Result<c_uint, LibcryptErr> {
         let description_cstring = to_cstring!(key_description)?;
-        errno_int_success!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_token_luks2_keyring_set(
-                self.reference.as_ptr(),
-                token
-                    .map(|t| t as c_int)
-                    .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
-                &libcryptsetup_rs_sys::crypt_token_params_luks2_keyring {
-                    key_description: description_cstring.as_ptr(),
-                } as *const _,
-            )
-        }))
+        errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_token_luks2_keyring_set(
+            self.reference.as_ptr(),
+            token
+                .map(|t| t as c_int)
+                .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
+            &libcryptsetup_rs_sys::crypt_token_params_luks2_keyring {
+                key_description: description_cstring.as_ptr(),
+            } as *const _,
+        )))
         .map(|rc| rc as c_uint)
     }
 
@@ -175,13 +167,11 @@ impl<'a> CryptLuks2Token<'a> {
         let mut params = libcryptsetup_rs_sys::crypt_token_params_luks2_keyring {
             key_description: std::ptr::null(),
         };
-        errno_int_success!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_token_luks2_keyring_get(
-                self.reference.as_ptr(),
-                token as c_int,
-                &mut params as *mut _,
-            )
-        }))
+        errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_token_luks2_keyring_get(
+            self.reference.as_ptr(),
+            token as c_int,
+            &mut params as *mut _,
+        )))
         .and_then(|_| from_str_ptr!(params.key_description).map(|s| s.to_string()))
     }
 
@@ -193,15 +183,13 @@ impl<'a> CryptLuks2Token<'a> {
         token: c_uint,
         keyslot: Option<c_uint>,
     ) -> Result<(), LibcryptErr> {
-        errno_int_success!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_token_assign_keyslot(
-                self.reference.as_ptr(),
-                token as c_int,
-                keyslot
-                    .map(|k| k as c_int)
-                    .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
-            )
-        }))
+        errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_token_assign_keyslot(
+            self.reference.as_ptr(),
+            token as c_int,
+            keyslot
+                .map(|k| k as c_int)
+                .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
+        )))
         .map(|_| ())
     }
 
@@ -213,28 +201,24 @@ impl<'a> CryptLuks2Token<'a> {
         token: c_uint,
         keyslot: Option<c_uint>,
     ) -> Result<(), LibcryptErr> {
-        errno_int_success!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_token_unassign_keyslot(
-                self.reference.as_ptr(),
-                token as c_int,
-                keyslot
-                    .map(|k| k as c_int)
-                    .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
-            )
-        }))
+        errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_token_unassign_keyslot(
+            self.reference.as_ptr(),
+            token as c_int,
+            keyslot
+                .map(|k| k as c_int)
+                .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
+        )))
         .map(|_| ())
     }
 
     /// Check if token is assigned
     #[allow(clippy::wrong_self_convention)]
     pub fn is_assigned(&mut self, token: c_uint, keyslot: c_uint) -> Result<Bool, LibcryptErr> {
-        let rc = mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_token_is_assigned(
-                self.reference.as_ptr(),
-                token as c_int,
-                keyslot as c_int,
-            )
-        });
+        let rc = mutex!(libcryptsetup_rs_sys::crypt_token_is_assigned(
+            self.reference.as_ptr(),
+            token as c_int,
+            keyslot as c_int,
+        ));
         if rc == 0 {
             Ok(Bool::Yes)
         } else if rc == libc::ENOENT {
@@ -262,11 +246,9 @@ impl<'a> CryptLuks2Token<'a> {
             validate,
             dump,
         };
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_token_register(
-                &handler as *const libcryptsetup_rs_sys::crypt_token_handler,
-            )
-        }))
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_token_register(
+            &handler as *const libcryptsetup_rs_sys::crypt_token_handler,
+        )))
     }
 
     /// Activate device or check key using a token
@@ -285,20 +267,18 @@ impl<'a> CryptLuks2Token<'a> {
             Some(reference) => reference as *mut _ as *mut c_void,
             None => ptr::null_mut(),
         };
-        errno_int_success!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_activate_by_token(
-                self.reference.as_ptr(),
-                match name_cstring_option {
-                    Some(ref s) => s.as_ptr(),
-                    None => std::ptr::null(),
-                },
-                token
-                    .map(|t| t as c_int)
-                    .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
-                usrdata_ptr,
-                flags.into(),
-            )
-        }))
+        errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_activate_by_token(
+            self.reference.as_ptr(),
+            match name_cstring_option {
+                Some(ref s) => s.as_ptr(),
+                None => std::ptr::null(),
+            },
+            token
+                .map(|t| t as c_int)
+                .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
+            usrdata_ptr,
+            flags.into(),
+        )))
         .map(|rc| rc as c_uint)
     }
 }

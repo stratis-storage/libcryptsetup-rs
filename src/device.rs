@@ -27,12 +27,10 @@ impl CryptInit {
     pub fn init(device_path: &Path) -> Result<CryptDevice, LibcryptErr> {
         let mut cdevice: *mut crypt_device = ptr::null_mut();
         let device_path_cstring = path_to_cstring!(device_path)?;
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_init(
-                &mut cdevice as *mut *mut crypt_device,
-                device_path_cstring.as_ptr(),
-            )
-        }))?;
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_init(
+            &mut cdevice as *mut *mut crypt_device,
+            device_path_cstring.as_ptr(),
+        )))?;
         Ok(CryptDevice { ptr: cdevice })
     }
 
@@ -49,16 +47,14 @@ impl CryptInit {
             ),
         };
 
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_init_data_device(
-                &mut cdevice as *mut *mut crypt_device,
-                device_path_cstring.as_ptr(),
-                match data_device_option {
-                    Some(ref d) => d.as_ptr(),
-                    None => ptr::null(),
-                },
-            )
-        }))?;
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_init_data_device(
+            &mut cdevice as *mut *mut crypt_device,
+            device_path_cstring.as_ptr(),
+            match data_device_option {
+                Some(ref d) => d.as_ptr(),
+                None => ptr::null(),
+            },
+        )))?;
         Ok(CryptDevice { ptr: cdevice })
     }
 
@@ -75,17 +71,15 @@ impl CryptInit {
             header_device_path_cstring = path_to_cstring!(path)?;
         }
 
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_init_by_name_and_header(
-                &mut cdevice as *mut *mut crypt_device,
-                name_cstring.as_ptr(),
-                if header_device_path.is_some() {
-                    header_device_path_cstring.as_ptr()
-                } else {
-                    ptr::null()
-                },
-            )
-        }))?;
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_init_by_name_and_header(
+            &mut cdevice as *mut *mut crypt_device,
+            name_cstring.as_ptr(),
+            if header_device_path.is_some() {
+                header_device_path_cstring.as_ptr()
+            } else {
+                ptr::null()
+            },
+        )))?;
         Ok(CryptDevice { ptr: cdevice })
     }
 }
@@ -187,31 +181,31 @@ impl CryptDevice {
         confirm: Option<ConfirmCallback>,
         usrdata: Option<&mut T>,
     ) {
-        mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_set_confirm_callback(
-                self.ptr,
-                confirm,
-                match usrdata {
-                    Some(ud) => ud as *mut _ as *mut c_void,
-                    None => ptr::null_mut(),
-                },
-            )
-        })
+        mutex!(libcryptsetup_rs_sys::crypt_set_confirm_callback(
+            self.ptr,
+            confirm,
+            match usrdata {
+                Some(ud) => ud as *mut _ as *mut c_void,
+                None => ptr::null_mut(),
+            },
+        ))
     }
 
     /// Set the device path for a data device
     pub fn set_data_device(&mut self, device_path: &Path) -> Result<(), LibcryptErr> {
         let device_path_cstring = path_to_cstring!(device_path)?;
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_set_data_device(self.ptr, device_path_cstring.as_ptr())
-        }))
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_set_data_device(
+            self.ptr,
+            device_path_cstring.as_ptr()
+        )))
     }
 
     /// Set the offset in 4096-byte sectors for the data section on a device
     pub fn set_data_offset(&mut self, offset: u64) -> Result<(), LibcryptErr> {
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_set_data_offset(self.ptr, offset * 8)
-        }))
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_set_data_offset(
+            self.ptr,
+            offset * 8
+        )))
     }
 
     pub(crate) fn as_ptr(&mut self) -> *mut crypt_device {
@@ -221,6 +215,6 @@ impl CryptDevice {
 
 impl Drop for CryptDevice {
     fn drop(&mut self) {
-        mutex!(unsafe { libcryptsetup_rs_sys::crypt_free(self.ptr) })
+        mutex!(libcryptsetup_rs_sys::crypt_free(self.ptr))
     }
 }

@@ -309,16 +309,17 @@ impl<'a> CryptSettings<'a> {
     /// Set random number generator type
     pub fn set_rng_type(&mut self, rng_type: CryptRngFlag) {
         let rng_u32: u32 = rng_type.into();
-        mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_set_rng_type(self.reference.as_ptr(), rng_u32 as c_int)
-        })
+        mutex!(libcryptsetup_rs_sys::crypt_set_rng_type(
+            self.reference.as_ptr(),
+            rng_u32 as c_int
+        ))
     }
 
     /// Get random number generator type
     pub fn get_rng_type(&mut self) -> Result<CryptRngFlag, LibcryptErr> {
-        CryptRngFlag::try_from(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_get_rng_type(self.reference.as_ptr())
-        }) as u32)
+        CryptRngFlag::try_from(mutex!(libcryptsetup_rs_sys::crypt_get_rng_type(
+            self.reference.as_ptr()
+        )) as u32)
     }
 
     /// Set PBKDF type
@@ -327,63 +328,61 @@ impl<'a> CryptSettings<'a> {
         pbkdf_type: &'b CryptPbkdfType,
     ) -> Result<(), LibcryptErr> {
         let type_: CryptPbkdfTypeRef<'b> = pbkdf_type.try_into()?;
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_set_pbkdf_type(
-                self.reference.as_ptr(),
-                &type_.inner as *const crypt_pbkdf_type,
-            )
-        }))
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_set_pbkdf_type(
+            self.reference.as_ptr(),
+            &type_.inner as *const crypt_pbkdf_type,
+        )))
     }
 
     /// Get PBKDF parameters
     pub fn get_pbkdf_type_params(pbkdf_type: &CryptKdf) -> Result<CryptPbkdfType, LibcryptErr> {
-        let type_ = ptr_to_result_with_reference!(mutex!(unsafe {
+        let type_ = ptr_to_result_with_reference!(mutex!(
             libcryptsetup_rs_sys::crypt_get_pbkdf_type_params(pbkdf_type.as_ptr())
-        }))?;
+        ))?;
         CryptPbkdfType::try_from(type_)
     }
 
     /// Get PBKDF default type
     pub fn get_pbkdf_default(luks_type: &LuksType) -> Result<CryptPbkdfType, LibcryptErr> {
-        let default = ptr_to_result_with_reference!(mutex!(unsafe {
+        let default = ptr_to_result_with_reference!(mutex!(
             libcryptsetup_rs_sys::crypt_get_pbkdf_default(luks_type.as_ptr())
-        }))?;
+        ))?;
         CryptPbkdfType::try_from(default)
     }
 
     /// Get PBKDF type
     pub fn get_pbkdf_type(&mut self) -> Result<CryptPbkdfType, LibcryptErr> {
-        let type_ = ptr_to_result_with_reference!(mutex!(unsafe {
+        let type_ = ptr_to_result_with_reference!(mutex!(
             libcryptsetup_rs_sys::crypt_get_pbkdf_type(self.reference.as_ptr())
-        }))?;
+        ))?;
         CryptPbkdfType::try_from(type_)
     }
 
     /// Set the iteration time in milliseconds
     pub fn set_iteration_time(&mut self, iteration_time_ms: u64) {
-        mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_set_iteration_time(
-                self.reference.as_ptr(),
-                iteration_time_ms,
-            )
-        })
+        mutex!(libcryptsetup_rs_sys::crypt_set_iteration_time(
+            self.reference.as_ptr(),
+            iteration_time_ms,
+        ))
     }
 
     /// Lock or unlock memory
     pub fn memory_lock(&mut self, lock: LockState) -> LockState {
         int_to_return!(
-            mutex!(unsafe {
-                libcryptsetup_rs_sys::crypt_memory_lock(self.reference.as_ptr(), lock as c_int)
-            }),
+            mutex!(libcryptsetup_rs_sys::crypt_memory_lock(
+                self.reference.as_ptr(),
+                lock as c_int
+            )),
             LockState
         )
     }
 
     /// Lock or unlock the metadata
     pub fn metadata_locking(&mut self, enable: Bool) -> Result<(), LibcryptErr> {
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_metadata_locking(self.reference.as_ptr(), enable as c_int)
-        }))
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_metadata_locking(
+            self.reference.as_ptr(),
+            enable as c_int
+        )))
     }
 
     /// Set the metadata size and keyslot size
@@ -392,26 +391,22 @@ impl<'a> CryptSettings<'a> {
         metadata_size: MetadataSize,
         keyslots_size: KeyslotsSize,
     ) -> Result<(), LibcryptErr> {
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_set_metadata_size(
-                self.reference.as_ptr(),
-                *metadata_size,
-                *keyslots_size,
-            )
-        }))
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_set_metadata_size(
+            self.reference.as_ptr(),
+            *metadata_size,
+            *keyslots_size,
+        )))
     }
 
     /// Get the metadata size and keyslot size
     pub fn get_metadata_size(&mut self) -> Result<(MetadataSize, KeyslotsSize), LibcryptErr> {
         let mut metadata_size = 0u64;
         let mut keyslots_size = 0u64;
-        errno!(mutex!(unsafe {
-            libcryptsetup_rs_sys::crypt_get_metadata_size(
-                self.reference.as_ptr(),
-                &mut metadata_size as *mut u64,
-                &mut keyslots_size as *mut u64,
-            )
-        }))?;
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_get_metadata_size(
+            self.reference.as_ptr(),
+            &mut metadata_size as *mut u64,
+            &mut keyslots_size as *mut u64,
+        )))?;
         let msize = MetadataSize::try_from(metadata_size)?;
         let ksize = KeyslotsSize::try_from(keyslots_size)?;
         Ok((msize, ksize))
