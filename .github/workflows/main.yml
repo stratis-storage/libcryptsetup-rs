@@ -101,7 +101,7 @@ jobs:
   # MANDATORY TESTING USING LOWEST SUPPORTED TOOLCHAIN
   lowest_supported:
     env:
-      TOOLCHAIN: 1.47.0
+      TOOLCHAIN: 1.49.0
     strategy:
       matrix:
         include:
