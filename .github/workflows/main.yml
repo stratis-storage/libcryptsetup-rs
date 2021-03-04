@@ -17,7 +17,7 @@ jobs:
     env:
       TASK: fmt-travis
       TOOLCHAIN: 1.50.0
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -31,7 +31,7 @@ jobs:
     env:
       TASK: clippy
       TOOLCHAIN: 1.50.0
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -79,7 +79,7 @@ jobs:
             dependencies: libcryptsetup-dev libkeyutils-dev
           - task: make -f Makefile release
             dependencies: libcryptsetup-dev
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -121,7 +121,7 @@ jobs:
               PATH=$GITHUB_WORKSPACE/.cargo/bin:$PATH
               make -f Makefile test-loopback-mutex
             dependencies: libcryptsetup-dev libkeyutils-dev
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -148,7 +148,7 @@ jobs:
     env:
       TASK: clippy
       TOOLCHAIN: stable
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -171,7 +171,7 @@ jobs:
     env:
       TASK: yamllint
       PYTHON: 3.8.6
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
