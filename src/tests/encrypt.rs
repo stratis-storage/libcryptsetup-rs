@@ -74,12 +74,12 @@ fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_uint, Libcr
         let mut kf_handle = dev.keyfile_handle();
         kf_handle.device_read(keyfile_path, 0, None, CryptKeyfileFlags::empty())?
     };
-    Ok(dev.keyslot_handle().add_by_key(
+    dev.keyslot_handle().add_by_key(
         None,
         None,
         keyfile_contents.as_ref(),
         CryptVolumeKeyFlags::empty(),
-    )?)
+    )
 }
 
 fn activate_without_explicit_format(
