@@ -39,7 +39,7 @@ semver = "0.11"
 [dev-dependencies]
 base64 = "0.13"
 loopdev = "0.2"
-nix = "0.19"
+nix = "0.20"
 rand = "0.8"
 
 [features]
