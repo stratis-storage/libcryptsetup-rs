@@ -1,6 +1,6 @@
 [package]
 name = "libcryptsetup-rs"
-version = "0.4.3"
+version = "0.4.4"
 authors = ["John Baublitz <jbaublitz@redhat.com>"]
 edition = "2018"
 description = "High level Rust bindings for libcryptsetup"
@@ -12,7 +12,7 @@ build = "build.rs"
 exclude = [".gitignore", ".github/*"]
 
 [dependencies.libcryptsetup-rs-sys]
-version = "0.1.4"
+version = "0.1.5"
 path = "./libcryptsetup-rs-sys"
 
 [dependencies]
