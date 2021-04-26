@@ -37,7 +37,7 @@ test-loopback-mutex:
 	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex -- --ignored
 
 yamllint:
-	yamllint --strict .github/workflows/main.yml
+	yamllint --strict .github/workflows/*.yml
 
 .PHONY:
 	build

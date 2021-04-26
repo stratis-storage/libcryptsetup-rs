@@ -1,0 +1,34 @@
+---
+name: libcryptsetup nightly
+
+# yamllint disable-line rule:truthy
+on:
+  schedule:
+    - cron: 10 3 * * *
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+jobs:
+  allowed_failures:
+    continue-on-error: true
+    env:
+      TASK: clippy
+      TOOLCHAIN: stable
+    runs-on: ubuntu-18.04
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          components: clippy
+          toolchain: ${{ env.TOOLCHAIN }}
+          override: true
+      - name: Install dependencies
+        run: >
+          sudo
+          add-apt-repository
+          "deb http://us.archive.ubuntu.com/ubuntu/ focal main"
+      - name: Install dependencies
+        run: sudo apt-get install libcryptsetup-dev
+      - name: Test linting on ${{ env.TOOLCHAIN }} toolchain
+        run: make -f Makefile $TASK
