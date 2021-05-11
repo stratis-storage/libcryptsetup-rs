@@ -8,7 +8,7 @@ build:
 	RUSTFLAGS="${DENY}" cargo build
 
 clippy:
-	cargo clippy --all-targets --all-features -- -D warnings -D clippy::needless_borrow -A clippy::upper-case-acronyms -A clippy::from_over_into
+	RUSTFLAGS="${DENY}" cargo clippy --all-targets --all-features -- -D clippy::needless_borrow -A clippy::upper-case-acronyms -A clippy::from_over_into
 
 docs-rust:
 	cargo doc --no-deps --package libcryptsetup-rs --package libcryptsetup-rs-sys
