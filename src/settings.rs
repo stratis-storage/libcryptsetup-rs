@@ -266,6 +266,7 @@ impl Deref for MetadataSize {
 ///
 /// The value must be divisible by a 4KB block and no larger than
 /// 128MB.
+#[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub struct KeyslotsSize(u64);
 
 impl KeyslotsSize {
