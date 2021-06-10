@@ -16,16 +16,16 @@ version = "0.1.5"
 path = "./libcryptsetup-rs-sys"
 
 [dependencies]
-either = "1.5"
+either = "1.5.0"
 libc = "0.2.82"
-serde_json = "1.0"
+serde_json = "1.0.0"
 
 [dependencies.uuid]
-version = "0.8"
+version = "0.8.0"
 features = ["v4"]
 
 [dependencies.lazy_static]
-version = "1"
+version = "1.0.0"
 optional = true
 
 [dependencies.log]
@@ -34,13 +34,13 @@ optional = true
 
 [build-dependencies]
 pkg-config = "0.3.7"
-semver = "0.11"
+semver = "0.11.0"
 
 [dev-dependencies]
-base64 = "0.13"
-loopdev = "0.2"
-nix = "0.20"
-rand = "0.8"
+base64 = "0.13.0"
+loopdev = "0.2.0"
+nix = "0.20.0"
+rand = "0.8.0"
 
 [features]
 mutex = ["lazy_static", "log"]
