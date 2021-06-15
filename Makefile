@@ -7,6 +7,14 @@ DENY = -D warnings -D future-incompatible -D unused ${RUST_2018_IDIOMS}
 build:
 	RUSTFLAGS="${DENY}" cargo build
 
+check-fedora-versions:
+	`${COMPARE_FEDORA_VERSIONS} | jq '[.missing == [], .high == []] | all'`
+
+check-fedora-versions-sys:
+	`${COMPARE_FEDORA_VERSIONS} \
+	--manifest-path=./libcryptsetup-rs-sys/Cargo.toml \
+	| jq '[.missing == [], .high == []] | all'`
+
 clippy:
 	RUSTFLAGS="${DENY}" cargo clippy --all-targets --all-features -- -D clippy::needless_borrow -A clippy::upper-case-acronyms -A clippy::from_over_into
 
@@ -41,6 +49,8 @@ yamllint:
 
 .PHONY:
 	build
+	check-fedora-versions
+	check-fedora-versions-sys
 	clippy
 	docs-rust
 	docs-travis
