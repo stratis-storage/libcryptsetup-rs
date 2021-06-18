@@ -34,6 +34,17 @@ jobs:
         run: make -f Makefile $TASK
 
   checks-with-ci-repo:
+    strategy:
+      matrix:
+        include:
+          - task: >
+              COMPARE_FEDORA_VERSIONS=./compare_fedora_versions
+              MANIFEST_PATH=../../Cargo.toml
+              make -f ../../Makefile check-fedora-versions
+          - task: >
+              COMPARE_FEDORA_VERSIONS=./compare_fedora_versions
+              MANIFEST_PATH=../../libcryptsetup-rs-sys/Cargo.toml
+              make -f ../../Makefile check-fedora-versions-sys
     continue-on-error: true
     runs-on: ubuntu-18.04
     container:
@@ -58,6 +69,6 @@ jobs:
           override: true
       - name: Check out ci repo
         run: git clone https://github.com/stratis-storage/ci.git
-      - name: Compare Fedora versions
-        run: ./compare_fedora_versions
+      - name: Run ${{ matrix.task }}
+        run: ${{ matrix.task }}
         working-directory: ./ci/dependency_management
