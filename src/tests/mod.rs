@@ -29,18 +29,18 @@ mod test {
     #[test]
     fn test_format_with_zeros() {
         std::env::remove_var("FORMAT_WITH_ZEROS");
-        assert_eq!(format_with_zeros(), true);
+        assert!(format_with_zeros());
         std::env::set_var("FORMAT_WITH_ZEROS", "false");
-        assert_eq!(format_with_zeros(), false);
+        assert!(!format_with_zeros());
         std::env::remove_var("FORMAT_WITH_ZEROS");
     }
 
     #[test]
     fn test_do_cleanup() {
         std::env::remove_var("DO_CLEANUP");
-        assert_eq!(do_cleanup(), true);
+        assert!(do_cleanup());
         std::env::set_var("DO_CLEANUP", "false");
-        assert_eq!(do_cleanup(), false);
+        assert!(!do_cleanup());
         std::env::remove_var("DO_CLEANUP");
     }
 }
