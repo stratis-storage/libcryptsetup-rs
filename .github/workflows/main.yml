@@ -140,6 +140,44 @@ jobs:
       - name: Test build on ${{ env.TOOLCHAIN }} toolchain
         run: ${{ matrix.task }}
 
+  checks-with-ci-repo:
+    strategy:
+      matrix:
+        include:
+          - task: >
+              COMPARE_FEDORA_VERSIONS=./compare_fedora_versions
+              MANIFEST_PATH=../../Cargo.toml
+              make -f ../../Makefile check-fedora-versions
+          - task: >
+              COMPARE_FEDORA_VERSIONS=./compare_fedora_versions
+              MANIFEST_PATH=../../libcryptsetup-rs-sys/Cargo.toml
+              make -f ../../Makefile check-fedora-versions-sys
+    runs-on: ubuntu-18.04
+    container:
+      image: fedora:33  # CURRENT DEVELOPMENT ENVIRONMENT
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies for Fedora
+        run: >
+          dnf install -y
+          clang
+          curl
+          git
+          make
+          openssl-devel
+          python-requests
+          python-semantic_version
+      - uses: actions-rs/toolchain@v1
+        with:
+          components: cargo
+          toolchain: 1.53.0  # CURRENT DEVELOPMENT TOOLCHAIN
+          override: true
+      - name: Check out ci repo
+        run: git clone https://github.com/stratis-storage/ci.git
+      - name: Run ${{ matrix.task }}
+        run: ${{ matrix.task }}
+        working-directory: ./ci/dependency_management
+
   # VERIFICATION OF TEST INFRASTRUCTURE
   yamllint:
     env:
