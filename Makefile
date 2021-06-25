@@ -19,6 +19,16 @@ check-fedora-versions:
 check-fedora-versions-sys:
 	${COMPARE_FEDORA_VERSIONS} ${MANIFEST_PATH_ARGS}
 
+verify-dependency-bounds:
+	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
+	${SET_LOWER_BOUNDS} ${MANIFEST_PATH_ARGS}
+	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
+
+verify-dependency-bounds-sys:
+	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
+	${SET_LOWER_BOUNDS} ${MANIFEST_PATH_ARGS}
+	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
+
 clippy:
 	RUSTFLAGS="${DENY}" cargo clippy --all-targets --all-features -- -D clippy::needless_borrow -A clippy::upper-case-acronyms -A clippy::from_over_into
 
@@ -63,4 +73,6 @@ yamllint:
 	release
 	test
 	test-loopback
+	verify-dependency-bounds
+	verify-dependency-bounds-sys
 	yamllint

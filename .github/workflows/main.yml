@@ -145,6 +145,14 @@ jobs:
       matrix:
         include:
           - task: >
+              SET_LOWER_BOUNDS=./set_lower_bounds
+              MANIFEST_PATH=../../Cargo.toml
+              make -f ../../Makefile verify-dependency-bounds
+          - task: >
+              SET_LOWER_BOUNDS=./set_lower_bounds
+              MANIFEST_PATH=../../libcryptsetup-rs-sys/Cargo.toml
+              make -f ../../Makefile verify-dependency-bounds-sys
+          - task: >
               COMPARE_FEDORA_VERSIONS=./compare_fedora_versions
               MANIFEST_PATH=../../Cargo.toml
               make -f ../../Makefile check-fedora-versions
@@ -161,6 +169,7 @@ jobs:
         run: >
           dnf install -y
           clang
+          cryptsetup-devel
           curl
           git
           make
