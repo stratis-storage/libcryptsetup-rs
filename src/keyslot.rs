@@ -90,7 +90,7 @@ impl<'a> CryptKeyslot<'a> {
         keyslot_new: Option<c_uint>,
         passphrase: &[u8],
         new_passphrase: &[u8],
-    ) -> Result<c_int, LibcryptErr> {
+    ) -> Result<c_uint, LibcryptErr> {
         errno_int_success!(mutex!(
             libcryptsetup_rs_sys::crypt_keyslot_change_by_passphrase(
                 self.reference.as_ptr(),
@@ -106,6 +106,7 @@ impl<'a> CryptKeyslot<'a> {
                 new_passphrase.len(),
             )
         ))
+        .map(|k| k as c_uint)
     }
 
     /// Add key slot using key file
