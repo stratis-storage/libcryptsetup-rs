@@ -73,12 +73,6 @@ jobs:
               PATH=$GITHUB_WORKSPACE/.cargo/bin:$PATH
               make -f Makefile test-loopback
             dependencies: libcryptsetup-dev libkeyutils-dev
-          - task: >
-              sudo
-              TEST_DIR=$GITHUB_WORKSPACE
-              PATH=$GITHUB_WORKSPACE/.cargo/bin:$PATH
-              make -f Makefile test-loopback-mutex
-            dependencies: libcryptsetup-dev libkeyutils-dev
           - task: make -f Makefile release
             dependencies: libcryptsetup-dev
     runs-on: ubuntu-18.04
@@ -118,12 +112,6 @@ jobs:
               TEST_DIR=$GITHUB_WORKSPACE
               PATH=$GITHUB_WORKSPACE/.cargo/bin:$PATH
               make -f Makefile test-loopback
-            dependencies: libcryptsetup-dev libkeyutils-dev
-          - task: >
-              sudo
-              TEST_DIR=$GITHUB_WORKSPACE
-              PATH=$GITHUB_WORKSPACE/.cargo/bin:$PATH
-              make -f Makefile test-loopback-mutex
             dependencies: libcryptsetup-dev libkeyutils-dev
     runs-on: ubuntu-18.04
     steps:

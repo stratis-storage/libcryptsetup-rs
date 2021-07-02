@@ -110,6 +110,11 @@ lazy_static::lazy_static! {
     static ref MUTEX: std::sync::Mutex<()> = std::sync::Mutex::new(());
 }
 
+#[cfg(not(feature = "mutex"))]
+lazy_static::lazy_static! {
+    static ref THREAD_ID: std::thread::ThreadId = std::thread::current().id();
+}
+
 /// Boolean specifying yes or no
 #[derive(Debug, Eq, PartialEq)]
 pub enum Bool {

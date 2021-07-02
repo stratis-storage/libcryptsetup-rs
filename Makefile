@@ -64,11 +64,10 @@ test-mutex:
 test-mutex-guard:
 	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex test_mutex_poisoning_panic
 
+# Loopback tests must have the mutex feature enabled because Rust runs the tests
+# on multiple threads which will cause a panic if the mutex feature is not enabled.
 test-loopback:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test -- --ignored --skip test_mutex_poisoning_panic
-
-test-loopback-mutex:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex -- --ignored
+	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex -- --ignored --skip test_mutex_poisoning_panic
 
 yamllint:
 	yamllint --strict .github/workflows/*.yml
