@@ -12,14 +12,13 @@ macro_rules! mutex {
         let lock = match $crate::MUTEX.lock() {
             Ok(l) => Some(l),
             Err(e) => {
-                log::warn!(
-                    "The synchronization mutex can no longer be locked! \
+                panic!(
+                    "The synchronization mutex can no longer be locked. \
                     Locking failed with error: {}; see Rust's documentation \
                     on Mutex poisoning here to decide how to proceed: \
                     https://doc.rust-lang.org/std/sync/struct.Mutex.html#errors",
                     e,
-                );
-                None
+                )
             }
         };
 
@@ -499,5 +498,18 @@ mod test {
         assert_eq!(PETestEnum::Can, PETestEnum::try_from(1).unwrap());
         assert_eq!(PETestEnum::Use, PETestEnum::try_from(2).unwrap());
         assert_eq!(PETestEnum::PartialEq, PETestEnum::try_from(3).unwrap());
+    }
+
+    #[cfg(feature = "mutex")]
+    #[test]
+    #[should_panic(expected = "The synchronization mutex can no longer be locked.")]
+    fn test_mutex_poisoning_panic() {
+        assert!(std::panic::catch_unwind(|| {
+            let _lock = crate::MUTEX.lock().unwrap();
+            panic!("Cause panic");
+        })
+        .is_err());
+
+        crate::status::get_sector_size(None);
     }
 }
