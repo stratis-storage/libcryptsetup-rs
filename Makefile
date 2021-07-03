@@ -56,13 +56,16 @@ release:
 	RUSTFLAGS="${DENY}" cargo build --release
 
 test:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test
+	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test -- --skip test_mutex_poisoning_panic
 
 test-mutex:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test --features=mutex
+	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test --features=mutex -- --skip test_mutex_poisoning_panic
+
+test-mutex-guard:
+	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex test_mutex_poisoning_panic
 
 test-loopback:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test -- --ignored
+	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test -- --ignored --skip test_mutex_poisoning_panic
 
 test-loopback-mutex:
 	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex -- --ignored
@@ -81,8 +84,11 @@ yamllint:
 	fmt-travis
 	release
 	test
+	test-mutex
+	test-mutex-guard
 	test-compare-fedora-versions
 	test-loopback
+	test-loopback-mutex
 	verify-dependency-bounds
 	verify-dependency-bounds-sys
 	yamllint
