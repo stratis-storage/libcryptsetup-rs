@@ -209,10 +209,30 @@ impl<'a> CryptLuks2Reencrypt<'a> {
     }
 
     /// Run data reencryption
+    #[cfg(not(cryptsetup24supported))]
     pub fn reencrypt(&mut self, progress: Option<ReencryptProgress>) -> Result<(), LibcryptErr> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_reencrypt(
             self.reference.as_ptr(),
             progress
+        )))
+    }
+
+    /// Run data reencryption
+    ///
+    /// This method provides a bug fix for the API added in libcryptsetup 2.4.0
+    #[cfg(cryptsetup24supported)]
+    pub fn reencrypt<T>(
+        &mut self,
+        progress: Option<ReencryptProgress>,
+        usrdata: Option<&mut T>,
+    ) -> Result<(), LibcryptErr> {
+        let usrptr = usrdata
+            .map(|data| data as *mut _ as *mut c_void)
+            .unwrap_or_else(|| ptr::null_mut());
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_reencrypt(
+            self.reference.as_ptr(),
+            progress,
+            usrptr,
         )))
     }
 

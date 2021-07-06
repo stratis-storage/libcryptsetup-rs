@@ -1,7 +1,7 @@
 use pkg_config::Config;
 use semver::Version;
 
-static SUPPORTED_VERSIONS: &[&str] = &["2.2.0", "2.3.0"];
+static SUPPORTED_VERSIONS: &[&str] = &["2.2.0", "2.3.0", "2.4.0"];
 
 // This build script will set a cfg directive in the form of
 // "cryptsetup[MAJOR][MINOR]supported" for every version up until and including
