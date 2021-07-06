@@ -91,7 +91,7 @@ jobs:
       - name: Install dependencies
         run: >
           sudo apt-get install ${{ matrix.dependencies }}
-      - name: Test build on ${{ env.TOOLCHAIN }} toolchain
+      - name: Test ${{ matrix.task }} on ${{ env.TOOLCHAIN }} toolchain
         run: ${{ matrix.task }}
 
   # MANDATORY TESTING USING LOWEST SUPPORTED TOOLCHAIN
@@ -129,7 +129,100 @@ jobs:
       - name: Install dependencies
         run: >
           sudo apt-get install ${{ matrix.dependencies }}
-      - name: Test build on ${{ env.TOOLCHAIN }} toolchain
+      - name: Test ${{ matrix.task }} on ${{ env.TOOLCHAIN }} toolchain
+        run: ${{ matrix.task }}
+
+  # MANDATORY TESTING ON FEDORA
+  fedora:
+    env:
+      # Lowest supported
+      TOOLCHAIN: 1.49.0
+    strategy:
+      matrix:
+        include:
+          # Fedora 33
+          - task: make -f Makefile build
+            dependencies: cryptsetup-devel
+            container: 33
+          - task: make -f Makefile docs-travis
+            dependencies: cryptsetup-devel
+            container: 33
+          - task: make -f Makefile test
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: 33
+          - task: make -f Makefile test-mutex
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: 33
+          - task: make -f Makefile test-mutex-guard
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: 33
+          - task: make -f Makefile test-loopback
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: 33
+          - task: make -f Makefile release
+            dependencies: cryptsetup-devel
+            container: 33
+
+          # Fedora 34
+          - task: make -f Makefile build
+            dependencies: cryptsetup-devel
+            container: 34
+          - task: make -f Makefile docs-travis
+            dependencies: cryptsetup-devel
+            container: 34
+          - task: make -f Makefile test
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: 34
+          - task: make -f Makefile test-mutex
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: 34
+          - task: make -f Makefile test-mutex-guard
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: 34
+          - task: make -f Makefile test-loopback
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: 34
+          - task: make -f Makefile release
+            dependencies: cryptsetup-devel
+            container: 34
+
+          # Fedora rawhide
+          - task: make -f Makefile build
+            dependencies: cryptsetup-devel
+            container: rawhide
+          - task: make -f Makefile docs-travis
+            dependencies: cryptsetup-devel
+            container: rawhide
+          - task: make -f Makefile test
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: rawhide
+          - task: make -f Makefile test-mutex
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: rawhide
+          - task: make -f Makefile test-mutex-guard
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: rawhide
+          - task: make -f Makefile test-loopback
+            dependencies: cryptsetup-devel keyutils-libs-devel
+            container: rawhide
+          - task: make -f Makefile release
+            dependencies: cryptsetup-devel
+            container: rawhide
+
+    runs-on: ubuntu-18.04
+    container:
+      image: fedora:${{ matrix.container }}
+      options: --privileged -v /dev:/dev
+    steps:
+      - uses: actions/checkout@v2
+      - uses: actions-rs/toolchain@v1
+        with:
+          profile: minimal
+          toolchain: ${{ env.TOOLCHAIN }}
+          override: true
+      - name: Install dependencies
+        run: dnf install -y make gcc clang-devel ${{ matrix.dependencies }}
+      - name: Test ${{ matrix.task }} on ${{ env.TOOLCHAIN }} toolchain
         run: ${{ matrix.task }}
 
   checks-with-ci-repo:
