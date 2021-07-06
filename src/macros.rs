@@ -22,6 +22,11 @@ macro_rules! mutex {
             }
         };
 
+        #[cfg(not(feature = "mutex"))]
+        if *$crate::THREAD_ID != std::thread::current().id() {
+            panic!("Enable the mutex feature for this crate to allow calling libcryptsetup methods from multiple threads");
+        }
+
         unsafe { $libcryptsetup_call }
     }};
 }
@@ -511,5 +516,17 @@ mod test {
         .is_err());
 
         crate::status::get_sector_size(None);
+    }
+
+    #[cfg(not(feature = "mutex"))]
+    #[test]
+    #[should_panic(expected = "Enable the mutex feature")]
+    fn test_multiple_threads_no_mutex_feature() {
+        std::thread::spawn(|| {
+            crate::get_sector_size(None);
+        })
+        .join()
+        .unwrap();
+        crate::get_sector_size(None);
     }
 }

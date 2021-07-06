@@ -145,7 +145,7 @@ impl Drop for SafeMemHandle {
 memzero!(SafeMemHandle);
 as_ref!(SafeMemHandle);
 
-#[cfg(all(test, cryptsetup23supported))]
+#[cfg(all(test, cryptsetup23supported, feature = "mutex"))]
 mod test {
     use super::*;
 
