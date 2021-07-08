@@ -28,12 +28,17 @@ check-fedora-versions: test-compare-fedora-versions
 check-fedora-versions-sys: test-compare-fedora-versions
 	${COMPARE_FEDORA_VERSIONS} ${MANIFEST_PATH_ARGS} ${FEDORA_RELEASE_ARGS}
 
-verify-dependency-bounds:
+SET_LOWER_BOUNDS ?=
+test-set-lower-bounds:
+	echo "Testing that SET_LOWER_BOUNDS environment variable is set to a valid path"
+	test -e "${SET_LOWER_BOUNDS}"
+
+verify-dependency-bounds: test-set-lower-bounds
 	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
 	${SET_LOWER_BOUNDS} ${MANIFEST_PATH_ARGS}
 	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
 
-verify-dependency-bounds-sys:
+verify-dependency-bounds-sys: test-set-lower-bounds
 	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
 	${SET_LOWER_BOUNDS} ${MANIFEST_PATH_ARGS}
 	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
@@ -88,6 +93,7 @@ yamllint:
 	test-compare-fedora-versions
 	test-loopback
 	test-loopback-mutex
+	test-set-lower-bounds
 	verify-dependency-bounds
 	verify-dependency-bounds-sys
 	yamllint
