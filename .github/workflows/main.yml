@@ -16,7 +16,7 @@ jobs:
   format:
     env:
       TASK: fmt-travis
-      TOOLCHAIN: 1.53.0
+      TOOLCHAIN: 1.53.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -30,7 +30,7 @@ jobs:
   lint:
     env:
       TASK: clippy
-      TOOLCHAIN: 1.53.0
+      TOOLCHAIN: 1.53.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -97,7 +97,7 @@ jobs:
   # MANDATORY TESTING USING LOWEST SUPPORTED TOOLCHAIN
   lowest_supported:
     env:
-      TOOLCHAIN: 1.49.0
+      TOOLCHAIN: 1.49.0  # LOWEST SUPPORTED RUST TOOLCHAIN
     strategy:
       matrix:
         include:
@@ -136,7 +136,7 @@ jobs:
   fedora:
     env:
       # Lowest supported
-      TOOLCHAIN: 1.49.0
+      TOOLCHAIN: 1.49.0  # LOWEST SUPPORTED RUST TOOLCHAIN
     strategy:
       matrix:
         include:
