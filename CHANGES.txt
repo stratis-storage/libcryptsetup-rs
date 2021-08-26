@@ -1,0 +1,54 @@
+libcryptsetup-rs 0.5.0 (UNRELEASED)
+===================================
+Recommended Rust toolchain version: 1.54.0
+Lowest supported Rust toolchain version: 1.54.0
+
+- Fix return type for change_by_passphrase:
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/141
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/150
+
+- Fix input types for cryptsetup metadata back up and restore methods:
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/152
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/160
+
+- Panic if libcryptsetup methods are called from multiple threads:
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/139
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/153
+
+- Panic on mutex poisoning:
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/151
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/154
+
+- Derive additional traits for KeyslotSize:
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/130
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/137
+
+- Changes relating to libcryptsetup API changes for crypt_reencrypt:
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/166
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/168
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/155
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/159
+
+- Add Fedora-specific testing:
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/156
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/157
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/175
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/174
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/173
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/172
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/171
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/167
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/162
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/161
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/149
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/148
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/147
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/146
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/145
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/143
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/142
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/140
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/138
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/136
