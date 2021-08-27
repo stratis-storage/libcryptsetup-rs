@@ -1,0 +1,27 @@
+---
+name: libcryptsetup weekly
+
+# yamllint disable-line rule:truthy
+on:
+  schedule:
+    - cron: 20 1 * * 1
+  workflow_dispatch:
+
+jobs:
+  next-fedora-python-checks:
+    strategy:
+      matrix:
+        include:
+          - dependencies: yamllint
+            task: yamllint
+    runs-on: ubuntu-latest
+    container: fedora:34
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install dependencies
+        run: >
+          dnf install -y
+          make
+          ${{ matrix.dependencies }}
+      - name: make -f Makefile ${{ matrix.task }}
+        run: make -f Makefile ${{ matrix.task }}
