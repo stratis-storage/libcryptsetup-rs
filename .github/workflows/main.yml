@@ -245,7 +245,7 @@ jobs:
               make -f ../../Makefile verify-dependency-bounds-sys
     runs-on: ubuntu-18.04
     container:
-      image: fedora:33  # CURRENT DEVELOPMENT ENVIRONMENT
+      image: fedora:34  # CURRENT DEVELOPMENT ENVIRONMENT
     steps:
       - uses: actions/checkout@v2
       - name: Install dependencies for Fedora
