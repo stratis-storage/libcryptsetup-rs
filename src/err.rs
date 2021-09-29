@@ -34,7 +34,7 @@ pub enum LibcryptErr {
 }
 
 impl Display for LibcryptErr {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match *self {
             LibcryptErr::IOError(ref e) => write!(f, "IO error occurred: {}", e),
             LibcryptErr::UuidError(ref e) => write!(f, "Failed to parse UUID from C string: {}", e),

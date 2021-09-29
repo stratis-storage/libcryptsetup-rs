@@ -96,27 +96,27 @@ impl CryptDevice {
     }
 
     /// Get a logging option handle
-    pub fn logging_handle(&mut self) -> CryptLog {
+    pub fn logging_handle(&mut self) -> CryptLog<'_> {
         CryptLog::new(self)
     }
 
     /// Get a settings option handle
-    pub fn settings_handle(&mut self) -> CryptSettings {
+    pub fn settings_handle(&mut self) -> CryptSettings<'_> {
         CryptSettings::new(self)
     }
 
     /// Get a format option handle
-    pub fn format_handle(&mut self) -> CryptFormat {
+    pub fn format_handle(&mut self) -> CryptFormat<'_> {
         CryptFormat::new(self)
     }
 
     /// Get a context option handle
-    pub fn context_handle(&mut self) -> CryptContext {
+    pub fn context_handle(&mut self) -> CryptContext<'_> {
         CryptContext::new(self)
     }
 
     /// Get a keyslot option handle
-    pub fn keyslot_handle(&mut self) -> CryptKeyslot {
+    pub fn keyslot_handle(&mut self) -> CryptKeyslot<'_> {
         CryptKeyslot::new(self)
     }
 
@@ -126,27 +126,27 @@ impl CryptDevice {
     }
 
     /// Get LUKS2 flags option handle
-    pub fn luks2_flag_handle<T>(&mut self) -> CryptLuks2Flags<T> {
+    pub fn luks2_flag_handle<T>(&mut self) -> CryptLuks2Flags<'_, T> {
         CryptLuks2Flags::new(self)
     }
 
     /// Get activation option handle
-    pub fn activate_handle(&mut self) -> CryptActivation {
+    pub fn activate_handle(&mut self) -> CryptActivation<'_> {
         CryptActivation::new(self)
     }
 
     /// Get volume key option handle
-    pub fn volume_key_handle(&mut self) -> CryptVolumeKey {
+    pub fn volume_key_handle(&mut self) -> CryptVolumeKey<'_> {
         CryptVolumeKey::new(self)
     }
 
     /// Get crypt device status option handle
-    pub fn status_handle(&mut self) -> CryptDeviceStatus {
+    pub fn status_handle(&mut self) -> CryptDeviceStatus<'_> {
         CryptDeviceStatus::new(self)
     }
 
     /// Get crypt device backup option handle
-    pub fn backup_handle(&mut self) -> CryptBackup {
+    pub fn backup_handle(&mut self) -> CryptBackup<'_> {
         CryptBackup::new(self)
     }
 
@@ -156,22 +156,22 @@ impl CryptDevice {
     }
 
     /// Get crypt device keyfile option handle
-    pub fn keyfile_handle(&mut self) -> CryptKeyfile {
+    pub fn keyfile_handle(&mut self) -> CryptKeyfile<'_> {
         CryptKeyfile::new(self)
     }
 
     /// Get crypt device wipe option handle
-    pub fn wipe_handle(&mut self) -> CryptWipe {
+    pub fn wipe_handle(&mut self) -> CryptWipe<'_> {
         CryptWipe::new(self)
     }
 
     /// Get crypt device LUKS2 token option handle
-    pub fn token_handle(&mut self) -> CryptLuks2Token {
+    pub fn token_handle(&mut self) -> CryptLuks2Token<'_> {
         CryptLuks2Token::new(self)
     }
 
     /// Get crypt device reencryption option handle
-    pub fn reencrypt_handle(&mut self) -> CryptLuks2Reencrypt {
+    pub fn reencrypt_handle(&mut self) -> CryptLuks2Reencrypt<'_> {
         CryptLuks2Reencrypt::new(self)
     }
 
