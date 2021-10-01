@@ -101,7 +101,7 @@ impl<'a> CryptLuks2Token<'a> {
     }
 
     /// Set contents of a token in JSON format
-    pub fn json_set(&mut self, input: TokenInput) -> Result<c_uint, LibcryptErr> {
+    pub fn json_set(&mut self, input: TokenInput<'_>) -> Result<c_uint, LibcryptErr> {
         let (token, json) = match input {
             TokenInput::AddToken(json) => (libcryptsetup_rs_sys::CRYPT_ANY_TOKEN, Some(json)),
             TokenInput::ReplaceToken(token, json) => (token as i32, Some(json)),

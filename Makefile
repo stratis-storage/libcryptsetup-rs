@@ -10,11 +10,7 @@ endif
 
 IGNORE_ARGS ?=
 
-RUST_2018_IDIOMS = -D bare-trait-objects \
-                   -D ellipsis-inclusive-range-patterns \
-                   -D unused-extern-crates
-
-DENY = -D warnings -D future-incompatible -D unused ${RUST_2018_IDIOMS}
+DENY = -D warnings -D future-incompatible -D unused -D rust_2018_idioms -D rust_2018_compatibility -D nonstandard_style
 
 build:
 	RUSTFLAGS="${DENY}" cargo build
