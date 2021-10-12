@@ -9,6 +9,8 @@ documentation = "https://docs.rs/libcryptsetup-rs"
 homepage = "https://stratis-storage.github.io/"
 repository = "https://github.com/stratis-storage/libcryptsetup-rs"
 build = "build.rs"
+keywords = ["Linux", "filesystem", "storage"]
+categories = ["filesystem"]
 exclude = [".gitignore", ".github/*"]
 
 [dependencies.libcryptsetup-rs-sys]
