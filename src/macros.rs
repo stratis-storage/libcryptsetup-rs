@@ -178,6 +178,7 @@ macro_rules! consts_to_from_enum {
             )*
         }
 
+        #[allow(clippy::from_over_into)]
         impl std::convert::Into<$flag_type> for $flag_enum {
             fn into(self) -> $flag_type {
                 match self {
@@ -221,6 +222,7 @@ macro_rules! bitflags_to_from_struct {
             }
         }
 
+        #[allow(clippy::from_over_into)]
         impl std::convert::Into<$bitflags_type> for $flags_type {
             fn into(self) -> $bitflags_type {
                 self.0.into_iter().fold(0, |acc, flag| {
@@ -249,6 +251,7 @@ macro_rules! bitflags_to_from_struct {
 /// Convert bit a struct reference to bitflags
 macro_rules! struct_ref_to_bitflags {
     ( $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
+        #[allow(clippy::from_over_into)]
         impl<'a> std::convert::Into<$bitflags_type> for &'a $flags_type {
             fn into(self) -> $bitflags_type {
                 self.0.iter().fold(0, |acc, flag| {

@@ -47,6 +47,7 @@ impl CryptTokenInfo {
     }
 }
 
+#[allow(clippy::from_over_into)]
 impl Into<u32> for CryptTokenInfo {
     fn into(self) -> u32 {
         match self {

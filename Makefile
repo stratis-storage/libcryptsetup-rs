@@ -38,7 +38,7 @@ verify-dependency-bounds-sys: test-set-lower-bounds
 	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
 
 clippy:
-	RUSTFLAGS="${DENY}" cargo clippy --all-targets --all-features -- -D clippy::cargo -D clippy::all -A clippy::from_over_into
+	RUSTFLAGS="${DENY}" cargo clippy --all-targets --all-features -- -D clippy::cargo -D clippy::all
 
 docs-rust:
 	cargo doc --no-deps --package libcryptsetup-rs --package libcryptsetup-rs-sys
