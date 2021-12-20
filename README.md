@@ -20,10 +20,6 @@ contains a pointer is *not* safe to send across threads. Providing an `unsafe
 impl Send {}` for any data structure provided by libcryptsetup-rs that is not `Send`
 may result in undefined behavior.
 
-### API documentation
-
-The API documentation can be found [here](https://stratis-storage.github.io/libcryptsetup-rs/doc/libcryptsetup_rs/index.html).
-
 ### Building
 
 The libcryptsetup bindings require some dependencies outside of cargo to build
