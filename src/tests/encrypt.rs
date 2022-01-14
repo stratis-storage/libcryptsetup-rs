@@ -118,7 +118,7 @@ fn activate_by_passphrase(
 }
 
 fn create_keyfile(loopback_file_path: &Path) -> Result<PathBuf, LibcryptErr> {
-    let path = PathBuf::from(format!("{}-key", loopback_file_path.display().to_string()));
+    let path = PathBuf::from(format!("{}-key", loopback_file_path.display()));
     let mut f = File::create(&path).map_err(LibcryptErr::IOError)?;
     let random: Vec<_> = (0..4096).map(|_| random::<u8>()).collect();
     f.write(&random).map_err(LibcryptErr::IOError)?;
