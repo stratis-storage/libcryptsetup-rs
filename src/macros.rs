@@ -148,11 +148,12 @@ macro_rules! to_mut_byte_ptr {
 }
 
 /// Convert a `*const c_char` into a `&str` type
+#[macro_export]
 macro_rules! from_str_ptr {
     ( $str_ptr:expr ) => {
         unsafe { ::std::ffi::CStr::from_ptr($str_ptr) }
             .to_str()
-            .map_err($crate::err::LibcryptErr::Utf8Error)
+            .map_err($crate::LibcryptErr::Utf8Error)
     };
 }
 
@@ -280,7 +281,7 @@ macro_rules! c_confirm_callback {
             usrptr: *mut std::os::raw::c_void,
         ) -> std::os::raw::c_int {
             let msg_str =
-                from_str_ptr!(msg).expect("Invalid message string passed to cryptsetup-rs");
+                $crate::from_str_ptr!(msg).expect("Invalid message string passed to cryptsetup-rs");
             let generic_ptr = usrptr as *mut $type;
             let generic_ref = unsafe { generic_ptr.as_mut() };
 
@@ -304,7 +305,7 @@ macro_rules! c_logging_callback {
                 )
                 .expect("Invalid logging level passed to cryptsetup-rs");
             let msg_str =
-                from_str_ptr!(msg).expect("Invalid message string passed to cryptsetup-rs");
+                $crate::from_str_ptr!(msg).expect("Invalid message string passed to cryptsetup-rs");
             let generic_ptr = usrptr as *mut $type;
             let generic_ref = unsafe { generic_ptr.as_mut() };
 
@@ -345,7 +346,7 @@ macro_rules! c_token_handler_open {
             let generic_ptr = usrptr as *mut $type;
             let generic_ref = unsafe { generic_ptr.as_mut() };
 
-            let buffer: Result<Box<[u8]>, $crate::err::LibcryptErr> =
+            let buffer: Result<Box<[u8]>, $crate::LibcryptErr> =
                 $safe_fn_name(device, token_id, generic_ref);
             match buffer {
                 Ok(()) => {
@@ -384,7 +385,7 @@ macro_rules! c_token_handler_validate {
             json: *mut std::os::raw::c_char,
         ) -> std::os::raw::c_int {
             let device = $crate::device::CryptDevice::from_ptr(cd);
-            let s = match from_str_ptr!(json) {
+            let s = match $crate::from_str_ptr!(json) {
                 Ok(s) => s,
                 Err(_) => return -1,
             };
@@ -393,7 +394,7 @@ macro_rules! c_token_handler_validate {
                 Err(_) => return -1,
             };
 
-            let rc: Result<(), $crate::err::LibcryptErr> = $safe_fn_name(device, json_obj);
+            let rc: Result<(), $crate::LibcryptErr> = $safe_fn_name(device, json_obj);
             match rc {
                 Ok(()) => 0,
                 Err(_) => -1,
@@ -411,7 +412,7 @@ macro_rules! c_token_handler_dump {
             json: *mut std::os::raw::c_char,
         ) {
             let device = $crate::device::CryptDevice::from_ptr(cd);
-            let s = match from_str_ptr!(json) {
+            let s = match $crate::from_str_ptr!(json) {
                 Ok(s) => s,
                 Err(_) => return,
             };

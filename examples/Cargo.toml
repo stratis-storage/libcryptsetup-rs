@@ -20,6 +20,10 @@ path = "unlock-luks2-with-token.rs"
 name = "add-key-to-persistent-keyring"
 path = "add-key-to-persistent-keyring.rs"
 
+[[bin]]
+name = "callback_macro"
+path = "callback_macro.rs"
+
 [dependencies]
 libcryptsetup-rs = { path = ".." }
 libcryptsetup-rs-sys = { path = "../libcryptsetup-rs-sys" }
