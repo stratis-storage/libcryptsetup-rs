@@ -1,0 +1,9 @@
+#!/bin/bash
+
+make fmt-ci && \
+	make build && \
+	make test && \
+	make test-mutex && \
+	make test-mutex-guard && \
+	make clippy \
+	|| exit 1

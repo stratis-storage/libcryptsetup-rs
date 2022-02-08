@@ -21,7 +21,7 @@ jobs:
   # MANDATORY CHECKS USING CURRENT DEVELOPMENT TOOLCHAIN:
   format:
     env:
-      TASK: fmt-travis
+      TASK: fmt-ci
       TOOLCHAIN: 1.58.1  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-18.04
     steps:
@@ -65,7 +65,7 @@ jobs:
         include:
           - task: make -f Makefile build
             dependencies: libcryptsetup-dev
-          - task: make -f Makefile docs-travis
+          - task: make -f Makefile docs-ci
             dependencies: libcryptsetup-dev
           - task: make -f Makefile test
             dependencies: libcryptsetup-dev libkeyutils-dev
@@ -150,7 +150,7 @@ jobs:
           - task: make -f Makefile build
             dependencies: cryptsetup-devel
             container: 33
-          - task: make -f Makefile docs-travis
+          - task: make -f Makefile docs-ci
             dependencies: cryptsetup-devel
             container: 33
           - task: make -f Makefile test
@@ -173,7 +173,7 @@ jobs:
           - task: make -f Makefile build
             dependencies: cryptsetup-devel
             container: 34
-          - task: make -f Makefile docs-travis
+          - task: make -f Makefile docs-ci
             dependencies: cryptsetup-devel
             container: 34
           - task: make -f Makefile test
@@ -196,7 +196,7 @@ jobs:
           - task: make -f Makefile build
             dependencies: cryptsetup-devel
             container: rawhide
-          - task: make -f Makefile docs-travis
+          - task: make -f Makefile docs-ci
             dependencies: cryptsetup-devel
             container: rawhide
           - task: make -f Makefile test
