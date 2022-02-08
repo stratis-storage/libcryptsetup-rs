@@ -227,7 +227,7 @@ impl<'a> CryptLuks2Reencrypt<'a> {
     ) -> Result<(), LibcryptErr> {
         let usrptr = usrdata
             .map(|data| data as *mut _ as *mut c_void)
-            .unwrap_or_else(|| ptr::null_mut());
+            .unwrap_or_else(ptr::null_mut);
         errno!(mutex!(libcryptsetup_rs_sys::crypt_reencrypt_run(
             self.reference.as_ptr(),
             progress,

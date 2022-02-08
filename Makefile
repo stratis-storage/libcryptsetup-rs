@@ -43,12 +43,12 @@ clippy:
 docs-rust:
 	cargo doc --no-deps --package libcryptsetup-rs --package libcryptsetup-rs-sys
 
-docs-travis: docs-rust
+docs-ci: docs-rust
 
 fmt:
 	cargo fmt
 
-fmt-travis:
+fmt-ci:
 	cargo fmt -- --check
 
 release:
@@ -76,9 +76,9 @@ yamllint:
 	check-fedora-versions
 	clippy
 	docs-rust
-	docs-travis
+	docs-ci
 	fmt
-	fmt-travis
+	fmt-ci
 	release
 	test
 	test-mutex
