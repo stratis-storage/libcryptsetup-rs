@@ -137,6 +137,10 @@ impl SafeMemHandle {
     }
 }
 
+// libcryptsetup uses standard C heap allocation to allocate the safe memory. As a
+// result, it is safe to send and access across threads.
+unsafe impl Send for SafeMemHandle {}
+
 impl Drop for SafeMemHandle {
     fn drop(&mut self) {
         mutex!(libcryptsetup_rs_sys::crypt_safe_free(self.0))
