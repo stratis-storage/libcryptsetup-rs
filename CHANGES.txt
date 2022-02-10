@@ -1,4 +1,4 @@
-libcryptsetup-rs 0.5.0 (UNRELEASED)
+libcryptsetup-rs 0.5.0
 ===================================
 Recommended Rust toolchain version: 1.58.1
 Lowest supported Rust toolchain version: 1.54.0
