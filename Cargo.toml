@@ -10,7 +10,7 @@ homepage = "https://stratis-storage.github.io/"
 repository = "https://github.com/stratis-storage/libcryptsetup-rs"
 build = "build.rs"
 keywords = ["Linux", "encryption", "storage"]
-categories = ["encryption"]
+categories = ["cryptography"]
 exclude = [".gitignore", ".github/*", "Makefile"]
 
 [dependencies.libcryptsetup-rs-sys]
