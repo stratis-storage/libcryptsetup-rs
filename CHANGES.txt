@@ -1,5 +1,36 @@
-libcryptsetup-rs 0.5.0
+libcryptsetup-rs 0.5.1 (UNRELEASED)
 ===================================
+Recommended Rust toolchain version: 1.62.0
+Lowest supported Rust toolchain version: 1.58.1
+Recommended development environment: Fedora 36
+
+- Define constants in header.h to work around rust-bindgen#753:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/224
+
+- Update categories list in Cargo.toml:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/209
+
+- Increase nix dependency version to 0.24.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/217
+
+- Increase uuid dependency to 1.0.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/218
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/222
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/220
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/219
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/216
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/215
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/214
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/213
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/212
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/210
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/207
+
+
+libcryptsetup-rs 0.5.0
+======================
 Recommended Rust toolchain version: 1.58.1
 Lowest supported Rust toolchain version: 1.54.0
 Recommended development environment: Fedora 35
