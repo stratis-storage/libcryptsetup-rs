@@ -116,7 +116,7 @@ fn proto_token_handler(dev: &Path, key_description: &str) -> Result<(), Libcrypt
     let _ = token.json_set(TokenInput::AddToken(&json!({
         "type": "proto",
         "keyslots": [],
-        "a_uuid": Uuid::new_v4().to_simple().to_string(),
+        "a_uuid": Uuid::new_v4().as_simple().to_string(),
         "key_description": key_description
     })));
     Ok(())
