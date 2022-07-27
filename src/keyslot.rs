@@ -18,9 +18,9 @@ consts_to_from_enum!(
     /// Flags for tunable options when operating with volume keys
     CryptVolumeKeyFlag,
     u32,
-    NoSegment => libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_NO_SEGMENT,
-    Set => libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_SET,
-    DigestReuse => libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_DIGEST_REUSE
+    NoSegment => libcryptsetup_rs_sys::crypt_volume_key_no_segment,
+    Set => libcryptsetup_rs_sys::crypt_volume_key_set,
+    DigestReuse => libcryptsetup_rs_sys::crypt_volume_key_digest_reuse
 );
 
 bitflags_to_from_struct!(

@@ -20,9 +20,9 @@ consts_to_from_enum!(
     /// Verity format flags
     CryptVerityFlag,
     u32,
-    NoHeader => libcryptsetup_rs_sys::CRYPT_VERITY_NO_HEADER,
-    CheckHash => libcryptsetup_rs_sys::CRYPT_VERITY_CHECK_HASH,
-    CreateHash => libcryptsetup_rs_sys::CRYPT_VERITY_CREATE_HASH
+    NoHeader => libcryptsetup_rs_sys::crypt_verity_no_header,
+    CheckHash => libcryptsetup_rs_sys::crypt_verity_check_hash,
+    CreateHash => libcryptsetup_rs_sys::crypt_verity_create_hash
 );
 
 bitflags_to_from_struct!(
@@ -38,11 +38,11 @@ consts_to_from_enum!(
     /// tcrypt format flags
     CryptTcryptFlag,
     u32,
-    LegacyModes => libcryptsetup_rs_sys::CRYPT_TCRYPT_LEGACY_MODES,
-    HiddenHeader => libcryptsetup_rs_sys::CRYPT_TCRYPT_HIDDEN_HEADER,
-    BackupHeader => libcryptsetup_rs_sys::CRYPT_TCRYPT_BACKUP_HEADER,
-    SystemHeader => libcryptsetup_rs_sys::CRYPT_TCRYPT_SYSTEM_HEADER,
-    VeraModes => libcryptsetup_rs_sys::CRYPT_TCRYPT_VERA_MODES
+    LegacyModes => libcryptsetup_rs_sys::crypt_tcrypt_legacy_modes,
+    HiddenHeader => libcryptsetup_rs_sys::crypt_tcrypt_hidden_header,
+    BackupHeader => libcryptsetup_rs_sys::crypt_tcrypt_backup_header,
+    SystemHeader => libcryptsetup_rs_sys::crypt_tcrypt_system_header,
+    VeraModes => libcryptsetup_rs_sys::crypt_tcrypt_vera_modes
 );
 
 bitflags_to_from_struct!(

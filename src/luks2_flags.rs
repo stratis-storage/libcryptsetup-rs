@@ -14,9 +14,9 @@ enum CryptFlagsType {
 consts_to_from_enum!(
     /// Wrapper enum for `CRYPT_REQUIREMENT_*` flags
     CryptRequirementFlag, u32,
-    OfflineReencrypt => libcryptsetup_rs_sys::CRYPT_REQUIREMENT_OFFLINE_REENCRYPT,
-    OnlineReencrypt => libcryptsetup_rs_sys::CRYPT_REQUIREMENT_ONLINE_REENCRYPT,
-    Unknown => libcryptsetup_rs_sys::CRYPT_REQUIREMENT_UNKNOWN
+    OfflineReencrypt => libcryptsetup_rs_sys::crypt_requirement_offline_reencrypt,
+    OnlineReencrypt => libcryptsetup_rs_sys::crypt_requirement_online_reencrypt,
+    Unknown => libcryptsetup_rs_sys::crypt_requirement_unknown
 );
 
 bitflags_to_from_struct!(

@@ -53,7 +53,7 @@ impl<'a> CryptWipe<'a> {
             length,
             wipe_block_size,
             if wipe_no_direct_io {
-                libcryptsetup_rs_sys::CRYPT_WIPE_NO_DIRECT_IO
+                libcryptsetup_rs_sys::crypt_wipe_no_direct_io
             } else {
                 0
             },

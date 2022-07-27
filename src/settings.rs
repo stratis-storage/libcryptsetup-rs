@@ -67,8 +67,8 @@ consts_to_from_enum!(
     /// Enum wrapping `CRYPT_PBKDF_*` flags
     CryptPbkdfFlag,
     u32,
-    IterTimeSet => libcryptsetup_rs_sys::CRYPT_PBKDF_ITER_TIME_SET,
-    NoBenchmark => libcryptsetup_rs_sys::CRYPT_PBKDF_NO_BENCHMARK
+    IterTimeSet => libcryptsetup_rs_sys::crypt_pbkdf_iter_time_set,
+    NoBenchmark => libcryptsetup_rs_sys::crypt_pbkdf_no_benchmark
 );
 
 bitflags_to_from_struct!(
