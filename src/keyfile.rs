@@ -23,7 +23,7 @@ consts_to_from_enum!(
     /// Flags for reading keyfiles
     CryptKeyfileFlag,
     u32,
-    StopEol => libcryptsetup_rs_sys::CRYPT_KEYFILE_STOP_EOL
+    StopEol => libcryptsetup_rs_sys::crypt_keyfile_stop_eol
 );
 
 bitflags_to_from_struct!(

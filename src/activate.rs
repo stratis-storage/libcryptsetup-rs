@@ -12,27 +12,27 @@ consts_to_from_enum!(
     /// Enum wrapping `CRYPT_ACTIVATE_*` flags
     CryptActivateFlag,
     u32,
-    Readonly => libcryptsetup_rs_sys::CRYPT_ACTIVATE_READONLY,
-    NoUuid => libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_UUID,
-    Shared => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SHARED,
-    AllowDiscards => libcryptsetup_rs_sys::CRYPT_ACTIVATE_ALLOW_DISCARDS,
-    Private => libcryptsetup_rs_sys::CRYPT_ACTIVATE_PRIVATE,
-    Corrupted => libcryptsetup_rs_sys::CRYPT_ACTIVATE_CORRUPTED,
-    SameCpuCrypt => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SAME_CPU_CRYPT,
-    SubmitFromCryptCpus => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SUBMIT_FROM_CRYPT_CPUS,
-    IgnoreCorruption => libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_CORRUPTION,
-    RestartOnCorruption => libcryptsetup_rs_sys::CRYPT_ACTIVATE_RESTART_ON_CORRUPTION,
-    IgnoreZeroBlocks => libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_ZERO_BLOCKS,
-    KeyringKey => libcryptsetup_rs_sys::CRYPT_ACTIVATE_KEYRING_KEY,
-    NoJournal => libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_JOURNAL,
-    Recovery => libcryptsetup_rs_sys::CRYPT_ACTIVATE_RECOVERY,
-    IgnorePersistent => libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_PERSISTENT,
-    CheckAtMostOnce => libcryptsetup_rs_sys::CRYPT_ACTIVATE_CHECK_AT_MOST_ONCE,
-    AllowUnboundKey => libcryptsetup_rs_sys::CRYPT_ACTIVATE_ALLOW_UNBOUND_KEY,
-    Recalculate => libcryptsetup_rs_sys::CRYPT_ACTIVATE_RECALCULATE,
-    Refresh => libcryptsetup_rs_sys::CRYPT_ACTIVATE_REFRESH,
-    SerializeMemoryHardPbkdf => libcryptsetup_rs_sys::CRYPT_ACTIVATE_SERIALIZE_MEMORY_HARD_PBKDF,
-    NoJournalBitmap => libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_JOURNAL_BITMAP
+    Readonly => libcryptsetup_rs_sys::crypt_activate_readonly,
+    NoUuid => libcryptsetup_rs_sys::crypt_activate_no_uuid,
+    Shared => libcryptsetup_rs_sys::crypt_activate_shared,
+    AllowDiscards => libcryptsetup_rs_sys::crypt_activate_allow_discards,
+    Private => libcryptsetup_rs_sys::crypt_activate_private,
+    Corrupted => libcryptsetup_rs_sys::crypt_activate_corrupted,
+    SameCpuCrypt => libcryptsetup_rs_sys::crypt_activate_same_cpu_crypt,
+    SubmitFromCryptCpus => libcryptsetup_rs_sys::crypt_activate_submit_from_crypt_cpus,
+    IgnoreCorruption => libcryptsetup_rs_sys::crypt_activate_ignore_corruption,
+    RestartOnCorruption => libcryptsetup_rs_sys::crypt_activate_restart_on_corruption,
+    IgnoreZeroBlocks => libcryptsetup_rs_sys::crypt_activate_ignore_zero_blocks,
+    KeyringKey => libcryptsetup_rs_sys::crypt_activate_keyring_key,
+    NoJournal => libcryptsetup_rs_sys::crypt_activate_no_journal,
+    Recovery => libcryptsetup_rs_sys::crypt_activate_recovery,
+    IgnorePersistent => libcryptsetup_rs_sys::crypt_activate_ignore_persistent,
+    CheckAtMostOnce => libcryptsetup_rs_sys::crypt_activate_check_at_most_once,
+    AllowUnboundKey => libcryptsetup_rs_sys::crypt_activate_allow_unbound_key,
+    Recalculate => libcryptsetup_rs_sys::crypt_activate_recalculate,
+    Refresh => libcryptsetup_rs_sys::crypt_activate_refresh,
+    SerializeMemoryHardPbkdf => libcryptsetup_rs_sys::crypt_activate_serialize_memory_hard_pbkdf,
+    NoJournalBitmap => libcryptsetup_rs_sys::crypt_activate_no_journal_bitmap
 );
 
 bitflags_to_from_struct!(
@@ -46,8 +46,8 @@ consts_to_from_enum!(
     /// Flags for crypt deactivate operations
     CryptDeactivateFlag,
     u32,
-    Deferred => libcryptsetup_rs_sys::CRYPT_DEACTIVATE_DEFERRED,
-    Force => libcryptsetup_rs_sys::CRYPT_DEACTIVATE_FORCE
+    Deferred => libcryptsetup_rs_sys::crypt_deactivate_deferred,
+    Force => libcryptsetup_rs_sys::crypt_deactivate_force
 );
 
 bitflags_to_from_struct!(

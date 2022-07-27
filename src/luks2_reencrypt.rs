@@ -48,10 +48,10 @@ consts_to_from_enum!(
     /// Enum for `CRYPT_REENCRYPT_*` flags
     CryptReencryptFlag,
     u32,
-    InitializeOnly => libcryptsetup_rs_sys::CRYPT_REENCRYPT_INITIALIZE_ONLY,
-    MoveFirstSegment => libcryptsetup_rs_sys::CRYPT_REENCRYPT_MOVE_FIRST_SEGMENT,
-    ResumeOnly => libcryptsetup_rs_sys::CRYPT_REENCRYPT_RESUME_ONLY,
-    Recovery => libcryptsetup_rs_sys::CRYPT_REENCRYPT_RECOVERY
+    InitializeOnly => libcryptsetup_rs_sys::crypt_reencrypt_initialize_only,
+    MoveFirstSegment => libcryptsetup_rs_sys::crypt_reencrypt_move_first_segment,
+    ResumeOnly => libcryptsetup_rs_sys::crypt_reencrypt_resume_only,
+    Recovery => libcryptsetup_rs_sys::crypt_reencrypt_recovery
 );
 
 bitflags_to_from_struct!(

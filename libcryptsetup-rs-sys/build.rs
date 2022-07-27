@@ -48,4 +48,5 @@ fn main() {
         build_safe_free();
     }
     generate_bindings(safe_free_is_needed);
+    println!("cargo:rerun-if-changed=header.h");
 }
