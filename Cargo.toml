@@ -14,7 +14,7 @@ categories = ["cryptography", "api-bindings", "os::linux-apis"]
 exclude = [".gitignore", ".github/*", "Makefile"]
 
 [dependencies.libcryptsetup-rs-sys]
-version = "0.1.5"
+version = "0.2.0"
 path = "./libcryptsetup-rs-sys"
 
 [dependencies]
