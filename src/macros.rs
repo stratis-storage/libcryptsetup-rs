@@ -205,65 +205,6 @@ macro_rules! consts_to_from_enum {
     };
 }
 
-/// Convert bit flags to and from a struct
-macro_rules! bitflags_to_from_struct {
-    ( #[$meta:meta] $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
-        #[$meta]
-        pub struct $flags_type(Vec<$flag_type>);
-
-        impl $flags_type {
-            /// Create a new set of flags
-            pub fn new(vec: Vec<$flag_type>) -> Self {
-                $flags_type(vec)
-            }
-
-            /// Create an empty set of flags
-            pub fn empty() -> Self {
-                $flags_type(Vec::new())
-            }
-        }
-
-        #[allow(clippy::from_over_into)]
-        impl std::convert::Into<$bitflags_type> for $flags_type {
-            fn into(self) -> $bitflags_type {
-                self.0.into_iter().fold(0, |acc, flag| {
-                    let flag: $bitflags_type = flag.into();
-                    acc | flag
-                })
-            }
-        }
-
-        impl std::convert::TryFrom<$bitflags_type> for $flags_type {
-            type Error = LibcryptErr;
-
-            fn try_from(v: $bitflags_type) -> Result<Self, Self::Error> {
-                let mut vec = vec![];
-                for i in 0..std::mem::size_of::<$bitflags_type>() * 8 {
-                    if (v & (1 << i)) == (1 << i) {
-                        vec.push(<$flag_type>::try_from(1 << i)?);
-                    }
-                }
-                Ok(<$flags_type>::new(vec))
-            }
-        }
-    };
-}
-
-/// Convert bit a struct reference to bitflags
-macro_rules! struct_ref_to_bitflags {
-    ( $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
-        #[allow(clippy::from_over_into)]
-        impl<'a> std::convert::Into<$bitflags_type> for &'a $flags_type {
-            fn into(self) -> $bitflags_type {
-                self.0.iter().fold(0, |acc, flag| {
-                    let flag: $bitflags_type = (*flag).into();
-                    acc | flag
-                })
-            }
-        }
-    };
-}
-
 #[macro_export]
 /// Create a C-compatible static string with a null byte
 macro_rules! c_str {

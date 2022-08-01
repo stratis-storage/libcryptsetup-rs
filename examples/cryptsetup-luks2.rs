@@ -9,8 +9,8 @@ use std::{
 };
 
 use libcryptsetup_rs::{
-    CryptActivateFlags, CryptDeactivateFlags, CryptInit, CryptVolumeKeyFlags, EncryptionFormat,
-    LibcryptErr,
+    consts::flags::{CryptActivate, CryptDeactivate, CryptVolumeKey},
+    CryptInit, EncryptionFormat, LibcryptErr,
 };
 
 enum CryptCommand {
@@ -95,7 +95,7 @@ fn encrypt(path: &Path) -> Result<(), LibcryptErr> {
     )?;
     device
         .keyslot_handle()
-        .add_by_key(None, None, b"changeme", CryptVolumeKeyFlags::empty())?;
+        .add_by_key(None, None, b"changeme", CryptVolumeKey::empty())?;
     Ok(())
 }
 
@@ -108,7 +108,7 @@ fn activate(path: &Path, name: &str) -> Result<(), LibcryptErr> {
         Some(name),
         None,
         b"changeme",
-        CryptActivateFlags::empty(),
+        CryptActivate::empty(),
     )?;
     Ok(())
 }
@@ -120,7 +120,7 @@ fn deactivate(path: &Path, name: &str) -> Result<(), LibcryptErr> {
         .load::<()>(Some(EncryptionFormat::Luks2), None)?;
     device
         .activate_handle()
-        .deactivate(name, CryptDeactivateFlags::empty())?;
+        .deactivate(name, CryptDeactivate::empty())?;
     Ok(())
 }
 

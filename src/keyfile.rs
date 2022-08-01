@@ -6,7 +6,10 @@ use std::{path::Path, ptr};
 
 use libc::{c_char, c_void};
 
-use crate::{device::CryptDevice, err::LibcryptErr, mem::SafeMemHandle};
+use crate::{
+    consts::flags::CryptKeyfile as Keyfile, device::CryptDevice, err::LibcryptErr,
+    mem::SafeMemHandle,
+};
 
 /// Contents of a keyfile that have been read
 pub struct CryptKeyfileContents {
@@ -18,20 +21,6 @@ impl AsRef<[u8]> for CryptKeyfileContents {
         self.key_mem.as_ref()
     }
 }
-
-consts_to_from_enum!(
-    /// Flags for reading keyfiles
-    CryptKeyfileFlag,
-    u32,
-    StopEol => libcryptsetup_rs_sys::crypt_keyfile_stop_eol
-);
-
-bitflags_to_from_struct!(
-    /// Set of flags for reading keyfiles
-    CryptKeyfileFlags,
-    CryptKeyfileFlag,
-    u32
-);
 
 /// Handle for keyfile operations
 pub struct CryptKeyfile<'a> {
@@ -51,7 +40,7 @@ impl<'a> CryptKeyfile<'a> {
         keyfile: &Path,
         keyfile_offset: u64,
         key_size: Option<crate::size_t>,
-        flags: CryptKeyfileFlags,
+        flags: Keyfile,
     ) -> Result<CryptKeyfileContents, LibcryptErr> {
         let keyfile_cstring = path_to_cstring!(keyfile)?;
         let keyfile_size = match key_size {
@@ -70,7 +59,7 @@ impl<'a> CryptKeyfile<'a> {
             &mut size as *mut crate::size_t,
             keyfile_offset,
             keyfile_size,
-            flags.into(),
+            flags.bits(),
         )))?;
         Ok(CryptKeyfileContents {
             key_mem: unsafe { SafeMemHandle::from_ptr(key as *mut c_void, size) },

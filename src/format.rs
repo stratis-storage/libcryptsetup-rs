@@ -11,48 +11,11 @@ use std::{
 };
 
 use crate::{
+    consts::flags::{CryptTcrypt, CryptVerity},
     device::CryptDevice,
     err::LibcryptErr,
     settings::{CryptPbkdfType, CryptPbkdfTypeRef},
 };
-
-consts_to_from_enum!(
-    /// Verity format flags
-    CryptVerityFlag,
-    u32,
-    NoHeader => libcryptsetup_rs_sys::crypt_verity_no_header,
-    CheckHash => libcryptsetup_rs_sys::crypt_verity_check_hash,
-    CreateHash => libcryptsetup_rs_sys::crypt_verity_create_hash
-);
-
-bitflags_to_from_struct!(
-    /// Set of flags for Verity format
-    CryptVerityFlags,
-    CryptVerityFlag,
-    u32
-);
-
-struct_ref_to_bitflags!(CryptVerityFlags, CryptVerityFlag, u32);
-
-consts_to_from_enum!(
-    /// tcrypt format flags
-    CryptTcryptFlag,
-    u32,
-    LegacyModes => libcryptsetup_rs_sys::crypt_tcrypt_legacy_modes,
-    HiddenHeader => libcryptsetup_rs_sys::crypt_tcrypt_hidden_header,
-    BackupHeader => libcryptsetup_rs_sys::crypt_tcrypt_backup_header,
-    SystemHeader => libcryptsetup_rs_sys::crypt_tcrypt_system_header,
-    VeraModes => libcryptsetup_rs_sys::crypt_tcrypt_vera_modes
-);
-
-bitflags_to_from_struct!(
-    /// Set of flags for tcrypt format
-    CryptTcryptFlags,
-    CryptTcryptFlag,
-    u32
-);
-
-struct_ref_to_bitflags!(CryptTcryptFlags, CryptTcryptFlag, u32);
 
 /// Device formatting type options
 #[derive(Debug, PartialEq)]
@@ -373,7 +336,7 @@ pub struct CryptParamsVerity {
     #[allow(missing_docs)]
     pub fec_roots: u32,
     #[allow(missing_docs)]
-    pub flags: CryptVerityFlags,
+    pub flags: CryptVerity,
 }
 
 impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_verity> for CryptParamsVerity {
@@ -395,7 +358,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_verity> for CryptParamsV
             hash_area_offset: v.hash_area_offset,
             fec_area_offset: v.fec_area_offset,
             fec_roots: v.fec_roots,
-            flags: CryptVerityFlags::try_from(v.flags)?,
+            flags: CryptVerity::from_bits(v.flags).ok_or(LibcryptErr::InvalidConversion)?,
         })
     }
 }
@@ -423,7 +386,7 @@ impl<'a> TryInto<CryptParamsVerityRef<'a>> for &'a CryptParamsVerity {
                 hash_area_offset: self.hash_area_offset,
                 fec_area_offset: self.fec_area_offset,
                 fec_roots: self.fec_roots,
-                flags: (&self.flags).into(),
+                flags: self.flags.bits(),
             },
             reference: self,
             hash_name_cstring,
@@ -684,7 +647,7 @@ pub struct CryptParamsTcrypt {
     #[allow(missing_docs)]
     pub key_size: usize,
     #[allow(missing_docs)]
-    pub flags: CryptTcryptFlags,
+    pub flags: CryptTcrypt,
     #[allow(missing_docs)]
     pub veracrypt_pim: u32,
 }
@@ -719,7 +682,7 @@ impl<'a> TryInto<CryptParamsTcryptRef<'a>> for &'a CryptParamsTcrypt {
                 hash_name: hash_name_cstring.as_ptr(),
                 cipher: cipher_cstring.as_ptr(),
                 mode: mode_cstring.as_ptr(),
-                flags: (&self.flags).into(),
+                flags: self.flags.bits(),
                 key_size: self.key_size,
                 veracrypt_pim: self.veracrypt_pim,
             },
@@ -754,7 +717,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_tcrypt> for CryptParamsT
             hash_name: from_str_ptr_to_owned!(v.hash_name)?,
             cipher: from_str_ptr_to_owned!(v.cipher)?,
             mode: from_str_ptr_to_owned!(v.mode)?,
-            flags: CryptTcryptFlags::try_from(v.flags)?,
+            flags: CryptTcrypt::from_bits(v.flags).ok_or(LibcryptErr::InvalidConversion)?,
             key_size: v.key_size,
             veracrypt_pim: v.veracrypt_pim,
         })

@@ -6,56 +6,11 @@ use std::{path::Path, ptr};
 
 use libc::{c_int, c_uint};
 
-use crate::{device::CryptDevice, err::LibcryptErr};
-
-consts_to_from_enum!(
-    /// Enum wrapping `CRYPT_ACTIVATE_*` flags
-    CryptActivateFlag,
-    u32,
-    Readonly => libcryptsetup_rs_sys::crypt_activate_readonly,
-    NoUuid => libcryptsetup_rs_sys::crypt_activate_no_uuid,
-    Shared => libcryptsetup_rs_sys::crypt_activate_shared,
-    AllowDiscards => libcryptsetup_rs_sys::crypt_activate_allow_discards,
-    Private => libcryptsetup_rs_sys::crypt_activate_private,
-    Corrupted => libcryptsetup_rs_sys::crypt_activate_corrupted,
-    SameCpuCrypt => libcryptsetup_rs_sys::crypt_activate_same_cpu_crypt,
-    SubmitFromCryptCpus => libcryptsetup_rs_sys::crypt_activate_submit_from_crypt_cpus,
-    IgnoreCorruption => libcryptsetup_rs_sys::crypt_activate_ignore_corruption,
-    RestartOnCorruption => libcryptsetup_rs_sys::crypt_activate_restart_on_corruption,
-    IgnoreZeroBlocks => libcryptsetup_rs_sys::crypt_activate_ignore_zero_blocks,
-    KeyringKey => libcryptsetup_rs_sys::crypt_activate_keyring_key,
-    NoJournal => libcryptsetup_rs_sys::crypt_activate_no_journal,
-    Recovery => libcryptsetup_rs_sys::crypt_activate_recovery,
-    IgnorePersistent => libcryptsetup_rs_sys::crypt_activate_ignore_persistent,
-    CheckAtMostOnce => libcryptsetup_rs_sys::crypt_activate_check_at_most_once,
-    AllowUnboundKey => libcryptsetup_rs_sys::crypt_activate_allow_unbound_key,
-    Recalculate => libcryptsetup_rs_sys::crypt_activate_recalculate,
-    Refresh => libcryptsetup_rs_sys::crypt_activate_refresh,
-    SerializeMemoryHardPbkdf => libcryptsetup_rs_sys::crypt_activate_serialize_memory_hard_pbkdf,
-    NoJournalBitmap => libcryptsetup_rs_sys::crypt_activate_no_journal_bitmap
-);
-
-bitflags_to_from_struct!(
-    /// Enum wrapping `CRYPT_ACTIVATE_*` flags
-    CryptActivateFlags,
-    CryptActivateFlag,
-    u32
-);
-
-consts_to_from_enum!(
-    /// Flags for crypt deactivate operations
-    CryptDeactivateFlag,
-    u32,
-    Deferred => libcryptsetup_rs_sys::crypt_deactivate_deferred,
-    Force => libcryptsetup_rs_sys::crypt_deactivate_force
-);
-
-bitflags_to_from_struct!(
-    /// Set of flags for crypt deactivate operations
-    CryptDeactivateFlags,
-    CryptDeactivateFlag,
-    u32
-);
+use crate::{
+    consts::flags::{CryptActivate, CryptDeactivate},
+    device::CryptDevice,
+    err::LibcryptErr,
+};
 
 /// Handle for activation options
 pub struct CryptActivation<'a> {
@@ -76,7 +31,7 @@ impl<'a> CryptActivation<'a> {
         name: Option<&str>,
         keyslot: Option<c_uint>,
         passphrase: &[u8],
-        flags: CryptActivateFlags,
+        flags: CryptActivate,
     ) -> Result<c_uint, LibcryptErr> {
         let name_cstring_option = match name {
             Some(n) => Some(to_cstring!(n)?),
@@ -93,7 +48,7 @@ impl<'a> CryptActivation<'a> {
                 .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
             to_byte_ptr!(passphrase),
             passphrase.len(),
-            flags.into(),
+            flags.bits(),
         )))
         .map(|k| k as c_uint)
     }
@@ -106,7 +61,7 @@ impl<'a> CryptActivation<'a> {
         keyfile: &Path,
         keyfile_size: Option<crate::size_t>,
         keyfile_offset: u64,
-        flags: CryptActivateFlags,
+        flags: CryptActivate,
     ) -> Result<c_uint, LibcryptErr> {
         let name_cstring_option = match name {
             Some(n) => Some(to_cstring!(n)?),
@@ -131,7 +86,7 @@ impl<'a> CryptActivation<'a> {
                         .len() as crate::size_t,
                 },
                 keyfile_offset,
-                flags.into(),
+                flags.bits(),
             )
         ))
         .map(|k| k as c_uint)
@@ -142,7 +97,7 @@ impl<'a> CryptActivation<'a> {
         &mut self,
         name: Option<&str>,
         volume_key: Option<&[u8]>,
-        flags: CryptActivateFlags,
+        flags: CryptActivate,
     ) -> Result<(), LibcryptErr> {
         let name_cstring_option = match name {
             Some(n) => Some(to_cstring!(n)?),
@@ -160,7 +115,7 @@ impl<'a> CryptActivation<'a> {
             },
             volume_key_ptr,
             volume_key_len,
-            flags.into(),
+            flags.bits(),
         )))
     }
 
@@ -170,7 +125,7 @@ impl<'a> CryptActivation<'a> {
         name: Option<&str>,
         key_description: &str,
         keyslot: Option<c_uint>,
-        flags: CryptActivateFlags,
+        flags: CryptActivate,
     ) -> Result<c_uint, LibcryptErr> {
         let name_cstring_option = match name {
             Some(n) => Some(to_cstring!(n)?),
@@ -187,22 +142,18 @@ impl<'a> CryptActivation<'a> {
             keyslot
                 .map(|k| k as c_int)
                 .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_SLOT),
-            flags.into(),
+            flags.bits(),
         )))
         .map(|k| k as c_uint)
     }
 
     /// Deactivate crypt device
-    pub fn deactivate(
-        &mut self,
-        name: &str,
-        flags: CryptDeactivateFlags,
-    ) -> Result<(), LibcryptErr> {
+    pub fn deactivate(&mut self, name: &str, flags: CryptDeactivate) -> Result<(), LibcryptErr> {
         let name_cstring = to_cstring!(name)?;
         errno!(mutex!(libcryptsetup_rs_sys::crypt_deactivate_by_name(
             self.reference.as_ptr(),
             name_cstring.as_ptr(),
-            flags.into(),
+            flags.bits(),
         )))
     }
 }

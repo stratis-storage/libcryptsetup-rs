@@ -4,7 +4,7 @@
 
 use std::convert::TryFrom;
 
-use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr};
+use crate::{consts::flags::CryptActivate, device::CryptDevice, err::LibcryptErr};
 
 /// Record containing data on the given active device
 pub struct ActiveDevice {
@@ -15,7 +15,7 @@ pub struct ActiveDevice {
     /// Size of the device
     pub size: u64,
     /// Flags with activation options
-    pub flags: CryptActivateFlags,
+    pub flags: CryptActivate,
 }
 
 impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_active_device> for ActiveDevice {
@@ -26,7 +26,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_active_device> for ActiveDevice
             offset: v.offset,
             iv_offset: v.iv_offset,
             size: v.size,
-            flags: CryptActivateFlags::try_from(v.flags)?,
+            flags: CryptActivate::from_bits(v.flags).ok_or(LibcryptErr::InvalidConversion)?,
         })
     }
 }

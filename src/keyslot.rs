@@ -11,24 +11,9 @@ use std::{
 use libc::{c_int, c_uint};
 
 use crate::{
-    device::CryptDevice, err::LibcryptErr, format::EncryptionFormat, settings::CryptPbkdfType,
+    consts::flags::CryptVolumeKey, device::CryptDevice, err::LibcryptErr, format::EncryptionFormat,
+    settings::CryptPbkdfType,
 };
-
-consts_to_from_enum!(
-    /// Flags for tunable options when operating with volume keys
-    CryptVolumeKeyFlag,
-    u32,
-    NoSegment => libcryptsetup_rs_sys::crypt_volume_key_no_segment,
-    Set => libcryptsetup_rs_sys::crypt_volume_key_set,
-    DigestReuse => libcryptsetup_rs_sys::crypt_volume_key_digest_reuse
-);
-
-bitflags_to_from_struct!(
-    /// Set of volume key flags
-    CryptVolumeKeyFlags,
-    CryptVolumeKeyFlag,
-    u32
-);
 
 consts_to_from_enum!(
     /// Value indicating the status of a keyslot
@@ -145,7 +130,7 @@ impl<'a> CryptKeyslot<'a> {
         keyslot: Option<c_uint>,
         volume_key: Option<&[u8]>,
         passphrase: &[u8],
-        flags: CryptVolumeKeyFlags,
+        flags: CryptVolumeKey,
     ) -> Result<c_uint, LibcryptErr> {
         let (vk_ptr, vk_len) = match volume_key {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
@@ -160,7 +145,7 @@ impl<'a> CryptKeyslot<'a> {
             vk_len,
             to_byte_ptr!(passphrase),
             passphrase.len(),
-            flags.into(),
+            flags.bits(),
         )))
         .map(|k| k as c_uint)
     }

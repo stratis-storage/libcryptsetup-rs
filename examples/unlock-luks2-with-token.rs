@@ -5,7 +5,7 @@ use std::{
 };
 
 use libc::syscall;
-use libcryptsetup_rs::{CryptActivateFlags, CryptInit, EncryptionFormat, LibcryptErr};
+use libcryptsetup_rs::{consts::flags::CryptActivate, CryptInit, EncryptionFormat, LibcryptErr};
 
 fn usage() -> &'static str {
     "Usage: format-luks2-with-token <DEVICE_PATH> <KEY_DESCRIPTION>\n\
@@ -59,7 +59,7 @@ fn activate(devpath: &Path, name: &str) -> Result<(), LibcryptErr> {
         Some(name),
         None,
         None,
-        CryptActivateFlags::empty(),
+        CryptActivate::empty(),
     )?;
     Ok(())
 }

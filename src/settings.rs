@@ -12,7 +12,7 @@ use std::{
 
 use libcryptsetup_rs_sys::crypt_pbkdf_type;
 
-use crate::{device::CryptDevice, err::LibcryptErr};
+use crate::{consts::flags::CryptPbkdf, device::CryptDevice, err::LibcryptErr};
 
 consts_to_from_enum!(
     /// Rust representation of random number generator enum
@@ -63,23 +63,6 @@ impl CryptKdf {
     }
 }
 
-consts_to_from_enum!(
-    /// Enum wrapping `CRYPT_PBKDF_*` flags
-    CryptPbkdfFlag,
-    u32,
-    IterTimeSet => libcryptsetup_rs_sys::crypt_pbkdf_iter_time_set,
-    NoBenchmark => libcryptsetup_rs_sys::crypt_pbkdf_no_benchmark
-);
-
-bitflags_to_from_struct!(
-    /// Wrapper for a set of CryptPbkdfFlag
-    CryptPbkdfFlags,
-    CryptPbkdfFlag,
-    u32
-);
-
-struct_ref_to_bitflags!(CryptPbkdfFlags, CryptPbkdfFlag, u32);
-
 /// Rust representation of `crypt_pbkdf_type`
 pub struct CryptPbkdfType {
     #[allow(missing_docs)]
@@ -95,7 +78,7 @@ pub struct CryptPbkdfType {
     #[allow(missing_docs)]
     pub parallel_threads: u32,
     #[allow(missing_docs)]
-    pub flags: CryptPbkdfFlags,
+    pub flags: CryptPbkdf,
 }
 
 impl TryFrom<libcryptsetup_rs_sys::crypt_pbkdf_type> for CryptPbkdfType {
@@ -111,7 +94,7 @@ impl TryFrom<libcryptsetup_rs_sys::crypt_pbkdf_type> for CryptPbkdfType {
             iterations: type_.iterations,
             max_memory_kb: type_.max_memory_kb,
             parallel_threads: type_.parallel_threads,
-            flags: CryptPbkdfFlags::try_from(type_.flags)?,
+            flags: CryptPbkdf::from_bits(type_.flags).ok_or(LibcryptErr::InvalidConversion)?,
         })
     }
 }
@@ -127,7 +110,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_pbkdf_type> for CryptPbkdfType 
             iterations: v.iterations,
             max_memory_kb: v.max_memory_kb,
             parallel_threads: v.parallel_threads,
-            flags: CryptPbkdfFlags::try_from(v.flags)?,
+            flags: CryptPbkdf::from_bits(v.flags).ok_or(LibcryptErr::InvalidConversion)?,
         })
     }
 }
@@ -154,7 +137,7 @@ impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
             iterations: self.iterations,
             max_memory_kb: self.max_memory_kb,
             parallel_threads: self.parallel_threads,
-            flags: (&self.flags).into(),
+            flags: self.flags.bits(),
         };
         Ok(CryptPbkdfTypeRef {
             inner,

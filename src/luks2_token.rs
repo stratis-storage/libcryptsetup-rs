@@ -4,7 +4,7 @@
 
 use std::ptr;
 
-use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr};
+use crate::{consts::flags::CryptActivate, device::CryptDevice, err::LibcryptErr};
 
 use libc::{c_char, c_int, c_uint, c_void};
 
@@ -258,7 +258,7 @@ impl<'a> CryptLuks2Token<'a> {
         name: Option<&str>,
         token: Option<c_uint>,
         usrdata: Option<&mut T>,
-        flags: CryptActivateFlags,
+        flags: CryptActivate,
     ) -> Result<c_uint, LibcryptErr> {
         let name_cstring_option = match name {
             Some(n) => Some(to_cstring!(n)?),
@@ -278,7 +278,7 @@ impl<'a> CryptLuks2Token<'a> {
                 .map(|t| t as c_int)
                 .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
             usrdata_ptr,
-            flags.into(),
+            flags.bits(),
         )))
         .map(|rc| rc as c_uint)
     }

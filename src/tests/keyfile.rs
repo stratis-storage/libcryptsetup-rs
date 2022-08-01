@@ -2,7 +2,7 @@ use std::{env, fs::File, io::Write, path::PathBuf};
 
 use super::loopback;
 
-use crate::{CryptInit, CryptKeyfileFlags, LibcryptErr};
+use crate::{consts::flags::CryptKeyfile, CryptInit, LibcryptErr};
 
 pub fn test_keyfile_cleanup() {
     loopback::use_loopback(
@@ -20,7 +20,7 @@ pub fn test_keyfile_cleanup() {
             let keyfile_contents =
                 device
                     .keyfile_handle()
-                    .device_read(&key_path, 0, None, CryptKeyfileFlags::empty());
+                    .device_read(&key_path, 0, None, CryptKeyfile::empty());
             std::fs::remove_file(&key_path).map_err(LibcryptErr::IOError)?;
             let (keyfile_ptr, keyfile_len) = {
                 let keyfile_contents = keyfile_contents?;
