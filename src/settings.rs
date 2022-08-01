@@ -12,7 +12,7 @@ use std::{
 
 use libcryptsetup_rs_sys::crypt_pbkdf_type;
 
-use crate::{device::CryptDevice, err::LibcryptErr, Bool};
+use crate::{device::CryptDevice, err::LibcryptErr};
 
 consts_to_from_enum!(
     /// Rust representation of random number generator enum
@@ -379,7 +379,7 @@ impl<'a> CryptSettings<'a> {
     }
 
     /// Lock or unlock the metadata
-    pub fn metadata_locking(&mut self, enable: Bool) -> Result<(), LibcryptErr> {
+    pub fn metadata_locking(&mut self, enable: bool) -> Result<(), LibcryptErr> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_metadata_locking(
             self.reference.as_ptr(),
             enable as c_int

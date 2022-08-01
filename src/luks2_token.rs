@@ -4,7 +4,7 @@
 
 use std::ptr;
 
-use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr, Bool};
+use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr};
 
 use libc::{c_char, c_int, c_uint, c_void};
 
@@ -214,16 +214,16 @@ impl<'a> CryptLuks2Token<'a> {
 
     /// Check if token is assigned
     #[allow(clippy::wrong_self_convention)]
-    pub fn is_assigned(&mut self, token: c_uint, keyslot: c_uint) -> Result<Bool, LibcryptErr> {
+    pub fn is_assigned(&mut self, token: c_uint, keyslot: c_uint) -> Result<bool, LibcryptErr> {
         let rc = mutex!(libcryptsetup_rs_sys::crypt_token_is_assigned(
             self.reference.as_ptr(),
             token as c_int,
             keyslot as c_int,
         ));
         if rc == 0 {
-            Ok(Bool::Yes)
+            Ok(true)
         } else if rc == libc::ENOENT {
-            Ok(Bool::No)
+            Ok(false)
         } else {
             Err(LibcryptErr::IOError(std::io::Error::from_raw_os_error(-rc)))
         }

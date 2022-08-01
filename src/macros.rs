@@ -430,10 +430,10 @@ macro_rules! c_token_handler_dump {
 mod test {
     use std::convert::TryFrom;
 
-    use crate::{log::CryptLogLevel, Bool, Interrupt};
+    use crate::log::CryptLogLevel;
 
-    fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u32>) -> Bool {
-        Bool::from(*usrdata.unwrap() as i32)
+    fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u32>) -> bool {
+        *usrdata.unwrap() != 0
     }
 
     c_confirm_callback!(confirm_callback, u32, safe_confirm_callback);
@@ -442,8 +442,8 @@ mod test {
 
     c_logging_callback!(logging_callback, u32, safe_logging_callback);
 
-    fn safe_progress_callback(_size: u64, _offset: u64, usrdata: Option<&mut u32>) -> Interrupt {
-        Interrupt::from(*usrdata.unwrap() as i32)
+    fn safe_progress_callback(_size: u64, _offset: u64, usrdata: Option<&mut u32>) -> bool {
+        *usrdata.unwrap() != 0
     }
 
     c_progress_callback!(progress_callback, u32, safe_progress_callback);
@@ -455,14 +455,12 @@ mod test {
             &mut 1u32 as *mut _ as *mut std::os::raw::c_void,
         );
         assert_eq!(1, ret);
-        assert_eq!(Bool::Yes, Bool::from(ret));
 
         let ret = confirm_callback(
             "\0".as_ptr() as *const std::os::raw::c_char,
             &mut 0u32 as *mut _ as *mut std::os::raw::c_void,
         );
         assert_eq!(0, ret);
-        assert_eq!(Bool::No, Bool::from(ret));
     }
 
     #[test]
@@ -484,11 +482,9 @@ mod test {
     fn test_c_progress_callback() {
         let ret = progress_callback(0, 0, &mut 1u32 as *mut _ as *mut std::os::raw::c_void);
         assert_eq!(1, ret);
-        assert_eq!(Interrupt::Yes, Interrupt::from(ret));
 
         let ret = progress_callback(0, 0, &mut 0u32 as *mut _ as *mut std::os::raw::c_void);
         assert_eq!(0, ret);
-        assert_eq!(Interrupt::No, Interrupt::from(ret));
     }
 
     consts_to_from_enum!(

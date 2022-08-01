@@ -115,42 +115,6 @@ lazy_static::lazy_static! {
     static ref THREAD_ID: std::thread::ThreadId = std::thread::current().id();
 }
 
-/// Boolean specifying yes or no
-#[derive(Debug, Eq, PartialEq)]
-pub enum Bool {
-    /// False
-    No = 0,
-    /// True
-    Yes = 1,
-}
-
-impl From<c_int> for Bool {
-    fn from(v: c_int) -> Self {
-        match v {
-            i if i == 0 => Bool::No,
-            _ => Bool::Yes,
-        }
-    }
-}
-
-/// Boolean specifying yes or no
-#[derive(Debug, Eq, PartialEq)]
-pub enum Interrupt {
-    /// False
-    No = Bool::No as isize,
-    /// True
-    Yes = Bool::Yes as isize,
-}
-
-impl From<c_int> for Interrupt {
-    fn from(v: c_int) -> Self {
-        match v {
-            i if i == 0 => Interrupt::No,
-            _ => Interrupt::Yes,
-        }
-    }
-}
-
 #[cfg(test)]
 mod test {
     use crate::tests;
