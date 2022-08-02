@@ -11,30 +11,14 @@ use std::{
 use libc::{c_int, c_uint};
 
 use crate::{
-    consts::flags::CryptVolumeKey, device::CryptDevice, err::LibcryptErr, format::EncryptionFormat,
+    consts::{
+        flags::CryptVolumeKey,
+        vals::{EncryptionFormat, KeyslotInfo, KeyslotPriority},
+    },
+    device::CryptDevice,
+    err::LibcryptErr,
     settings::CryptPbkdfType,
 };
-
-consts_to_from_enum!(
-    /// Value indicating the status of a keyslot
-    KeyslotInfo,
-    u32,
-    Invalid => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_INVALID,
-    Inactive => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_INACTIVE,
-    Active => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE,
-    ActiveLast => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE_LAST,
-    Unbound => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_UNBOUND
-);
-
-consts_to_from_enum!(
-    /// Value indicating the priority of a keyslot
-    KeyslotPriority,
-    i32,
-    Invalid => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_INVALID,
-    Ignore => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_IGNORE,
-    Normal => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_NORMAL,
-    Prefer => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_PREFER
-);
 
 /// Handle for keyslot operations
 pub struct CryptKeyslot<'a> {

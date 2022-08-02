@@ -101,3 +101,10 @@ bitflags! {
         const NO_BENCHMARK = libcryptsetup_rs_sys::crypt_pbkdf_no_benchmark;
     }
 }
+
+bitflags! {
+    /// Flags for crypt wipe operations
+    pub struct CryptWipe: u32 {
+        const NO_DIRECT_IO = libcryptsetup_rs_sys::crypt_wipe_no_direct_io;
+    }
+}

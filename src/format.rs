@@ -4,82 +4,21 @@
 
 use std::{
     convert::{TryFrom, TryInto},
-    ffi::{CStr, CString},
-    os::raw::{c_char, c_uint},
+    ffi::CString,
+    os::raw::c_uint,
     path::PathBuf,
     ptr, slice,
 };
 
 use crate::{
-    consts::flags::{CryptTcrypt, CryptVerity},
+    consts::{
+        flags::{CryptTcrypt, CryptVerity},
+        vals::EncryptionFormat,
+    },
     device::CryptDevice,
     err::LibcryptErr,
     settings::{CryptPbkdfType, CryptPbkdfTypeRef},
 };
-
-/// Device formatting type options
-#[derive(Debug, PartialEq)]
-pub enum EncryptionFormat {
-    #[allow(missing_docs)]
-    Plain,
-    #[allow(missing_docs)]
-    Luks1,
-    #[allow(missing_docs)]
-    Luks2,
-    #[allow(missing_docs)]
-    Loopaes,
-    #[allow(missing_docs)]
-    Verity,
-    #[allow(missing_docs)]
-    Tcrypt,
-    #[allow(missing_docs)]
-    Integrity,
-}
-
-impl EncryptionFormat {
-    /// Get `EncryptionFormat` as a char pointer
-    pub(crate) fn as_ptr(&self) -> *const c_char {
-        match *self {
-            EncryptionFormat::Plain => libcryptsetup_rs_sys::CRYPT_PLAIN.as_ptr() as *const c_char,
-            EncryptionFormat::Luks1 => libcryptsetup_rs_sys::CRYPT_LUKS1.as_ptr() as *const c_char,
-            EncryptionFormat::Luks2 => libcryptsetup_rs_sys::CRYPT_LUKS2.as_ptr() as *const c_char,
-            EncryptionFormat::Loopaes => {
-                libcryptsetup_rs_sys::CRYPT_LOOPAES.as_ptr() as *const c_char
-            }
-            EncryptionFormat::Verity => {
-                libcryptsetup_rs_sys::CRYPT_VERITY.as_ptr() as *const c_char
-            }
-            EncryptionFormat::Tcrypt => {
-                libcryptsetup_rs_sys::CRYPT_TCRYPT.as_ptr() as *const c_char
-            }
-            EncryptionFormat::Integrity => {
-                libcryptsetup_rs_sys::CRYPT_INTEGRITY.as_ptr() as *const c_char
-            }
-        }
-    }
-
-    /// Get `EncryptionFormat` from a char pointer
-    fn from_ptr(p: *const c_char) -> Result<Self, LibcryptErr> {
-        let p_bytes = unsafe { CStr::from_ptr(p) }.to_bytes_with_nul();
-        if libcryptsetup_rs_sys::CRYPT_PLAIN == p_bytes {
-            Ok(EncryptionFormat::Plain)
-        } else if libcryptsetup_rs_sys::CRYPT_LUKS1 == p_bytes {
-            Ok(EncryptionFormat::Luks1)
-        } else if libcryptsetup_rs_sys::CRYPT_LUKS2 == p_bytes {
-            Ok(EncryptionFormat::Luks2)
-        } else if libcryptsetup_rs_sys::CRYPT_LOOPAES == p_bytes {
-            Ok(EncryptionFormat::Loopaes)
-        } else if libcryptsetup_rs_sys::CRYPT_VERITY == p_bytes {
-            Ok(EncryptionFormat::Verity)
-        } else if libcryptsetup_rs_sys::CRYPT_TCRYPT == p_bytes {
-            Ok(EncryptionFormat::Tcrypt)
-        } else if libcryptsetup_rs_sys::CRYPT_INTEGRITY == p_bytes {
-            Ok(EncryptionFormat::Integrity)
-        } else {
-            Err(LibcryptErr::InvalidConversion)
-        }
-    }
-}
 
 /// A struct with a lifetime representing a reference to `CryptParamsLuks1`.
 pub struct CryptParamsLuks1Ref<'a> {

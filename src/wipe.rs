@@ -7,19 +7,14 @@ use std::{
     path::Path,
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr};
+use crate::{
+    consts::{flags::CryptWipe as Wipe, vals::CryptWipePattern},
+    device::CryptDevice,
+    err::LibcryptErr,
+};
 
 type WipeProgressCallback =
     unsafe extern "C" fn(size: u64, offset: u64, usrptr: *mut c_void) -> c_int;
-
-consts_to_from_enum!(
-    /// Pattern for disk wipe
-    CryptWipePattern, u32,
-    Zero => libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_ZERO,
-    Random => libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_RANDOM,
-    EncryptedZero => libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_ENCRYPTED_ZERO,
-    Special => libcryptsetup_rs_sys::crypt_wipe_pattern_CRYPT_WIPE_SPECIAL
-);
 
 /// Handle for volume key operations
 pub struct CryptWipe<'a> {
@@ -40,7 +35,7 @@ impl<'a> CryptWipe<'a> {
         offset: u64,
         length: u64,
         wipe_block_size: crate::size_t,
-        wipe_no_direct_io: bool,
+        flags: Wipe,
         callback: Option<WipeProgressCallback>,
         usrptr: Option<&mut T>,
     ) -> Result<(), LibcryptErr> {
@@ -52,11 +47,7 @@ impl<'a> CryptWipe<'a> {
             offset,
             length,
             wipe_block_size,
-            if wipe_no_direct_io {
-                libcryptsetup_rs_sys::crypt_wipe_no_direct_io
-            } else {
-                0
-            },
+            flags.bits(),
             callback,
             match usrptr {
                 Some(up) => up as *mut _ as *mut c_void,

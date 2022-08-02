@@ -10,40 +10,16 @@ use std::{
 };
 
 use crate::{
-    consts::flags::CryptReencrypt,
+    consts::{
+        flags::CryptReencrypt,
+        vals::{CryptReencryptDirectionInfo, CryptReencryptInfo, CryptReencryptModeInfo},
+    },
     device::CryptDevice,
     err::LibcryptErr,
     format::{CryptParamsLuks2, CryptParamsLuks2Ref},
 };
 
 type ReencryptProgress = unsafe extern "C" fn(size: u64, offset: u64, *mut c_void) -> c_int;
-
-consts_to_from_enum!(
-    /// Encryption mode flags
-    CryptReencryptInfo,
-    u32,
-    None => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_NONE,
-    Clean => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_CLEAN,
-    Crash => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_CRASH,
-    Invalid => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_INVALID
-);
-
-consts_to_from_enum!(
-    /// Encryption mode flags
-    CryptReencryptModeInfo,
-    u32,
-    Reencrypt => libcryptsetup_rs_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_REENCRYPT,
-    Encrypt => libcryptsetup_rs_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_ENCRYPT,
-    Decrypt => libcryptsetup_rs_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_DECRYPT
-);
-
-consts_to_from_enum!(
-    /// Reencryption direction flags
-    CryptReencryptDirectionInfo,
-    u32,
-    Forward => libcryptsetup_rs_sys::crypt_reencrypt_direction_info_CRYPT_REENCRYPT_FORWARD,
-    Backward => libcryptsetup_rs_sys::crypt_reencrypt_direction_info_CRYPT_REENCRYPT_BACKWARD
-);
 
 /// A struct representing a reference with a lifetime to a `CryptParamsReencrypt`
 /// struct

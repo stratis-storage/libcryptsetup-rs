@@ -4,7 +4,7 @@
 
 use std::{path::Path, ptr};
 
-use crate::{device::CryptDevice, err::LibcryptErr, format::EncryptionFormat};
+use crate::{consts::vals::EncryptionFormat, device::CryptDevice, err::LibcryptErr};
 
 /// Handle for backup operations on a device
 pub struct CryptBackup<'a> {

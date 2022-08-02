@@ -5,21 +5,13 @@
 use std::{convert::TryFrom, os::raw::c_int, path::Path, ptr, str::FromStr};
 
 use crate::{
+    consts::vals::CryptStatusInfo,
     device::CryptDevice,
     err::LibcryptErr,
     format::{CryptParamsIntegrity, CryptParamsVerity},
 };
 
 use uuid::Uuid;
-
-consts_to_from_enum!(
-    /// Status of a crypt device
-    CryptStatusInfo, u32,
-    Invalid => libcryptsetup_rs_sys::crypt_status_info_CRYPT_INVALID,
-    Inactive => libcryptsetup_rs_sys::crypt_status_info_CRYPT_INACTIVE,
-    Active => libcryptsetup_rs_sys::crypt_status_info_CRYPT_ACTIVE,
-    Busy => libcryptsetup_rs_sys::crypt_status_info_CRYPT_BUSY
-);
 
 /// Handle for crypt device status operations
 pub struct CryptDeviceStatus<'a> {

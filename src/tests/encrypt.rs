@@ -12,10 +12,12 @@ use std::{
 };
 
 use crate::{
-    consts::flags::{CryptActivate, CryptDeactivate, CryptKeyfile, CryptVolumeKey},
+    consts::{
+        flags::{CryptActivate, CryptDeactivate, CryptKeyfile, CryptVolumeKey},
+        vals::EncryptionFormat,
+    },
     device::CryptInit,
     err::LibcryptErr,
-    format::EncryptionFormat,
     tests::loopback,
     Either,
 };

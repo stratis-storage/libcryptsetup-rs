@@ -5,7 +5,9 @@ use std::{
 };
 
 use libcryptsetup_rs::{
-    c_uint, consts::flags::CryptVolumeKey, CryptInit, EncryptionFormat, LibcryptErr, TokenInput,
+    c_uint,
+    consts::{flags::CryptVolumeKey, vals::EncryptionFormat},
+    CryptInit, LibcryptErr, TokenInput,
 };
 
 #[macro_use]

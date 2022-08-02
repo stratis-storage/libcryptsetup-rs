@@ -9,8 +9,11 @@ use std::{
 };
 
 use libcryptsetup_rs::{
-    consts::flags::{CryptActivate, CryptDeactivate, CryptVolumeKey},
-    CryptInit, EncryptionFormat, LibcryptErr,
+    consts::{
+        flags::{CryptActivate, CryptDeactivate, CryptVolumeKey},
+        vals::EncryptionFormat,
+    },
+    CryptInit, LibcryptErr,
 };
 
 enum CryptCommand {

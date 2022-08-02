@@ -8,7 +8,7 @@ use std::{
     ptr,
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr, format::EncryptionFormat};
+use crate::{consts::vals::EncryptionFormat, device::CryptDevice, err::LibcryptErr};
 
 use either::Either;
 use uuid::Uuid;

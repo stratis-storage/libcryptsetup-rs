@@ -5,15 +5,13 @@
 use std::marker::PhantomData;
 
 use crate::{
-    consts::flags::{CryptActivate, CryptRequirement},
+    consts::{
+        flags::{CryptActivate, CryptRequirement},
+        vals::CryptFlagsType,
+    },
     device::CryptDevice,
     err::LibcryptErr,
 };
-
-enum CryptFlagsType {
-    Activation = libcryptsetup_rs_sys::crypt_flags_type_CRYPT_FLAGS_ACTIVATION as isize,
-    Requirements = libcryptsetup_rs_sys::crypt_flags_type_CRYPT_FLAGS_REQUIREMENTS as isize,
-}
 
 /// Handle for LUKS2 persistent flag operations
 pub struct CryptLuks2Flags<'a, T> {

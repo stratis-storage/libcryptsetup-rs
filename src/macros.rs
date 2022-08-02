@@ -240,11 +240,10 @@ macro_rules! c_logging_callback {
             msg: *const std::os::raw::c_char,
             usrptr: *mut std::os::raw::c_void,
         ) {
-            let level =
-                <$crate::CryptLogLevel as std::convert::TryFrom<std::os::raw::c_int>>::try_from(
-                    level,
-                )
-                .expect("Invalid logging level passed to cryptsetup-rs");
+            let level = <$crate::consts::vals::CryptLogLevel as std::convert::TryFrom<
+                std::os::raw::c_int,
+            >>::try_from(level)
+            .expect("Invalid logging level passed to cryptsetup-rs");
             let msg_str =
                 $crate::from_str_ptr!(msg).expect("Invalid message string passed to cryptsetup-rs");
             let generic_ptr = usrptr as *mut $type;
@@ -371,7 +370,7 @@ macro_rules! c_token_handler_dump {
 mod test {
     use std::convert::TryFrom;
 
-    use crate::log::CryptLogLevel;
+    use crate::consts::vals::CryptLogLevel;
 
     fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u32>) -> bool {
         *usrdata.unwrap() != 0
