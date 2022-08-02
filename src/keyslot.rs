@@ -21,13 +21,13 @@ use crate::{
 };
 
 /// Handle for keyslot operations
-pub struct CryptKeyslot<'a> {
+pub struct CryptKeyslotHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptKeyslot<'a> {
+impl<'a> CryptKeyslotHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptKeyslot { reference }
+        CryptKeyslotHandle { reference }
     }
 
     /// Add key slot using a passphrase

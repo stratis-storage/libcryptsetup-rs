@@ -14,13 +14,13 @@ use either::Either;
 use uuid::Uuid;
 
 /// Cryptographic context for device
-pub struct CryptContext<'a> {
+pub struct CryptContextHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptContext<'a> {
+impl<'a> CryptContextHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptContext { reference }
+        CryptContextHandle { reference }
     }
 
     /// Format and encrypt the given device with the requested encryption

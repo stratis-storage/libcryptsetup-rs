@@ -12,13 +12,13 @@ use crate::{consts::vals::CryptLogLevel, device::CryptDevice, err::LibcryptErr};
 type LoggingCallback = unsafe extern "C" fn(level: c_int, msg: *const c_char, usrptr: *mut c_void);
 
 /// Handle for logging operations
-pub struct CryptLog<'a> {
+pub struct CryptLogHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptLog<'a> {
+impl<'a> CryptLogHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptLog { reference }
+        CryptLogHandle { reference }
     }
 
     /// Generate a log entry

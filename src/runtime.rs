@@ -32,14 +32,14 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_active_device> for ActiveDevice
 }
 
 /// Handle for runtime attribute options
-pub struct CryptRuntime<'a> {
+pub struct CryptRuntimeHandle<'a> {
     reference: &'a mut CryptDevice,
     name: &'a str,
 }
 
-impl<'a> CryptRuntime<'a> {
+impl<'a> CryptRuntimeHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice, name: &'a str) -> Self {
-        CryptRuntime { reference, name }
+        CryptRuntimeHandle { reference, name }
     }
 
     /// Get active crypt device attributes

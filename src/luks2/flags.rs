@@ -14,21 +14,21 @@ use crate::{
 };
 
 /// Handle for LUKS2 persistent flag operations
-pub struct CryptLuks2Flags<'a, T> {
+pub struct CryptLuks2FlagsHandle<'a, T> {
     reference: &'a mut CryptDevice,
     data: PhantomData<T>,
 }
 
-impl<'a, T> CryptLuks2Flags<'a, T> {
+impl<'a, T> CryptLuks2FlagsHandle<'a, T> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptLuks2Flags {
+        CryptLuks2FlagsHandle {
             reference,
             data: PhantomData,
         }
     }
 }
 
-impl<'a> CryptLuks2Flags<'a, CryptActivate> {
+impl<'a> CryptLuks2FlagsHandle<'a, CryptActivate> {
     /// Implementation for setting persistent flags for activation
     pub fn persistent_flags_set(&mut self, flags: CryptActivate) -> Result<(), LibcryptErr> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_persistent_flags_set(
@@ -52,7 +52,7 @@ impl<'a> CryptLuks2Flags<'a, CryptActivate> {
     }
 }
 
-impl<'a> CryptLuks2Flags<'a, CryptRequirement> {
+impl<'a> CryptLuks2FlagsHandle<'a, CryptRequirement> {
     /// Implementation for setting persistent flags for requirements
     pub fn persistent_flags_set(&mut self, flags: CryptRequirement) -> Result<(), LibcryptErr> {
         errno!(unsafe {

@@ -13,13 +13,13 @@ use crate::{
 };
 
 /// Handle for activation options
-pub struct CryptActivation<'a> {
+pub struct CryptActivationHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptActivation<'a> {
+impl<'a> CryptActivationHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptActivation { reference }
+        CryptActivationHandle { reference }
     }
 
     /// Activate device by passphrase.

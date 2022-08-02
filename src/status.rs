@@ -14,13 +14,13 @@ use crate::{
 use uuid::Uuid;
 
 /// Handle for crypt device status operations
-pub struct CryptDeviceStatus<'a> {
+pub struct CryptDeviceStatusHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptDeviceStatus<'a> {
+impl<'a> CryptDeviceStatusHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptDeviceStatus { reference }
+        CryptDeviceStatusHandle { reference }
     }
 
     /// Dump text info about device to log output

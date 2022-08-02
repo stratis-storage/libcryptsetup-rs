@@ -80,13 +80,13 @@ pub enum TokenInput<'a> {
 }
 
 /// Handle for LUKS2 token operations
-pub struct CryptLuks2Token<'a> {
+pub struct CryptLuks2TokenHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptLuks2Token<'a> {
+impl<'a> CryptLuks2TokenHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptLuks2Token { reference }
+        CryptLuks2TokenHandle { reference }
     }
 
     /// Get contents of a token in JSON format

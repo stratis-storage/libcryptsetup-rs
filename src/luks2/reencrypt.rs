@@ -89,13 +89,13 @@ impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
 }
 
 /// Handle for reencryption operations
-pub struct CryptLuks2Reencrypt<'a> {
+pub struct CryptLuks2ReencryptHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptLuks2Reencrypt<'a> {
+impl<'a> CryptLuks2ReencryptHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptLuks2Reencrypt { reference }
+        CryptLuks2ReencryptHandle { reference }
     }
 
     /// Initialize reencryption metadata on a device by passphrase

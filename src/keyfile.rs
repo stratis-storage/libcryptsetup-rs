@@ -7,8 +7,7 @@ use std::{path::Path, ptr};
 use libc::{c_char, c_void};
 
 use crate::{
-    consts::flags::CryptKeyfile as Keyfile, device::CryptDevice, err::LibcryptErr,
-    mem::SafeMemHandle,
+    consts::flags::CryptKeyfile, device::CryptDevice, err::LibcryptErr, mem::SafeMemHandle,
 };
 
 /// Contents of a keyfile that have been read
@@ -23,14 +22,14 @@ impl AsRef<[u8]> for CryptKeyfileContents {
 }
 
 /// Handle for keyfile operations
-pub struct CryptKeyfile<'a> {
+pub struct CryptKeyfileHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptKeyfile<'a> {
+impl<'a> CryptKeyfileHandle<'a> {
     /// Create a new keyfile operation handle
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptKeyfile { reference }
+        CryptKeyfileHandle { reference }
     }
 
     /// Read keyfile into memory - these bindings will automatically
@@ -40,7 +39,7 @@ impl<'a> CryptKeyfile<'a> {
         keyfile: &Path,
         keyfile_offset: u64,
         key_size: Option<crate::size_t>,
-        flags: Keyfile,
+        flags: CryptKeyfile,
     ) -> Result<CryptKeyfileContents, LibcryptErr> {
         let keyfile_cstring = path_to_cstring!(keyfile)?;
         let keyfile_size = match key_size {

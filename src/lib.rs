@@ -41,32 +41,32 @@ mod wipe;
 #[cfg(cryptsetup23supported)]
 pub use crate::mem::{SafeBorrowedMemZero, SafeMemzero, SafeOwnedMemZero};
 pub use crate::{
-    activate::CryptActivation,
-    backup::CryptBackup,
-    context::CryptContext,
-    debug::CryptDebug,
+    activate::CryptActivationHandle,
+    backup::CryptBackupHandle,
+    context::CryptContextHandle,
+    debug::CryptDebugHandle,
     device::{CryptDevice, CryptInit},
     err::LibcryptErr,
     format::{
-        CryptFormat, CryptParamsIntegrity, CryptParamsIntegrityRef, CryptParamsLoopaes,
+        CryptFormatHandle, CryptParamsIntegrity, CryptParamsIntegrityRef, CryptParamsLoopaes,
         CryptParamsLoopaesRef, CryptParamsLuks1, CryptParamsLuks1Ref, CryptParamsLuks2,
         CryptParamsLuks2Ref, CryptParamsPlain, CryptParamsPlainRef, CryptParamsTcrypt,
         CryptParamsTcryptRef, CryptParamsVerity, CryptParamsVerityRef,
     },
-    key::CryptVolumeKey,
-    keyfile::{CryptKeyfile, CryptKeyfileContents},
-    keyslot::CryptKeyslot,
-    log::CryptLog,
+    key::CryptVolumeKeyHandle,
+    keyfile::{CryptKeyfileContents, CryptKeyfileHandle},
+    keyslot::CryptKeyslotHandle,
+    log::CryptLogHandle,
     luks2::{
-        flags::CryptLuks2Flags,
-        reencrypt::{CryptLuks2Reencrypt, CryptParamsReencrypt, CryptParamsReencryptRef},
-        token::{CryptLuks2Token, CryptTokenInfo, TokenInput},
+        flags::CryptLuks2FlagsHandle,
+        reencrypt::{CryptLuks2ReencryptHandle, CryptParamsReencrypt, CryptParamsReencryptRef},
+        token::{CryptLuks2TokenHandle, CryptTokenInfo, TokenInput},
     },
     mem::SafeMemHandle,
-    runtime::{ActiveDevice, CryptRuntime},
-    settings::{CryptPbkdfType, CryptPbkdfTypeRef, CryptSettings},
-    status::{get_sector_size, status, CryptDeviceStatus},
-    wipe::CryptWipe,
+    runtime::{ActiveDevice, CryptRuntimeHandle},
+    settings::{CryptPbkdfType, CryptPbkdfTypeRef, CryptSettingsHandle},
+    status::{get_sector_size, status, CryptDeviceStatusHandle},
+    wipe::CryptWipeHandle,
 };
 
 /// Re-exports `libc` types in API

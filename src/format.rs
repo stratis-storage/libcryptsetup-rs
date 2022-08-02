@@ -664,13 +664,13 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_tcrypt> for CryptParamsT
 }
 
 /// Handle for format operations on a device
-pub struct CryptFormat<'a> {
+pub struct CryptFormatHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptFormat<'a> {
+impl<'a> CryptFormatHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptFormat { reference }
+        CryptFormatHandle { reference }
     }
 
     /// Get the formatting type

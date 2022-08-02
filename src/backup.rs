@@ -7,13 +7,13 @@ use std::{path::Path, ptr};
 use crate::{consts::vals::EncryptionFormat, device::CryptDevice, err::LibcryptErr};
 
 /// Handle for backup operations on a device
-pub struct CryptBackup<'a> {
+pub struct CryptBackupHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptBackup<'a> {
+impl<'a> CryptBackupHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptBackup { reference }
+        CryptBackupHandle { reference }
     }
 
     /// Back up header and keyslots to a file

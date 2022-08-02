@@ -105,13 +105,13 @@ impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
 }
 
 /// Handle to operate on cryptsetup device settings
-pub struct CryptSettings<'a> {
+pub struct CryptSettingsHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptSettings<'a> {
+impl<'a> CryptSettingsHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptSettings { reference }
+        CryptSettingsHandle { reference }
     }
 
     /// Set random number generator type
