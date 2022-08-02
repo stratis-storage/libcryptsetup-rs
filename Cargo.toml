@@ -11,7 +11,7 @@ repository = "https://github.com/stratis-storage/libcryptsetup-rs"
 build = "build.rs"
 keywords = ["Linux", "encryption", "storage"]
 categories = ["cryptography", "api-bindings", "os::linux-apis"]
-exclude = [".gitignore", ".github/*", "Makefile"]
+exclude = [".clippy.toml", ".githooks/*", ".gitignore", ".github/*", "Makefile"]
 
 [dependencies.libcryptsetup-rs-sys]
 version = "0.2.0"
