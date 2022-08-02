@@ -29,9 +29,7 @@ mod key;
 mod keyfile;
 mod keyslot;
 mod log;
-mod luks2_flags;
-mod luks2_reencrypt;
-mod luks2_token;
+mod luks2;
 mod mem;
 mod runtime;
 mod settings;
@@ -59,9 +57,11 @@ pub use crate::{
     keyfile::{CryptKeyfile, CryptKeyfileContents},
     keyslot::CryptKeyslot,
     log::CryptLog,
-    luks2_flags::CryptLuks2Flags,
-    luks2_reencrypt::{CryptLuks2Reencrypt, CryptParamsReencrypt, CryptParamsReencryptRef},
-    luks2_token::{CryptLuks2Token, CryptTokenInfo, TokenInput},
+    luks2::{
+        flags::CryptLuks2Flags,
+        reencrypt::{CryptLuks2Reencrypt, CryptParamsReencrypt, CryptParamsReencryptRef},
+        token::{CryptLuks2Token, CryptTokenInfo, TokenInput},
+    },
     mem::SafeMemHandle,
     runtime::{ActiveDevice, CryptRuntime},
     settings::{CryptPbkdfType, CryptPbkdfTypeRef, CryptSettings},

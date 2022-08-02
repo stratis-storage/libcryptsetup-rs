@@ -10,11 +10,21 @@ use libc::{c_char, c_int, c_void};
 use libcryptsetup_rs_sys::crypt_device;
 
 use crate::{
-    activate::CryptActivation, backup::CryptBackup, context::CryptContext, debug::CryptDebug,
-    err::LibcryptErr, format::CryptFormat, key::CryptVolumeKey, keyfile::CryptKeyfile,
-    keyslot::CryptKeyslot, log::CryptLog, luks2_flags::CryptLuks2Flags,
-    luks2_reencrypt::CryptLuks2Reencrypt, luks2_token::CryptLuks2Token, runtime::CryptRuntime,
-    settings::CryptSettings, status::CryptDeviceStatus, wipe::CryptWipe,
+    activate::CryptActivation,
+    backup::CryptBackup,
+    context::CryptContext,
+    debug::CryptDebug,
+    err::LibcryptErr,
+    format::CryptFormat,
+    key::CryptVolumeKey,
+    keyfile::CryptKeyfile,
+    keyslot::CryptKeyslot,
+    log::CryptLog,
+    luks2::{flags::CryptLuks2Flags, reencrypt::CryptLuks2Reencrypt, token::CryptLuks2Token},
+    runtime::CryptRuntime,
+    settings::CryptSettings,
+    status::CryptDeviceStatus,
+    wipe::CryptWipe,
 };
 
 type ConfirmCallback = unsafe extern "C" fn(msg: *const c_char, usrptr: *mut c_void) -> c_int;
