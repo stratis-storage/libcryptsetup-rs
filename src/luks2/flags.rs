@@ -2,58 +2,44 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{convert::TryFrom, marker::PhantomData};
+use std::marker::PhantomData;
 
-use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr};
-
-enum CryptFlagsType {
-    Activation = libcryptsetup_rs_sys::crypt_flags_type_CRYPT_FLAGS_ACTIVATION as isize,
-    Requirements = libcryptsetup_rs_sys::crypt_flags_type_CRYPT_FLAGS_REQUIREMENTS as isize,
-}
-
-consts_to_from_enum!(
-    /// Wrapper enum for `CRYPT_REQUIREMENT_*` flags
-    CryptRequirementFlag, u32,
-    OfflineReencrypt => libcryptsetup_rs_sys::crypt_requirement_offline_reencrypt,
-    OnlineReencrypt => libcryptsetup_rs_sys::crypt_requirement_online_reencrypt,
-    Unknown => libcryptsetup_rs_sys::crypt_requirement_unknown
-);
-
-bitflags_to_from_struct!(
-    /// Set of `CryptRequirementFlag`s
-    CryptRequirementFlags,
-    CryptRequirementFlag,
-    u32
-);
+use crate::{
+    consts::{
+        flags::{CryptActivate, CryptRequirement},
+        vals::CryptFlagsType,
+    },
+    device::CryptDevice,
+    err::LibcryptErr,
+};
 
 /// Handle for LUKS2 persistent flag operations
-pub struct CryptLuks2Flags<'a, T> {
+pub struct CryptLuks2FlagsHandle<'a, T> {
     reference: &'a mut CryptDevice,
     data: PhantomData<T>,
 }
 
-impl<'a, T> CryptLuks2Flags<'a, T> {
+impl<'a, T> CryptLuks2FlagsHandle<'a, T> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptLuks2Flags {
+        CryptLuks2FlagsHandle {
             reference,
             data: PhantomData,
         }
     }
 }
 
-impl<'a> CryptLuks2Flags<'a, CryptActivateFlags> {
+impl<'a> CryptLuks2FlagsHandle<'a, CryptActivate> {
     /// Implementation for setting persistent flags for activation
-    pub fn persistent_flags_set(&mut self, flags: CryptActivateFlags) -> Result<(), LibcryptErr> {
-        let flags_u32: u32 = flags.into();
+    pub fn persistent_flags_set(&mut self, flags: CryptActivate) -> Result<(), LibcryptErr> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_persistent_flags_set(
             self.reference.as_ptr(),
             CryptFlagsType::Activation as u32,
-            flags_u32,
+            flags.bits(),
         )))
     }
 
     /// Implementation for getting persistent flags for activation
-    pub fn persistent_flags_get(&mut self) -> Result<CryptActivateFlags, LibcryptErr> {
+    pub fn persistent_flags_get(&mut self) -> Result<CryptActivate, LibcryptErr> {
         let mut flags_u32 = 0u32;
         errno!(unsafe {
             libcryptsetup_rs_sys::crypt_persistent_flags_get(
@@ -62,28 +48,24 @@ impl<'a> CryptLuks2Flags<'a, CryptActivateFlags> {
                 &mut flags_u32 as *mut _,
             )
         })
-        .and_then(|_| CryptActivateFlags::try_from(flags_u32))
+        .and_then(|_| CryptActivate::from_bits(flags_u32).ok_or(LibcryptErr::InvalidConversion))
     }
 }
 
-impl<'a> CryptLuks2Flags<'a, CryptRequirementFlags> {
+impl<'a> CryptLuks2FlagsHandle<'a, CryptRequirement> {
     /// Implementation for setting persistent flags for requirements
-    pub fn persistent_flags_set(
-        &mut self,
-        flags: CryptRequirementFlags,
-    ) -> Result<(), LibcryptErr> {
-        let flags_u32: u32 = flags.into();
+    pub fn persistent_flags_set(&mut self, flags: CryptRequirement) -> Result<(), LibcryptErr> {
         errno!(unsafe {
             libcryptsetup_rs_sys::crypt_persistent_flags_set(
                 self.reference.as_ptr(),
                 CryptFlagsType::Requirements as u32,
-                flags_u32,
+                flags.bits(),
             )
         })
     }
 
     /// Implementation for getting persistent flags for requirements
-    pub fn persistent_flags_get(&mut self) -> Result<CryptRequirementFlags, LibcryptErr> {
+    pub fn persistent_flags_get(&mut self) -> Result<CryptRequirement, LibcryptErr> {
         let mut flags_u32 = 0u32;
         errno!(unsafe {
             libcryptsetup_rs_sys::crypt_persistent_flags_get(
@@ -92,6 +74,6 @@ impl<'a> CryptLuks2Flags<'a, CryptRequirementFlags> {
                 &mut flags_u32 as *mut _,
             )
         })
-        .and_then(|_| CryptRequirementFlags::try_from(flags_u32))
+        .and_then(|_| CryptRequirement::from_bits(flags_u32).ok_or(LibcryptErr::InvalidConversion))
     }
 }

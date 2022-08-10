@@ -10,58 +10,16 @@ use std::{
 };
 
 use crate::{
+    consts::{
+        flags::CryptReencrypt,
+        vals::{CryptReencryptDirectionInfo, CryptReencryptInfo, CryptReencryptModeInfo},
+    },
     device::CryptDevice,
     err::LibcryptErr,
     format::{CryptParamsLuks2, CryptParamsLuks2Ref},
 };
 
 type ReencryptProgress = unsafe extern "C" fn(size: u64, offset: u64, *mut c_void) -> c_int;
-
-consts_to_from_enum!(
-    /// Encryption mode flags
-    CryptReencryptInfo,
-    u32,
-    None => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_NONE,
-    Clean => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_CLEAN,
-    Crash => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_CRASH,
-    Invalid => libcryptsetup_rs_sys::crypt_reencrypt_info_CRYPT_REENCRYPT_INVALID
-);
-
-consts_to_from_enum!(
-    /// Encryption mode flags
-    CryptReencryptModeInfo,
-    u32,
-    Reencrypt => libcryptsetup_rs_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_REENCRYPT,
-    Encrypt => libcryptsetup_rs_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_ENCRYPT,
-    Decrypt => libcryptsetup_rs_sys::crypt_reencrypt_mode_info_CRYPT_REENCRYPT_DECRYPT
-);
-
-consts_to_from_enum!(
-    /// Reencryption direction flags
-    CryptReencryptDirectionInfo,
-    u32,
-    Forward => libcryptsetup_rs_sys::crypt_reencrypt_direction_info_CRYPT_REENCRYPT_FORWARD,
-    Backward => libcryptsetup_rs_sys::crypt_reencrypt_direction_info_CRYPT_REENCRYPT_BACKWARD
-);
-
-consts_to_from_enum!(
-    /// Enum for `CRYPT_REENCRYPT_*` flags
-    CryptReencryptFlag,
-    u32,
-    InitializeOnly => libcryptsetup_rs_sys::crypt_reencrypt_initialize_only,
-    MoveFirstSegment => libcryptsetup_rs_sys::crypt_reencrypt_move_first_segment,
-    ResumeOnly => libcryptsetup_rs_sys::crypt_reencrypt_resume_only,
-    Recovery => libcryptsetup_rs_sys::crypt_reencrypt_recovery
-);
-
-bitflags_to_from_struct!(
-    /// Wrapper for a set of CryptReencryptFlag
-    CryptReencryptFlags,
-    CryptReencryptFlag,
-    u32
-);
-
-struct_ref_to_bitflags!(CryptReencryptFlags, CryptReencryptFlag, u32);
 
 /// A struct representing a reference with a lifetime to a `CryptParamsReencrypt`
 /// struct
@@ -97,7 +55,7 @@ pub struct CryptParamsReencrypt {
     /// LUKS2-specific parameters
     pub luks2: CryptParamsLuks2,
     /// Reencryption flags
-    pub flags: CryptReencryptFlags,
+    pub flags: CryptReencrypt,
 }
 
 impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
@@ -118,7 +76,7 @@ impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
             max_hotzone_size: self.max_hotzone_size,
             device_size: self.device_size,
             luks2: &luks2_params.inner as *const _,
-            flags: (&self.flags).into(),
+            flags: self.flags.bits(),
         };
         Ok(CryptParamsReencryptRef {
             inner,
@@ -131,13 +89,13 @@ impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
 }
 
 /// Handle for reencryption operations
-pub struct CryptLuks2Reencrypt<'a> {
+pub struct CryptLuks2ReencryptHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptLuks2Reencrypt<'a> {
+impl<'a> CryptLuks2ReencryptHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptLuks2Reencrypt { reference }
+        CryptLuks2ReencryptHandle { reference }
     }
 
     /// Initialize reencryption metadata on a device by passphrase

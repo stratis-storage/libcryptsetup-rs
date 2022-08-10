@@ -205,65 +205,6 @@ macro_rules! consts_to_from_enum {
     };
 }
 
-/// Convert bit flags to and from a struct
-macro_rules! bitflags_to_from_struct {
-    ( #[$meta:meta] $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
-        #[$meta]
-        pub struct $flags_type(Vec<$flag_type>);
-
-        impl $flags_type {
-            /// Create a new set of flags
-            pub fn new(vec: Vec<$flag_type>) -> Self {
-                $flags_type(vec)
-            }
-
-            /// Create an empty set of flags
-            pub fn empty() -> Self {
-                $flags_type(Vec::new())
-            }
-        }
-
-        #[allow(clippy::from_over_into)]
-        impl std::convert::Into<$bitflags_type> for $flags_type {
-            fn into(self) -> $bitflags_type {
-                self.0.into_iter().fold(0, |acc, flag| {
-                    let flag: $bitflags_type = flag.into();
-                    acc | flag
-                })
-            }
-        }
-
-        impl std::convert::TryFrom<$bitflags_type> for $flags_type {
-            type Error = LibcryptErr;
-
-            fn try_from(v: $bitflags_type) -> Result<Self, Self::Error> {
-                let mut vec = vec![];
-                for i in 0..std::mem::size_of::<$bitflags_type>() * 8 {
-                    if (v & (1 << i)) == (1 << i) {
-                        vec.push(<$flag_type>::try_from(1 << i)?);
-                    }
-                }
-                Ok(<$flags_type>::new(vec))
-            }
-        }
-    };
-}
-
-/// Convert bit a struct reference to bitflags
-macro_rules! struct_ref_to_bitflags {
-    ( $flags_type:ident, $flag_type:ty, $bitflags_type:ty ) => {
-        #[allow(clippy::from_over_into)]
-        impl<'a> std::convert::Into<$bitflags_type> for &'a $flags_type {
-            fn into(self) -> $bitflags_type {
-                self.0.iter().fold(0, |acc, flag| {
-                    let flag: $bitflags_type = (*flag).into();
-                    acc | flag
-                })
-            }
-        }
-    };
-}
-
 #[macro_export]
 /// Create a C-compatible static string with a null byte
 macro_rules! c_str {
@@ -299,11 +240,10 @@ macro_rules! c_logging_callback {
             msg: *const std::os::raw::c_char,
             usrptr: *mut std::os::raw::c_void,
         ) {
-            let level =
-                <$crate::CryptLogLevel as std::convert::TryFrom<std::os::raw::c_int>>::try_from(
-                    level,
-                )
-                .expect("Invalid logging level passed to cryptsetup-rs");
+            let level = <$crate::consts::vals::CryptLogLevel as std::convert::TryFrom<
+                std::os::raw::c_int,
+            >>::try_from(level)
+            .expect("Invalid logging level passed to cryptsetup-rs");
             let msg_str =
                 $crate::from_str_ptr!(msg).expect("Invalid message string passed to cryptsetup-rs");
             let generic_ptr = usrptr as *mut $type;
@@ -430,10 +370,10 @@ macro_rules! c_token_handler_dump {
 mod test {
     use std::convert::TryFrom;
 
-    use crate::{log::CryptLogLevel, Bool, Interrupt};
+    use crate::consts::vals::CryptLogLevel;
 
-    fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u32>) -> Bool {
-        Bool::from(*usrdata.unwrap() as i32)
+    fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u32>) -> bool {
+        *usrdata.unwrap() != 0
     }
 
     c_confirm_callback!(confirm_callback, u32, safe_confirm_callback);
@@ -442,8 +382,8 @@ mod test {
 
     c_logging_callback!(logging_callback, u32, safe_logging_callback);
 
-    fn safe_progress_callback(_size: u64, _offset: u64, usrdata: Option<&mut u32>) -> Interrupt {
-        Interrupt::from(*usrdata.unwrap() as i32)
+    fn safe_progress_callback(_size: u64, _offset: u64, usrdata: Option<&mut u32>) -> bool {
+        *usrdata.unwrap() != 0
     }
 
     c_progress_callback!(progress_callback, u32, safe_progress_callback);
@@ -455,14 +395,12 @@ mod test {
             &mut 1u32 as *mut _ as *mut std::os::raw::c_void,
         );
         assert_eq!(1, ret);
-        assert_eq!(Bool::Yes, Bool::from(ret));
 
         let ret = confirm_callback(
             "\0".as_ptr() as *const std::os::raw::c_char,
             &mut 0u32 as *mut _ as *mut std::os::raw::c_void,
         );
         assert_eq!(0, ret);
-        assert_eq!(Bool::No, Bool::from(ret));
     }
 
     #[test]
@@ -484,11 +422,9 @@ mod test {
     fn test_c_progress_callback() {
         let ret = progress_callback(0, 0, &mut 1u32 as *mut _ as *mut std::os::raw::c_void);
         assert_eq!(1, ret);
-        assert_eq!(Interrupt::Yes, Interrupt::from(ret));
 
         let ret = progress_callback(0, 0, &mut 0u32 as *mut _ as *mut std::os::raw::c_void);
         assert_eq!(0, ret);
-        assert_eq!(Interrupt::No, Interrupt::from(ret));
     }
 
     consts_to_from_enum!(

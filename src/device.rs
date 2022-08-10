@@ -10,11 +10,24 @@ use libc::{c_char, c_int, c_void};
 use libcryptsetup_rs_sys::crypt_device;
 
 use crate::{
-    activate::CryptActivation, backup::CryptBackup, context::CryptContext, debug::CryptDebug,
-    err::LibcryptErr, format::CryptFormat, key::CryptVolumeKey, keyfile::CryptKeyfile,
-    keyslot::CryptKeyslot, log::CryptLog, luks2_flags::CryptLuks2Flags,
-    luks2_reencrypt::CryptLuks2Reencrypt, luks2_token::CryptLuks2Token, runtime::CryptRuntime,
-    settings::CryptSettings, status::CryptDeviceStatus, wipe::CryptWipe,
+    activate::CryptActivationHandle,
+    backup::CryptBackupHandle,
+    context::CryptContextHandle,
+    debug::CryptDebugHandle,
+    err::LibcryptErr,
+    format::CryptFormatHandle,
+    key::CryptVolumeKeyHandle,
+    keyfile::CryptKeyfileHandle,
+    keyslot::CryptKeyslotHandle,
+    log::CryptLogHandle,
+    luks2::{
+        flags::CryptLuks2FlagsHandle, reencrypt::CryptLuks2ReencryptHandle,
+        token::CryptLuks2TokenHandle,
+    },
+    runtime::CryptRuntimeHandle,
+    settings::CryptSettingsHandle,
+    status::CryptDeviceStatusHandle,
+    wipe::CryptWipeHandle,
 };
 
 type ConfirmCallback = unsafe extern "C" fn(msg: *const c_char, usrptr: *mut c_void) -> c_int;
@@ -96,83 +109,83 @@ impl CryptDevice {
     }
 
     /// Get a logging option handle
-    pub fn logging_handle(&mut self) -> CryptLog<'_> {
-        CryptLog::new(self)
+    pub fn logging_handle(&mut self) -> CryptLogHandle<'_> {
+        CryptLogHandle::new(self)
     }
 
     /// Get a settings option handle
-    pub fn settings_handle(&mut self) -> CryptSettings<'_> {
-        CryptSettings::new(self)
+    pub fn settings_handle(&mut self) -> CryptSettingsHandle<'_> {
+        CryptSettingsHandle::new(self)
     }
 
     /// Get a format option handle
-    pub fn format_handle(&mut self) -> CryptFormat<'_> {
-        CryptFormat::new(self)
+    pub fn format_handle(&mut self) -> CryptFormatHandle<'_> {
+        CryptFormatHandle::new(self)
     }
 
     /// Get a context option handle
-    pub fn context_handle(&mut self) -> CryptContext<'_> {
-        CryptContext::new(self)
+    pub fn context_handle(&mut self) -> CryptContextHandle<'_> {
+        CryptContextHandle::new(self)
     }
 
     /// Get a keyslot option handle
-    pub fn keyslot_handle(&mut self) -> CryptKeyslot<'_> {
-        CryptKeyslot::new(self)
+    pub fn keyslot_handle(&mut self) -> CryptKeyslotHandle<'_> {
+        CryptKeyslotHandle::new(self)
     }
 
     /// Get a runtime attribute option handle
-    pub fn runtime_handle<'a>(&'a mut self, name: &'a str) -> CryptRuntime<'a> {
-        CryptRuntime::new(self, name)
+    pub fn runtime_handle<'a>(&'a mut self, name: &'a str) -> CryptRuntimeHandle<'a> {
+        CryptRuntimeHandle::new(self, name)
     }
 
     /// Get LUKS2 flags option handle
-    pub fn luks2_flag_handle<T>(&mut self) -> CryptLuks2Flags<'_, T> {
-        CryptLuks2Flags::new(self)
+    pub fn luks2_flag_handle<T>(&mut self) -> CryptLuks2FlagsHandle<'_, T> {
+        CryptLuks2FlagsHandle::new(self)
     }
 
     /// Get activation option handle
-    pub fn activate_handle(&mut self) -> CryptActivation<'_> {
-        CryptActivation::new(self)
+    pub fn activate_handle(&mut self) -> CryptActivationHandle<'_> {
+        CryptActivationHandle::new(self)
     }
 
     /// Get volume key option handle
-    pub fn volume_key_handle(&mut self) -> CryptVolumeKey<'_> {
-        CryptVolumeKey::new(self)
+    pub fn volume_key_handle(&mut self) -> CryptVolumeKeyHandle<'_> {
+        CryptVolumeKeyHandle::new(self)
     }
 
     /// Get crypt device status option handle
-    pub fn status_handle(&mut self) -> CryptDeviceStatus<'_> {
-        CryptDeviceStatus::new(self)
+    pub fn status_handle(&mut self) -> CryptDeviceStatusHandle<'_> {
+        CryptDeviceStatusHandle::new(self)
     }
 
     /// Get crypt device backup option handle
-    pub fn backup_handle(&mut self) -> CryptBackup<'_> {
-        CryptBackup::new(self)
+    pub fn backup_handle(&mut self) -> CryptBackupHandle<'_> {
+        CryptBackupHandle::new(self)
     }
 
     /// Get crypt debug option handle
-    pub fn debug_handle() -> CryptDebug {
-        CryptDebug
+    pub fn debug_handle() -> CryptDebugHandle {
+        CryptDebugHandle
     }
 
     /// Get crypt device keyfile option handle
-    pub fn keyfile_handle(&mut self) -> CryptKeyfile<'_> {
-        CryptKeyfile::new(self)
+    pub fn keyfile_handle(&mut self) -> CryptKeyfileHandle<'_> {
+        CryptKeyfileHandle::new(self)
     }
 
     /// Get crypt device wipe option handle
-    pub fn wipe_handle(&mut self) -> CryptWipe<'_> {
-        CryptWipe::new(self)
+    pub fn wipe_handle(&mut self) -> CryptWipeHandle<'_> {
+        CryptWipeHandle::new(self)
     }
 
     /// Get crypt device LUKS2 token option handle
-    pub fn token_handle(&mut self) -> CryptLuks2Token<'_> {
-        CryptLuks2Token::new(self)
+    pub fn token_handle(&mut self) -> CryptLuks2TokenHandle<'_> {
+        CryptLuks2TokenHandle::new(self)
     }
 
     /// Get crypt device reencryption option handle
-    pub fn reencrypt_handle(&mut self) -> CryptLuks2Reencrypt<'_> {
-        CryptLuks2Reencrypt::new(self)
+    pub fn reencrypt_handle(&mut self) -> CryptLuks2ReencryptHandle<'_> {
+        CryptLuks2ReencryptHandle::new(self)
     }
 
     /// Set the callback that prompts the user to confirm an action

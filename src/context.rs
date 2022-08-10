@@ -8,19 +8,19 @@ use std::{
     ptr,
 };
 
-use crate::{device::CryptDevice, err::LibcryptErr, format::EncryptionFormat, Bool};
+use crate::{consts::vals::EncryptionFormat, device::CryptDevice, err::LibcryptErr};
 
 use either::Either;
 use uuid::Uuid;
 
 /// Cryptographic context for device
-pub struct CryptContext<'a> {
+pub struct CryptContextHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptContext<'a> {
+impl<'a> CryptContextHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptContext { reference }
+        CryptContextHandle { reference }
     }
 
     /// Format and encrypt the given device with the requested encryption
@@ -111,7 +111,7 @@ impl<'a> CryptContext<'a> {
     }
 
     /// Set policty on loading volume keys via kernel keyring
-    pub fn volume_key_keyring(&mut self, enable: Bool) -> Result<(), LibcryptErr> {
+    pub fn volume_key_keyring(&mut self, enable: bool) -> Result<(), LibcryptErr> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_volume_key_keyring(
             self.reference.as_ptr(),
             enable as c_int

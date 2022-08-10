@@ -12,12 +12,12 @@ use std::{
 };
 
 use crate::{
-    activate::{CryptActivateFlags, CryptDeactivateFlags},
+    consts::{
+        flags::{CryptActivate, CryptDeactivate, CryptKeyfile, CryptVolumeKey},
+        vals::EncryptionFormat,
+    },
     device::CryptInit,
     err::LibcryptErr,
-    format::EncryptionFormat,
-    keyfile::CryptKeyfileFlags,
-    keyslot::CryptVolumeKeyFlags,
     tests::loopback,
     Either,
 };
@@ -38,12 +38,8 @@ fn init(dev_path: &Path, passphrase: &str) -> Result<c_uint, LibcryptErr> {
         Either::Right(512 / 8),
         None,
     )?;
-    dev.keyslot_handle().add_by_key(
-        None,
-        None,
-        passphrase.as_bytes(),
-        CryptVolumeKeyFlags::empty(),
-    )
+    dev.keyslot_handle()
+        .add_by_key(None, None, passphrase.as_bytes(), CryptVolumeKey::empty())
 }
 
 /// This method initializes the device with no encryption as a way to test
@@ -72,13 +68,13 @@ fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_uint, Libcr
     )?;
     let keyfile_contents = {
         let mut kf_handle = dev.keyfile_handle();
-        kf_handle.device_read(keyfile_path, 0, None, CryptKeyfileFlags::empty())?
+        kf_handle.device_read(keyfile_path, 0, None, CryptKeyfile::empty())?
     };
     dev.keyslot_handle().add_by_key(
         None,
         None,
         keyfile_contents.as_ref(),
-        CryptVolumeKeyFlags::empty(),
+        CryptVolumeKey::empty(),
     )
 }
 
@@ -94,7 +90,7 @@ fn activate_without_explicit_format(
         Some(device_name),
         Some(keyslot),
         passphrase.as_bytes(),
-        CryptActivateFlags::empty(),
+        CryptActivate::empty(),
     )?;
     Ok(())
 }
@@ -112,7 +108,7 @@ fn activate_by_passphrase(
         Some(device_name),
         Some(keyslot),
         passphrase.as_bytes(),
-        CryptActivateFlags::empty(),
+        CryptActivate::empty(),
     )?;
     Ok(())
 }
@@ -141,7 +137,7 @@ fn activate_by_keyfile(
         keyfile_path,
         keyfile_size,
         0,
-        CryptActivateFlags::empty(),
+        CryptActivate::empty(),
     )?;
     Ok(())
 }
@@ -153,7 +149,7 @@ fn activate_null_cipher(dev_path: &Path, device_name: &'static str) -> Result<()
         Some(device_name),
         None,
         b"",
-        CryptActivateFlags::empty(),
+        CryptActivate::empty(),
     )?;
     Ok(())
 }
@@ -225,7 +221,7 @@ fn run_plaintext_test(dev_path: &Path, device_name: &str) -> Result<bool, Libcry
     if super::do_cleanup() {
         let mut dev = CryptInit::init_by_name_and_header(device_name, None)?;
         dev.activate_handle()
-            .deactivate(device_name, CryptDeactivateFlags::empty())?;
+            .deactivate(device_name, CryptDeactivate::empty())?;
     }
 
     let buffer = write_result.map_err(|e| LibcryptErr::Other(e.to_string()))?;

@@ -5,7 +5,9 @@ use std::{
 };
 
 use libcryptsetup_rs::{
-    c_uint, CryptInit, CryptVolumeKeyFlags, EncryptionFormat, LibcryptErr, TokenInput,
+    c_uint,
+    consts::{flags::CryptVolumeKey, vals::EncryptionFormat},
+    CryptInit, LibcryptErr, TokenInput,
 };
 
 #[macro_use]
@@ -86,7 +88,7 @@ fn format(dev: &Path, key_data: &str) -> Result<c_uint, LibcryptErr> {
         None,
         None,
         key_data.as_bytes(),
-        CryptVolumeKeyFlags::empty(),
+        CryptVolumeKey::empty(),
     )?;
 
     Ok(keyslot)

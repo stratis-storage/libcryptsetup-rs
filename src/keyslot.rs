@@ -11,54 +11,23 @@ use std::{
 use libc::{c_int, c_uint};
 
 use crate::{
-    device::CryptDevice, err::LibcryptErr, format::EncryptionFormat, settings::CryptPbkdfType,
+    consts::{
+        flags::CryptVolumeKey,
+        vals::{EncryptionFormat, KeyslotInfo, KeyslotPriority},
+    },
+    device::CryptDevice,
+    err::LibcryptErr,
+    settings::CryptPbkdfType,
 };
 
-consts_to_from_enum!(
-    /// Flags for tunable options when operating with volume keys
-    CryptVolumeKeyFlag,
-    u32,
-    NoSegment => libcryptsetup_rs_sys::crypt_volume_key_no_segment,
-    Set => libcryptsetup_rs_sys::crypt_volume_key_set,
-    DigestReuse => libcryptsetup_rs_sys::crypt_volume_key_digest_reuse
-);
-
-bitflags_to_from_struct!(
-    /// Set of volume key flags
-    CryptVolumeKeyFlags,
-    CryptVolumeKeyFlag,
-    u32
-);
-
-consts_to_from_enum!(
-    /// Value indicating the status of a keyslot
-    KeyslotInfo,
-    u32,
-    Invalid => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_INVALID,
-    Inactive => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_INACTIVE,
-    Active => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE,
-    ActiveLast => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_ACTIVE_LAST,
-    Unbound => libcryptsetup_rs_sys::crypt_keyslot_info_CRYPT_SLOT_UNBOUND
-);
-
-consts_to_from_enum!(
-    /// Value indicating the priority of a keyslot
-    KeyslotPriority,
-    i32,
-    Invalid => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_INVALID,
-    Ignore => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_IGNORE,
-    Normal => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_NORMAL,
-    Prefer => libcryptsetup_rs_sys::crypt_keyslot_priority_CRYPT_SLOT_PRIORITY_PREFER
-);
-
 /// Handle for keyslot operations
-pub struct CryptKeyslot<'a> {
+pub struct CryptKeyslotHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptKeyslot<'a> {
+impl<'a> CryptKeyslotHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptKeyslot { reference }
+        CryptKeyslotHandle { reference }
     }
 
     /// Add key slot using a passphrase
@@ -145,7 +114,7 @@ impl<'a> CryptKeyslot<'a> {
         keyslot: Option<c_uint>,
         volume_key: Option<&[u8]>,
         passphrase: &[u8],
-        flags: CryptVolumeKeyFlags,
+        flags: CryptVolumeKey,
     ) -> Result<c_uint, LibcryptErr> {
         let (vk_ptr, vk_len) = match volume_key {
             Some(vk) => (to_byte_ptr!(vk), vk.len()),
@@ -160,7 +129,7 @@ impl<'a> CryptKeyslot<'a> {
             vk_len,
             to_byte_ptr!(passphrase),
             passphrase.len(),
-            flags.into(),
+            flags.bits(),
         )))
         .map(|k| k as c_uint)
     }

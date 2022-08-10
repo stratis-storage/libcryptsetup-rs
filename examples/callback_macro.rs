@@ -2,10 +2,10 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use libcryptsetup_rs::{c_confirm_callback, Bool};
+use libcryptsetup_rs::c_confirm_callback;
 
-fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u32>) -> Bool {
-    Bool::from(*usrdata.unwrap() as i32)
+fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u32>) -> bool {
+    *usrdata.unwrap() != 0
 }
 
 c_confirm_callback!(confirm_callback, u32, safe_confirm_callback);

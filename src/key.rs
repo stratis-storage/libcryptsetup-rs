@@ -7,13 +7,13 @@ use std::os::raw::c_int;
 use crate::{device::CryptDevice, err::LibcryptErr};
 
 /// Handle for volume key operations
-pub struct CryptVolumeKey<'a> {
+pub struct CryptVolumeKeyHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptVolumeKey<'a> {
+impl<'a> CryptVolumeKeyHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptVolumeKey { reference }
+        CryptVolumeKeyHandle { reference }
     }
 
     /// Get volume key from crypt device - first tuple element is key slot, second is volume key

@@ -2,8 +2,6 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-#![deny(missing_docs)]
-
 //! This is a wrapper library for libcryptsetup. The intension is to provide as much safety as
 //! possible when crossing FFI boundaries to the crypsetup C library.
 
@@ -20,84 +18,56 @@ pub use either::Either;
 mod macros;
 
 mod activate;
-pub use activate::{
-    CryptActivateFlag, CryptActivateFlags, CryptActivation, CryptDeactivateFlag,
-    CryptDeactivateFlags,
-};
-
 mod backup;
-pub use backup::CryptBackup;
-
+pub mod consts;
 mod context;
-pub use context::CryptContext;
-
 mod debug;
-pub use debug::{CryptDebug, CryptDebugLevel};
-
 mod device;
-pub use device::{CryptDevice, CryptInit};
-
 mod err;
-pub use err::LibcryptErr;
-
 mod format;
-pub use format::{
-    CryptFormat, CryptParamsIntegrity, CryptParamsIntegrityRef, CryptParamsLoopaes,
-    CryptParamsLoopaesRef, CryptParamsLuks1, CryptParamsLuks1Ref, CryptParamsLuks2,
-    CryptParamsLuks2Ref, CryptParamsPlain, CryptParamsPlainRef, CryptParamsTcrypt,
-    CryptParamsTcryptRef, CryptParamsVerity, CryptParamsVerityRef, CryptTcryptFlag,
-    CryptTcryptFlags, CryptVerityFlag, CryptVerityFlags, EncryptionFormat,
-};
-
 mod key;
-pub use key::CryptVolumeKey;
-
 mod keyfile;
-pub use keyfile::{CryptKeyfile, CryptKeyfileContents, CryptKeyfileFlag, CryptKeyfileFlags};
-
 mod keyslot;
-pub use keyslot::{
-    CryptKeyslot, CryptVolumeKeyFlag, CryptVolumeKeyFlags, KeyslotInfo, KeyslotPriority,
-};
-
 mod log;
-pub use crate::log::{CryptLog, CryptLogLevel};
-
-mod luks2_flags;
-pub use luks2_flags::{CryptLuks2Flags, CryptRequirementFlag, CryptRequirementFlags};
-
-mod luks2_reencrypt;
-pub use luks2_reencrypt::{
-    CryptLuks2Reencrypt, CryptParamsReencrypt, CryptParamsReencryptRef,
-    CryptReencryptDirectionInfo, CryptReencryptFlag, CryptReencryptFlags, CryptReencryptInfo,
-    CryptReencryptModeInfo,
-};
-
-mod luks2_token;
-pub use luks2_token::{CryptLuks2Token, CryptTokenInfo, TokenInput};
-
+mod luks2;
 mod mem;
-pub use mem::SafeMemHandle;
-#[cfg(cryptsetup23supported)]
-pub use mem::{SafeBorrowedMemZero, SafeMemzero, SafeOwnedMemZero};
-
 mod runtime;
-pub use runtime::{ActiveDevice, CryptRuntime};
-
 mod settings;
-pub use settings::{
-    CryptKdf, CryptPbkdfFlag, CryptPbkdfFlags, CryptPbkdfType, CryptPbkdfTypeRef, CryptRngFlag,
-    CryptSettings, KeyslotsSize, LockState, LuksType, MetadataSize,
-};
-
 mod status;
-pub use status::{get_sector_size, status, CryptDeviceStatus, CryptStatusInfo};
-
 #[cfg(test)]
 mod tests;
-
 mod wipe;
-pub use wipe::{CryptWipe, CryptWipePattern};
+
+#[cfg(cryptsetup23supported)]
+pub use crate::mem::{SafeBorrowedMemZero, SafeMemzero, SafeOwnedMemZero};
+pub use crate::{
+    activate::CryptActivationHandle,
+    backup::CryptBackupHandle,
+    context::CryptContextHandle,
+    debug::CryptDebugHandle,
+    device::{CryptDevice, CryptInit},
+    err::LibcryptErr,
+    format::{
+        CryptFormatHandle, CryptParamsIntegrity, CryptParamsIntegrityRef, CryptParamsLoopaes,
+        CryptParamsLoopaesRef, CryptParamsLuks1, CryptParamsLuks1Ref, CryptParamsLuks2,
+        CryptParamsLuks2Ref, CryptParamsPlain, CryptParamsPlainRef, CryptParamsTcrypt,
+        CryptParamsTcryptRef, CryptParamsVerity, CryptParamsVerityRef,
+    },
+    key::CryptVolumeKeyHandle,
+    keyfile::{CryptKeyfileContents, CryptKeyfileHandle},
+    keyslot::CryptKeyslotHandle,
+    log::CryptLogHandle,
+    luks2::{
+        flags::CryptLuks2FlagsHandle,
+        reencrypt::{CryptLuks2ReencryptHandle, CryptParamsReencrypt, CryptParamsReencryptRef},
+        token::{CryptLuks2TokenHandle, CryptTokenInfo, TokenInput},
+    },
+    mem::SafeMemHandle,
+    runtime::{ActiveDevice, CryptRuntimeHandle},
+    settings::{CryptPbkdfType, CryptPbkdfTypeRef, CryptSettingsHandle},
+    status::{get_sector_size, status, CryptDeviceStatusHandle},
+    wipe::CryptWipeHandle,
+};
 
 /// Re-exports `libc` types in API
 pub use libc::{c_int, c_uint, size_t};
@@ -113,42 +83,6 @@ lazy_static::lazy_static! {
 #[cfg(not(feature = "mutex"))]
 lazy_static::lazy_static! {
     static ref THREAD_ID: std::thread::ThreadId = std::thread::current().id();
-}
-
-/// Boolean specifying yes or no
-#[derive(Debug, Eq, PartialEq)]
-pub enum Bool {
-    /// False
-    No = 0,
-    /// True
-    Yes = 1,
-}
-
-impl From<c_int> for Bool {
-    fn from(v: c_int) -> Self {
-        match v {
-            i if i == 0 => Bool::No,
-            _ => Bool::Yes,
-        }
-    }
-}
-
-/// Boolean specifying yes or no
-#[derive(Debug, Eq, PartialEq)]
-pub enum Interrupt {
-    /// False
-    No = Bool::No as isize,
-    /// True
-    Yes = Bool::Yes as isize,
-}
-
-impl From<c_int> for Interrupt {
-    fn from(v: c_int) -> Self {
-        match v {
-            i if i == 0 => Interrupt::No,
-            _ => Interrupt::Yes,
-        }
-    }
 }
 
 #[cfg(test)]

@@ -4,7 +4,7 @@
 
 use std::ptr;
 
-use crate::{activate::CryptActivateFlags, device::CryptDevice, err::LibcryptErr, Bool};
+use crate::{consts::flags::CryptActivate, device::CryptDevice, err::LibcryptErr};
 
 use libc::{c_char, c_int, c_uint, c_void};
 
@@ -80,13 +80,13 @@ pub enum TokenInput<'a> {
 }
 
 /// Handle for LUKS2 token operations
-pub struct CryptLuks2Token<'a> {
+pub struct CryptLuks2TokenHandle<'a> {
     reference: &'a mut CryptDevice,
 }
 
-impl<'a> CryptLuks2Token<'a> {
+impl<'a> CryptLuks2TokenHandle<'a> {
     pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptLuks2Token { reference }
+        CryptLuks2TokenHandle { reference }
     }
 
     /// Get contents of a token in JSON format
@@ -214,16 +214,16 @@ impl<'a> CryptLuks2Token<'a> {
 
     /// Check if token is assigned
     #[allow(clippy::wrong_self_convention)]
-    pub fn is_assigned(&mut self, token: c_uint, keyslot: c_uint) -> Result<Bool, LibcryptErr> {
+    pub fn is_assigned(&mut self, token: c_uint, keyslot: c_uint) -> Result<bool, LibcryptErr> {
         let rc = mutex!(libcryptsetup_rs_sys::crypt_token_is_assigned(
             self.reference.as_ptr(),
             token as c_int,
             keyslot as c_int,
         ));
         if rc == 0 {
-            Ok(Bool::Yes)
+            Ok(true)
         } else if rc == libc::ENOENT {
-            Ok(Bool::No)
+            Ok(false)
         } else {
             Err(LibcryptErr::IOError(std::io::Error::from_raw_os_error(-rc)))
         }
@@ -258,7 +258,7 @@ impl<'a> CryptLuks2Token<'a> {
         name: Option<&str>,
         token: Option<c_uint>,
         usrdata: Option<&mut T>,
-        flags: CryptActivateFlags,
+        flags: CryptActivate,
     ) -> Result<c_uint, LibcryptErr> {
         let name_cstring_option = match name {
             Some(n) => Some(to_cstring!(n)?),
@@ -278,7 +278,7 @@ impl<'a> CryptLuks2Token<'a> {
                 .map(|t| t as c_int)
                 .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
             usrdata_ptr,
-            flags.into(),
+            flags.bits(),
         )))
         .map(|rc| rc as c_uint)
     }
