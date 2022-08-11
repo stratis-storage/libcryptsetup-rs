@@ -17,7 +17,7 @@ consts_to_from_enum!(
 );
 
 /// Device formatting type options
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum EncryptionFormat {
     #[allow(missing_docs)]
     Plain,
@@ -102,7 +102,7 @@ consts_to_from_enum!(
 );
 
 /// Logging levels
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum CryptLogLevel {
     #[allow(missing_docs)]
     Normal = libcryptsetup_rs_sys::CRYPT_LOG_NORMAL as isize,
@@ -165,7 +165,7 @@ consts_to_from_enum!(
 );
 
 /// Rust representation of key generator enum
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum CryptKdf {
     #[allow(missing_docs)]
     Pbkdf2,
@@ -214,7 +214,7 @@ consts_to_from_enum!(
 );
 
 /// LUKS type (1 or 2)
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum LuksType {
     #[allow(missing_docs)]
     Luks1,
@@ -347,7 +347,7 @@ impl TryFrom<u64> for KeyslotsSize {
 }
 
 /// State of memory lock
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Eq, PartialEq)]
 pub enum LockState {
     #[allow(missing_docs)]
     Unlocked = 0,

@@ -171,7 +171,7 @@ macro_rules! from_str_ptr_to_owned {
 macro_rules! consts_to_from_enum {
     ( #[$meta:meta] $flag_enum:ident, $flag_type:ty, $( $name:ident => $constant:expr ),* ) => {
         #[$meta]
-        #[derive(Copy, Clone, Debug, PartialEq)]
+        #[derive(Copy, Clone, Debug, Eq, PartialEq)]
         pub enum $flag_enum {
             $(
                 #[allow(missing_docs)]
