@@ -1,5 +1,4 @@
 use std::{
-    convert::TryFrom,
     env::args,
     path::{Path, PathBuf},
 };

@@ -2,12 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{
-    convert::{TryFrom, TryInto},
-    ffi::CString,
-    marker::PhantomData,
-    os::raw::c_int,
-};
+use std::{ffi::CString, marker::PhantomData, os::raw::c_int};
 
 use libcryptsetup_rs_sys::crypt_pbkdf_type;
 

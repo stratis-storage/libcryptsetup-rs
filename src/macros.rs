@@ -369,8 +369,6 @@ macro_rules! c_token_handler_dump {
 
 #[cfg(test)]
 mod test {
-    use std::convert::TryFrom;
-
     use crate::consts::vals::CryptLogLevel;
 
     fn safe_confirm_callback(_msg: &str, usrdata: Option<&mut u32>) -> bool {
