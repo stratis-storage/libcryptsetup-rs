@@ -12,6 +12,12 @@ IGNORE_ARGS ?=
 
 DENY = -D warnings -D future-incompatible -D unused -D rust_2018_idioms -D rust_2021_compatibility -D nonstandard_style
 
+${HOME}/.cargo/bin/cargo-audit:
+	cargo install cargo-audit
+
+audit: ${HOME}/.cargo/bin/cargo-audit
+	PATH=${HOME}/.cargo/bin:${PATH} cargo audit -D warnings
+
 build:
 	RUSTFLAGS="${DENY}" cargo build
 
