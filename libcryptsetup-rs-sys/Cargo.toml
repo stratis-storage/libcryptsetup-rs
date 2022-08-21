@@ -9,6 +9,7 @@ documentation = "https://docs.rs/libcryptsetup-rs-sys"
 homepage = "https://stratis-storage.github.io/"
 repository = "https://github.com/stratis-storage/libcryptsetup-rs"
 categories = ["external-ffi-bindings", "os::linux-apis"]
+keywords = ["storage", "cryptsetup"]
 
 [build-dependencies]
 cc = "1.0.45"
