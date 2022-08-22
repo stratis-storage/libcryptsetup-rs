@@ -13,13 +13,11 @@ use crate::{
     activate::CryptActivationHandle,
     backup::CryptBackupHandle,
     context::CryptContextHandle,
-    debug::CryptDebugHandle,
     err::LibcryptErr,
     format::CryptFormatHandle,
     key::CryptVolumeKeyHandle,
     keyfile::CryptKeyfileHandle,
     keyslot::CryptKeyslotHandle,
-    log::CryptLogHandle,
     luks2::{
         flags::CryptLuks2FlagsHandle, reencrypt::CryptLuks2ReencryptHandle,
         token::CryptLuks2TokenHandle,
@@ -108,11 +106,6 @@ impl CryptDevice {
         CryptDevice { ptr }
     }
 
-    /// Get a logging option handle
-    pub fn logging_handle(&mut self) -> CryptLogHandle<'_> {
-        CryptLogHandle::new(self)
-    }
-
     /// Get a settings option handle
     pub fn settings_handle(&mut self) -> CryptSettingsHandle<'_> {
         CryptSettingsHandle::new(self)
@@ -161,11 +154,6 @@ impl CryptDevice {
     /// Get crypt device backup option handle
     pub fn backup_handle(&mut self) -> CryptBackupHandle<'_> {
         CryptBackupHandle::new(self)
-    }
-
-    /// Get crypt debug option handle
-    pub fn debug_handle() -> CryptDebugHandle {
-        CryptDebugHandle
     }
 
     /// Get crypt device keyfile option handle

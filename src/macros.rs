@@ -244,8 +244,9 @@ macro_rules! c_logging_callback {
                 std::os::raw::c_int,
             >>::try_from(level)
             .expect("Invalid logging level passed to cryptsetup-rs");
-            let msg_str =
-                $crate::from_str_ptr!(msg).expect("Invalid message string passed to cryptsetup-rs");
+            let msg_str = $crate::from_str_ptr!(msg)
+                .expect("Invalid message string passed to cryptsetup-rs")
+                .trim();
             let generic_ptr = usrptr as *mut $type;
             let generic_ref = unsafe { generic_ptr.as_mut() };
 

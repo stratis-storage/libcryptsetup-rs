@@ -44,7 +44,7 @@ pub use crate::{
     activate::CryptActivationHandle,
     backup::CryptBackupHandle,
     context::CryptContextHandle,
-    debug::CryptDebugHandle,
+    debug::set_debug_level,
     device::{CryptDevice, CryptInit},
     err::LibcryptErr,
     format::{
@@ -56,7 +56,7 @@ pub use crate::{
     key::CryptVolumeKeyHandle,
     keyfile::{CryptKeyfileContents, CryptKeyfileHandle},
     keyslot::CryptKeyslotHandle,
-    log::CryptLogHandle,
+    log::{log, set_log_callback},
     luks2::{
         flags::CryptLuks2FlagsHandle,
         reencrypt::{CryptLuks2ReencryptHandle, CryptParamsReencrypt, CryptParamsReencryptRef},
