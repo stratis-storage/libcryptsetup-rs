@@ -3,7 +3,6 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use std::{
-    convert::{TryFrom, TryInto},
     ffi::CString,
     os::raw::{c_int, c_void},
     ptr,
