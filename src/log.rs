@@ -7,44 +7,29 @@ use std::{
     ptr,
 };
 
-use crate::{consts::vals::CryptLogLevel, device::CryptDevice, err::LibcryptErr};
+use crate::{consts::vals::CryptLogLevel, err::LibcryptErr};
 
 type LoggingCallback = unsafe extern "C" fn(level: c_int, msg: *const c_char, usrptr: *mut c_void);
 
-/// Handle for logging operations
-pub struct CryptLogHandle<'a> {
-    reference: &'a mut CryptDevice,
+/// Generate a log entry
+pub fn log(level: CryptLogLevel, msg: &str) -> Result<(), LibcryptErr> {
+    let msg_cstring = to_cstring!(msg)?;
+    mutex!(libcryptsetup_rs_sys::crypt_log(
+        ptr::null_mut(),
+        level as c_int,
+        msg_cstring.as_ptr(),
+    ));
+    Ok(())
 }
 
-impl<'a> CryptLogHandle<'a> {
-    pub(crate) fn new(reference: &'a mut CryptDevice) -> Self {
-        CryptLogHandle { reference }
-    }
-
-    /// Generate a log entry
-    pub fn log(&mut self, level: CryptLogLevel, msg: &str) -> Result<(), LibcryptErr> {
-        let msg_cstring = to_cstring!(msg)?;
-        mutex!(libcryptsetup_rs_sys::crypt_log(
-            self.reference.as_ptr(),
-            level as c_int,
-            msg_cstring.as_ptr(),
-        ));
-        Ok(())
-    }
-
-    /// Set the callback to be executed on logging events
-    pub fn set_log_callback<T>(
-        &mut self,
-        callback: Option<LoggingCallback>,
-        usrdata: Option<&mut T>,
-    ) {
-        mutex!(libcryptsetup_rs_sys::crypt_set_log_callback(
-            self.reference.as_ptr(),
-            callback,
-            match usrdata {
-                Some(ud) => ud as *mut _ as *mut c_void,
-                None => ptr::null_mut(),
-            },
-        ))
-    }
+/// Set the callback to be executed on logging events
+pub fn set_log_callback<T>(callback: Option<LoggingCallback>, usrdata: Option<&mut T>) {
+    mutex!(libcryptsetup_rs_sys::crypt_set_log_callback(
+        ptr::null_mut(),
+        callback,
+        match usrdata {
+            Some(ud) => ud as *mut _ as *mut c_void,
+            None => ptr::null_mut(),
+        },
+    ))
 }

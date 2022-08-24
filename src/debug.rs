@@ -4,12 +4,7 @@
 
 use crate::consts::vals::CryptDebugLevel;
 
-/// Handle for backup operations on a device
-pub struct CryptDebugHandle;
-
-impl CryptDebugHandle {
-    /// Set library debug level
-    pub fn set_debug_level(level: CryptDebugLevel) {
-        mutex!(libcryptsetup_rs_sys::crypt_set_debug_level(level.into()))
-    }
+/// Set library debug level
+pub fn set_debug_level(level: CryptDebugLevel) {
+    mutex!(libcryptsetup_rs_sys::crypt_set_debug_level(level.into()))
 }
