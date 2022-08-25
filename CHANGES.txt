@@ -1,3 +1,36 @@
+libcryptsetup-rs 0.6.0
+======================
+Recommended Rust toolchain version: 1.63.0
+Lowest supported Rust toolchain version: 1.62.1
+Recommended development environment: Fedora 36
+
+- Miscellaneous refactorings and improvements:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/228
+
+- Fix logging and debug interfaces:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/242
+
+- Specify edition 2021:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/221
+
+- Increase some lower bounds for dependency requirements:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/232
+
+- Increase loopdev dependency lower bound to 0.4.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/240
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/241
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/239
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/238
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/237
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/236
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/234
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/231
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/230
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/229
+
+
 libcryptsetup-rs 0.5.1
 ======================
 Recommended Rust toolchain version: 1.62.0
