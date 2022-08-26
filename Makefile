@@ -16,9 +16,7 @@ ${HOME}/.cargo/bin/cargo-audit:
 	cargo install cargo-audit
 
 audit: ${HOME}/.cargo/bin/cargo-audit
-        # --ignore=RUSTSEC-2021-0139 is required due to old loopdev dependency
-	PATH=${HOME}/.cargo/bin:${PATH} cargo audit -D warnings \
-        --ignore=RUSTSEC-2021-0139
+	PATH=${HOME}/.cargo/bin:${PATH} cargo audit -D warnings
 
 build:
 	RUSTFLAGS="${DENY}" cargo build
