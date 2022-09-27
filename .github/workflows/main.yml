@@ -22,7 +22,7 @@ jobs:
   format:
     env:
       TASK: fmt-ci
-      TOOLCHAIN: 1.63.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
+      TOOLCHAIN: 1.64.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -36,7 +36,7 @@ jobs:
   lint:
     env:
       TASK: clippy
-      TOOLCHAIN: 1.63.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
+      TOOLCHAIN: 1.64.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-18.04
     steps:
       - uses: actions/checkout@v2
@@ -262,7 +262,7 @@ jobs:
       - uses: actions-rs/toolchain@v1
         with:
           components: cargo
-          toolchain: 1.63.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
+          toolchain: 1.64.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
           override: true
       - name: Check out ci repo
         run: git clone https://github.com/stratis-storage/ci.git
