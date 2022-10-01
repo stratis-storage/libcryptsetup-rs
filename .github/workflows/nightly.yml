@@ -21,7 +21,7 @@ jobs:
           - components: clippy
             toolchain: stable
             task: make -f Makefile clippy
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
       - uses: actions-rs/toolchain@v1
@@ -29,11 +29,6 @@ jobs:
           components: ${{ matrix.component }}
           toolchain: ${{ matrix.toolchain }}
           override: true
-      - name: Install dependencies
-        run: >
-          sudo
-          add-apt-repository
-          "deb http://us.archive.ubuntu.com/ubuntu/ focal main"
       - name: Install dependencies
         run: sudo apt-get install libcryptsetup-dev
       - name: Run ${{ matrix.task }} on ${{ matrix.toolchain }} toolchain
@@ -49,7 +44,7 @@ jobs:
               COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../libcryptsetup-rs-sys/Cargo.toml FEDORA_RELEASE=f35 make -f ../../Makefile check-fedora-versions
               COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../Cargo.toml FEDORA_RELEASE=rawhide IGNORE_ARGS="--ignore-high=libcryptsetup-rs-sys --ignore-high=loopdev" make -f ../../Makefile check-fedora-versions
               COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../Cargo.toml FEDORA_RELEASE=f35 IGNORE_ARGS="--ignore-high=libcryptsetup-rs-sys --ignore-high=loopdev" make -f ../../Makefile check-fedora-versions
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-20.04
     container:
       image: fedora:36  # CURRENT DEVELOPMENT ENVIRONMENT
     steps:
