@@ -25,7 +25,7 @@ jobs:
       TOOLCHAIN: 1.64.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           components: rustfmt
@@ -39,7 +39,7 @@ jobs:
       TOOLCHAIN: 1.64.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           components: clippy
@@ -77,7 +77,7 @@ jobs:
             dependencies: libcryptsetup-dev
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -109,7 +109,7 @@ jobs:
             dependencies: libcryptsetup-dev libkeyutils-dev
     runs-on: ubuntu-20.04
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -203,7 +203,7 @@ jobs:
       image: fedora:${{ matrix.container }}
       options: --privileged -v /dev:/dev
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - uses: actions-rs/toolchain@v1
         with:
           profile: minimal
@@ -230,7 +230,7 @@ jobs:
     container:
       image: fedora:36  # CURRENT DEVELOPMENT ENVIRONMENT
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies for Fedora
         run: >
           dnf install -y
@@ -258,7 +258,7 @@ jobs:
     runs-on: ubuntu-20.04
     container: fedora:36  # CURRENT DEVELOPMENT ENVIRONMENT
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       - name: Install dependencies
         run: dnf install -y make yamllint
       - name: Run yamllint
