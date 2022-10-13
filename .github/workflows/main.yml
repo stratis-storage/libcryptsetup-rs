@@ -69,7 +69,7 @@ jobs:
           - task: make -f Makefile test-mutex-guard
             dependencies: libcryptsetup-dev libkeyutils-dev
           # yamllint disable rule:line-length
-          - task: |
+          - task: >
               sudo rustup override set ${{ env.TOOLCHAIN }}
               sudo TEST_DIR=$GITHUB_WORKSPACE PATH=/home/runner/.cargo/bin:$PATH make -f Makefile test-loopback
             dependencies: libcryptsetup-dev libkeyutils-dev
@@ -103,7 +103,7 @@ jobs:
           - task: make -f Makefile test-mutex-guard
             dependencies: libcryptsetup-dev libkeyutils-dev
           # yamllint disable rule:line-length
-          - task: |
+          - task: >
               sudo rustup override set ${{ env.TOOLCHAIN }}
               sudo TEST_DIR=$GITHUB_WORKSPACE PATH=/home/runner/.cargo/bin:$PATH make -f Makefile test-loopback
             dependencies: libcryptsetup-dev libkeyutils-dev
