@@ -68,11 +68,6 @@ jobs:
             dependencies: libcryptsetup-dev libkeyutils-dev
           - task: make -f Makefile test-mutex-guard
             dependencies: libcryptsetup-dev libkeyutils-dev
-          # yamllint disable rule:line-length
-          - task: |
-              sudo rustup override set ${{ env.TOOLCHAIN }}
-              sudo TEST_DIR=$GITHUB_WORKSPACE PATH=/home/runner/.cargo/bin:$PATH make -f Makefile test-loopback
-            dependencies: libcryptsetup-dev libkeyutils-dev
           - task: make -f Makefile release
             dependencies: libcryptsetup-dev
     runs-on: ubuntu-20.04
@@ -101,11 +96,6 @@ jobs:
           - task: make -f Makefile test-mutex
             dependencies: libcryptsetup-dev libkeyutils-dev
           - task: make -f Makefile test-mutex-guard
-            dependencies: libcryptsetup-dev libkeyutils-dev
-          # yamllint disable rule:line-length
-          - task: |
-              sudo rustup override set ${{ env.TOOLCHAIN }}
-              sudo TEST_DIR=$GITHUB_WORKSPACE PATH=/home/runner/.cargo/bin:$PATH make -f Makefile test-loopback
             dependencies: libcryptsetup-dev libkeyutils-dev
     runs-on: ubuntu-20.04
     steps:
