@@ -18,7 +18,7 @@ fn setup_backing_file(size_in_bytes: usize, with_zeros: bool) -> Result<PathBuf,
     let mut i = 0;
 
     let b64_string = base64::encode_config(
-        &random::<[u8; 12]>(),
+        random::<[u8; 12]>(),
         base64::Config::new(base64::CharacterSet::UrlSafe, false),
     );
     let directory = PathBuf::from(env::var("TEST_DIR").unwrap_or_else(|_| "/tmp".to_string()));
