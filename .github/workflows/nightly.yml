@@ -24,11 +24,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           components: ${{ matrix.component }}
           toolchain: ${{ matrix.toolchain }}
-          override: true
       - name: Install dependencies
         run: sudo apt-get install libcryptsetup-dev
       - name: Run ${{ matrix.task }} on ${{ matrix.toolchain }} toolchain
@@ -51,11 +50,10 @@ jobs:
           openssl-devel
           python-requests
           python-semantic_version
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           components: cargo
           toolchain: 1.65.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
-          override: true
       - name: Check out ci repo
         run: git clone https://github.com/stratis-storage/ci.git
       - name: Run comparisons of version specs with available Fedora packages
