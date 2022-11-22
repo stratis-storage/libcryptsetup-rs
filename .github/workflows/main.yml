@@ -26,11 +26,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           components: rustfmt
           toolchain: ${{ env.TOOLCHAIN }}
-          override: true
       - name: Test format on ${{ env.TOOLCHAIN }} toolchain
         run: make -f Makefile $TASK
   lint:
@@ -40,11 +39,10 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           components: clippy
           toolchain: ${{ env.TOOLCHAIN }}
-          override: true
       - name: Install dependencies
         run: >
           sudo apt-get install libcryptsetup-dev
@@ -73,11 +71,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: ${{ env.TOOLCHAIN }}
-          override: true
       - name: Install dependencies
         run: >
           sudo apt-get install ${{ matrix.dependencies }}
@@ -100,11 +96,9 @@ jobs:
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: ${{ env.TOOLCHAIN }}
-          override: true
       - name: Install dependencies
         run: >
           sudo apt-get install ${{ matrix.dependencies }}
@@ -194,11 +188,9 @@ jobs:
       options: --privileged -v /dev:/dev
     steps:
       - uses: actions/checkout@v3
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
-          profile: minimal
           toolchain: ${{ env.TOOLCHAIN }}
-          override: true
       - name: Install dependencies
         run: dnf install -y make gcc clang-devel ${{ matrix.dependencies }}
       - name: Test ${{ matrix.task }} on ${{ env.TOOLCHAIN }} toolchain
@@ -232,11 +224,10 @@ jobs:
           openssl-devel
           python-requests
           python-semantic_version
-      - uses: actions-rs/toolchain@v1
+      - uses: dtolnay/rust-toolchain@master
         with:
           components: cargo
           toolchain: 1.65.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
-          override: true
       - name: Check out ci repo
         run: git clone https://github.com/stratis-storage/ci.git
       - name: Run ${{ matrix.task }}
