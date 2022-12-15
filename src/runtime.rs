@@ -60,11 +60,11 @@ impl<'a> CryptRuntimeHandle<'a> {
     /// Get detected number of integrity failures
     pub fn get_active_integrity_failures(&mut self) -> Result<u64, LibcryptErr> {
         let name_cstring = to_cstring!(self.name)?;
-        Ok(
-            mutex!(libcryptsetup_rs_sys::crypt_get_active_integrity_failures(
+        Ok(mutex!(
+            libcryptsetup_rs_sys::crypt_get_active_integrity_failures(
                 self.reference.as_ptr(),
                 name_cstring.as_ptr(),
-            )) as u64,
-        )
+            )
+        ))
     }
 }

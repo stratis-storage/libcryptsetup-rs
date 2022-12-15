@@ -411,7 +411,7 @@ mod test {
         );
 
         logging_callback(
-            libcryptsetup_rs_sys::CRYPT_LOG_DEBUG as i32,
+            libcryptsetup_rs_sys::CRYPT_LOG_DEBUG,
             "\0".as_ptr() as *const std::os::raw::c_char,
             &mut 0u32 as *mut _ as *mut std::os::raw::c_void,
         );
