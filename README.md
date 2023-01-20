@@ -37,5 +37,5 @@ the high level bindings build, and libcryptsetup successfully encrypts a loopbac
 This can be invoked as follows:
 
 ```
-sudo cargo test -- --test-threads=1 --ignored
+make test-loopback
 ```
