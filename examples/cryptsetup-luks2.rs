@@ -82,7 +82,7 @@ fn parse_args() -> Result<CryptCommand, LibcryptErr> {
             })?;
             Ok(CryptCommand::Deactivate(dev, name))
         }
-        Some(s) => Err(LibcryptErr::Other(format!("Unrecognized command {}", s))),
+        Some(s) => Err(LibcryptErr::Other(format!("Unrecognized command {s}"))),
         None => Err(LibcryptErr::Other("Missing command".to_string())),
     }
 }
