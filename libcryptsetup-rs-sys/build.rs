@@ -8,7 +8,7 @@ use std::path::PathBuf;
 fn get_version() -> Version {
     match Config::new().atleast_version("2.2.0").probe("libcryptsetup") {
         Ok(l) => Version::parse(&l.version).expect("Could not parse version"),
-        Err(e) => panic!("Bindings require at least cryptsetup-2.2.0: {}", e),
+        Err(e) => panic!("Bindings require at least cryptsetup-2.2.0: {e}"),
     }
 }
 

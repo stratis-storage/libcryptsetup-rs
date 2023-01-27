@@ -155,7 +155,7 @@ fn activate_null_cipher(dev_path: &Path, device_name: &'static str) -> Result<()
 }
 
 fn write_random(device_name: &str) -> Result<Box<[u8]>, io::Error> {
-    let mapped_device_path = PathBuf::from(format!("/dev/mapper/{}", device_name));
+    let mapped_device_path = PathBuf::from(format!("/dev/mapper/{device_name}"));
     let mut random_buffer = Box::new([0; WINDOW_SIZE]);
     File::open("/dev/urandom")?.read_exact(&mut (*random_buffer))?;
     let mut device = OpenOptions::new().write(true).open(mapped_device_path)?;
