@@ -26,7 +26,7 @@ fn build_safe_free() {
 fn generate_bindings(safe_free_is_needed: bool) {
     let builder = bindgen::Builder::default().header("header.h").size_t_is_usize(true);
     #[cfg(target_arch = "x86")]
-    let builder = builder.blacklist_type("max_align_t");
+    let builder = builder.blocklist_type("max_align_t");
     let builder_with_safe_free = if safe_free_is_needed {
         builder.header("safe_free.h")
     } else {
