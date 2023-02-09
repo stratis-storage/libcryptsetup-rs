@@ -105,8 +105,14 @@ impl<'a> CryptContextHandle<'a> {
         };
         errno!(mutex!(libcryptsetup_rs_sys::crypt_set_label(
             self.reference.as_ptr(),
-            lcstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
-            slcstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
+            lcstring
+                .as_ref()
+                .map(|cs| cs.as_ptr())
+                .unwrap_or(ptr::null()),
+            slcstring
+                .as_ref()
+                .map(|cs| cs.as_ptr())
+                .unwrap_or(ptr::null()),
         )))
     }
 
