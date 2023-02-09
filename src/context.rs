@@ -81,13 +81,16 @@ impl<'a> CryptContextHandle<'a> {
 
     /// Set UUID of crypt device
     pub fn set_uuid(&mut self, uuid: Option<Uuid>) -> Result<(), LibcryptErr> {
-        let uptr = match uuid {
-            Some(u) => u.as_bytes().as_ptr() as *const c_char,
-            None => std::ptr::null(),
+        let c_string = match uuid {
+            Some(u) => Some(to_cstring!(u.to_string())?),
+            None => None,
         };
         errno!(mutex!(libcryptsetup_rs_sys::crypt_set_uuid(
             self.reference.as_ptr(),
-            uptr
+            c_string
+                .as_ref()
+                .map(|cs| cs.as_ptr())
+                .unwrap_or_else(ptr::null)
         )))
     }
 
