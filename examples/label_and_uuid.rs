@@ -1,6 +1,7 @@
 use std::{env::args, error::Error, path::Path};
 
 use libcryptsetup_rs::{consts::vals::EncryptionFormat, CryptInit, LibcryptErr};
+use uuid::Uuid;
 
 fn main() -> Result<(), Box<dyn Error>> {
     let path = args().nth(1).ok_or_else(|| {
@@ -18,5 +19,8 @@ fn main() -> Result<(), Box<dyn Error>> {
     device
         .context_handle()
         .set_label(Some("label"), Some("subsystem"))?;
+    device
+        .context_handle()
+        .set_uuid(Some(Uuid::parse_str("01234567890123456890123456789012")?))?;
     Ok(())
 }
