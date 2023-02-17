@@ -1,20 +1,18 @@
 use std::env;
 
-use pkg_config::Config;
+use pkg_config::{Config, Library};
 use semver::Version;
 
 use std::path::PathBuf;
 
-fn get_version() -> Version {
-    match Config::new().atleast_version("2.2.0").probe("libcryptsetup") {
-        Ok(l) => Version::parse(&l.version).expect("Could not parse version"),
+fn probe() -> Library {
+    match Config::new()
+        .atleast_version("2.2.0")
+        .probe("libcryptsetup")
+    {
+        Ok(l) => l,
         Err(e) => panic!("Bindings require at least cryptsetup-2.2.0: {e}"),
     }
-}
-
-fn safe_free_is_needed() -> bool {
-    let version = get_version();
-    version < Version::new(2, 3, 0)
 }
 
 fn build_safe_free() {
@@ -23,8 +21,15 @@ fn build_safe_free() {
     println!("cargo:rustc-link-lib=cryptsetup");
 }
 
-fn generate_bindings(safe_free_is_needed: bool) {
-    let builder = bindgen::Builder::default().header("header.h").size_t_is_usize(true);
+fn generate_bindings(library: &Library, safe_free_is_needed: bool) {
+    let builder = bindgen::Builder::default()
+        .clang_args(library.include_paths.iter().map(|path| {
+            let r = format!("-I{}", path.to_string_lossy());
+            eprintln!("{}", r);
+            r
+        }))
+        .header("header.h")
+        .size_t_is_usize(true);
     #[cfg(target_arch = "x86")]
     let builder = builder.blocklist_type("max_align_t");
     let builder_with_safe_free = if safe_free_is_needed {
@@ -43,10 +48,12 @@ fn generate_bindings(safe_free_is_needed: bool) {
 }
 
 fn main() {
-    let safe_free_is_needed = safe_free_is_needed();
+    let library = probe();
+    let version = Version::parse(&library.version).expect("Could not parse version");
+    let safe_free_is_needed = version < Version::new(2, 3, 0);
     if safe_free_is_needed {
         build_safe_free();
     }
-    generate_bindings(safe_free_is_needed);
+    generate_bindings(&library, safe_free_is_needed);
     println!("cargo:rerun-if-changed=header.h");
 }
