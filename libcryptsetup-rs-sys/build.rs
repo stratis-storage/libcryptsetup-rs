@@ -6,7 +6,10 @@ use semver::Version;
 use std::path::PathBuf;
 
 fn get_version() -> Version {
-    match Config::new().atleast_version("2.2.0").probe("libcryptsetup") {
+    match Config::new()
+        .atleast_version("2.2.0")
+        .probe("libcryptsetup")
+    {
         Ok(l) => Version::parse(&l.version).expect("Could not parse version"),
         Err(e) => panic!("Bindings require at least cryptsetup-2.2.0: {e}"),
     }
@@ -24,7 +27,16 @@ fn build_safe_free() {
 }
 
 fn generate_bindings(safe_free_is_needed: bool) {
-    let builder = bindgen::Builder::default().header("header.h").size_t_is_usize(true);
+    match pkg_config::probe_library("libcryptsetup") {
+        Ok(l) => {
+            let builder = bindgen::Builder::default()
+                .clang_args(l.include_paths.iter().map(|path| {
+                    let r = format!("-I{}", path.to_string_lossy());
+                    eprintln!("{}", r);
+                    r
+                }))
+                .header("header.h")
+                .size_t_is_usize(true);
     #[cfg(target_arch = "x86")]
     let builder = builder.blocklist_type("max_align_t");
     let builder_with_safe_free = if safe_free_is_needed {
@@ -40,6 +52,9 @@ fn generate_bindings(safe_free_is_needed: bool) {
     bindings
         .write_to_file(out_path.join("bindings.rs"))
         .expect("Couldn't write bindings");
+        }
+        Err(e) => panic!("Cannot find libcryptsetup.h path: {e}"),
+    }
 }
 
 fn main() {
