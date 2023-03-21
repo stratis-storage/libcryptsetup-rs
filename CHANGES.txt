@@ -1,3 +1,32 @@
+libcryptsetup-rs 0.7.0
+======================
+Recommended Rust toolchain version: 1.69.0
+Lowest supported Rust toolchain version: 1.66.1
+Recommended development environment: Fedora 37
+
+- Fix passphrase parameter:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/282
+
+- Add some flags introduced in newer libcryptsetup versions:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/288
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/281
+
+- Release libcryptsetup-rs-sys 0.2.4:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/287
+
+- Increase libc dependency lower bound to 0.2.139:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/283
+
+- Increase base64 dependency lower bound to 0.21.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/284
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/286
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/285
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/280
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/279
+
+
 libcryptsetup-rs 0.6.1
 ======================
 Recommended Rust toolchain version: 1.67.0
