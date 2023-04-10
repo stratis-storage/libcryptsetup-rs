@@ -28,6 +28,18 @@ bitflags! {
         const REFRESH = libcryptsetup_rs_sys::crypt_activate_refresh;
         const SERIALIZE_MEMORY_HARD_PBKDF = libcryptsetup_rs_sys::crypt_activate_serialize_memory_hard_pbkdf;
         const NO_JOURNAL_BITMAP = libcryptsetup_rs_sys::crypt_activate_no_journal_bitmap;
+        #[cfg(cryptsetup23supported)]
+        const SUSPENDED = libcryptsetup_rs_sys::crypt_activate_suspended;
+        #[cfg(cryptsetup24supported)]
+        const IV_LARGE_SECTORS = libcryptsetup_rs_sys::crypt_activate_iv_large_sectors;
+        #[cfg(cryptsetup24supported)]
+        const PANIC_ON_CORRUPTION = libcryptsetup_rs_sys::crypt_activate_panic_on_corruption;
+        #[cfg(cryptsetup24supported)]
+        const NO_READ_WORKQUEUE = libcryptsetup_rs_sys::crypt_activate_no_read_workqueue;
+        #[cfg(cryptsetup24supported)]
+        const NO_WRITE_WORKQUEUE = libcryptsetup_rs_sys::crypt_activate_no_write_workqueue;
+        #[cfg(cryptsetup24supported)]
+        const RECALCULATE_RESET = libcryptsetup_rs_sys::crypt_activate_recalculate_reset;
     }
 }
 
