@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::os::raw::c_int;
+use std::os::raw::{c_int, c_uint};
 
 use crate::{device::CryptDevice, err::LibcryptErr};
 
@@ -20,14 +20,14 @@ impl<'a> CryptVolumeKeyHandle<'a> {
     /// size
     pub fn get(
         &mut self,
-        keyslot: c_int,
+        keyslot: c_uint,
         volume_key: &mut [u8],
         passphrase: &[u8],
     ) -> Result<(c_int, crate::size_t), LibcryptErr> {
         let mut volume_key_size_t = volume_key.len();
         errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_volume_key_get(
             self.reference.as_ptr(),
-            keyslot,
+            keyslot as c_int,
             to_mut_byte_ptr!(volume_key),
             &mut volume_key_size_t as *mut _,
             to_byte_ptr!(passphrase),
