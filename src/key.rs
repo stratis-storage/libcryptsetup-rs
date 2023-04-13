@@ -22,16 +22,15 @@ impl<'a> CryptVolumeKeyHandle<'a> {
         &mut self,
         keyslot: c_int,
         volume_key: &mut [u8],
-        passphrase: &str,
+        passphrase: &[u8],
     ) -> Result<(c_int, crate::size_t), LibcryptErr> {
         let mut volume_key_size_t = volume_key.len();
-        let passphrase_cstring = to_cstring!(passphrase)?;
         errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_volume_key_get(
             self.reference.as_ptr(),
             keyslot,
             to_mut_byte_ptr!(volume_key),
             &mut volume_key_size_t as *mut _,
-            passphrase_cstring.as_ptr(),
+            to_byte_ptr!(passphrase),
             passphrase.len(),
         )))
         .map(|i| (i, volume_key_size_t))
