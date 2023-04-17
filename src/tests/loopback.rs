@@ -9,6 +9,7 @@ use std::{
     path::{Path, PathBuf},
 };
 
+use base64::Engine;
 use loopdev::LoopControl;
 use rand::random;
 
@@ -17,10 +18,11 @@ use crate::err::LibcryptErr;
 fn setup_backing_file(size_in_bytes: usize, with_zeros: bool) -> Result<PathBuf, io::Error> {
     let mut i = 0;
 
-    let b64_string = base64::encode_config(
-        random::<[u8; 12]>(),
-        base64::Config::new(base64::CharacterSet::UrlSafe, false),
-    );
+    let b64_string = base64::engine::GeneralPurpose::new(
+        &base64::alphabet::URL_SAFE,
+        base64::engine::general_purpose::GeneralPurposeConfig::new().with_encode_padding(false),
+    )
+    .encode(random::<[u8; 12]>());
     let directory = PathBuf::from(env::var("TEST_DIR").unwrap_or_else(|_| "/tmp".to_string()));
     assert!(directory.exists() && directory.is_dir());
     let mut file_path = PathBuf::new();
