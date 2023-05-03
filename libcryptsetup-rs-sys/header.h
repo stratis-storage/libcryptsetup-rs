@@ -21,6 +21,24 @@ const uint32_t crypt_activate_recalculate = CRYPT_ACTIVATE_RECALCULATE;
 const uint32_t crypt_activate_refresh = CRYPT_ACTIVATE_REFRESH;
 const uint32_t crypt_activate_serialize_memory_hard_pbkdf = CRYPT_ACTIVATE_SERIALIZE_MEMORY_HARD_PBKDF;
 const uint32_t crypt_activate_no_journal_bitmap = CRYPT_ACTIVATE_NO_JOURNAL_BITMAP;
+#ifdef CRYPT_ACTIVATE_SUSPENDED
+const uint32_t crypt_activate_suspended = CRYPT_ACTIVATE_SUSPENDED;
+#endif
+#ifdef CRYPT_ACTIVATE_IV_LARGE_SECTORS
+const uint32_t crypt_activate_iv_large_sectors = CRYPT_ACTIVATE_IV_LARGE_SECTORS;
+#endif
+#ifdef CRYPT_ACTIVATE_PANIC_ON_CORRUPTION
+const uint32_t crypt_activate_panic_on_corruption = CRYPT_ACTIVATE_PANIC_ON_CORRUPTION;
+#endif
+#ifdef CRYPT_ACTIVATE_NO_READ_WORKQUEUE
+const uint32_t crypt_activate_no_read_workqueue = CRYPT_ACTIVATE_NO_READ_WORKQUEUE;
+#endif
+#ifdef CRYPT_ACTIVATE_NO_WRITE_WORKQUEUE
+const uint32_t crypt_activate_no_write_workqueue = CRYPT_ACTIVATE_NO_WRITE_WORKQUEUE;
+#endif
+#ifdef CRYPT_ACTIVATE_RECALCULATE_RESET
+const uint32_t crypt_activate_recalculate_reset = CRYPT_ACTIVATE_RECALCULATE_RESET;
+#endif
 
 const uint32_t crypt_deactivate_deferred = CRYPT_DEACTIVATE_DEFERRED;
 const uint32_t crypt_deactivate_force = CRYPT_DEACTIVATE_FORCE;
