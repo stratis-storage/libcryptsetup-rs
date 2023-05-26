@@ -2,7 +2,12 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{ffi::CString, os::raw::c_uint, path::PathBuf, ptr, slice};
+use std::{
+    ffi::{c_void, CString},
+    os::raw::c_uint,
+    path::PathBuf,
+    ptr, slice,
+};
 
 use crate::{
     consts::{
@@ -13,6 +18,16 @@ use crate::{
     err::LibcryptErr,
     settings::{CryptPbkdfType, CryptPbkdfTypeRef},
 };
+
+pub trait CryptParams {
+    fn as_ptr(&mut self) -> *mut c_void;
+}
+
+impl CryptParams for () {
+    fn as_ptr(&mut self) -> *mut c_void {
+        ptr::null_mut()
+    }
+}
 
 /// A struct with a lifetime representing a reference to `CryptParamsLuks1`.
 pub struct CryptParamsLuks1Ref<'a> {
@@ -76,6 +91,12 @@ impl<'a> TryInto<CryptParamsLuks1Ref<'a>> for &'a CryptParamsLuks1 {
             hash_cstring,
             data_device_cstring,
         })
+    }
+}
+
+impl<'a> CryptParams for CryptParamsLuks1Ref<'a> {
+    fn as_ptr(&mut self) -> *mut c_void {
+        &mut self.inner as *mut _ as *mut c_void
     }
 }
 
@@ -226,6 +247,12 @@ impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
     }
 }
 
+impl<'a> CryptParams for CryptParamsLuks2Ref<'a> {
+    fn as_ptr(&mut self) -> *mut c_void {
+        &mut self.inner as *mut _ as *mut c_void
+    }
+}
+
 /// Reference to parameters specific to Verity
 pub struct CryptParamsVerityRef<'a> {
     /// C representation of the struct to use with FFI
@@ -330,6 +357,12 @@ impl<'a> TryInto<CryptParamsVerityRef<'a>> for &'a CryptParamsVerity {
     }
 }
 
+impl<'a> CryptParams for CryptParamsVerityRef<'a> {
+    fn as_ptr(&mut self) -> *mut c_void {
+        &mut self.inner as *mut _ as *mut c_void
+    }
+}
+
 /// C-compatible reference to a `CryptParamsLoopaes` struct
 pub struct CryptParamsLoopaesRef<'a> {
     /// C representation of the struct to use with FFI
@@ -376,6 +409,12 @@ impl<'a> TryInto<CryptParamsLoopaesRef<'a>> for &'a CryptParamsLoopaes {
             reference: self,
             hash_cstring,
         })
+    }
+}
+
+impl<'a> CryptParams for CryptParamsLoopaesRef<'a> {
+    fn as_ptr(&mut self) -> *mut c_void {
+        &mut self.inner as *mut _ as *mut c_void
     }
 }
 
@@ -490,6 +529,12 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_integrity> for CryptPara
     }
 }
 
+impl<'a> CryptParams for CryptParamsIntegrityRef<'a> {
+    fn as_ptr(&mut self) -> *mut c_void {
+        &mut self.inner as *mut _ as *mut c_void
+    }
+}
+
 /// Represents a reference to a `CryptParamsPlain` struct
 pub struct CryptParamsPlainRef<'a> {
     /// C FFI-compatible field
@@ -544,6 +589,12 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_plain> for CryptParamsPl
             size: v.size,
             skip: v.skip,
         })
+    }
+}
+
+impl<'a> CryptParams for CryptParamsPlainRef<'a> {
+    fn as_ptr(&mut self) -> *mut c_void {
+        &mut self.inner as *mut _ as *mut c_void
     }
 }
 
@@ -654,6 +705,12 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_tcrypt> for CryptParamsT
             key_size: v.key_size,
             veracrypt_pim: v.veracrypt_pim,
         })
+    }
+}
+
+impl<'a> CryptParams for CryptParamsTcryptRef<'a> {
+    fn as_ptr(&mut self) -> *mut c_void {
+        &mut self.inner as *mut _ as *mut c_void
     }
 }
 
