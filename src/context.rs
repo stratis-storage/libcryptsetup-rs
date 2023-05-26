@@ -3,7 +3,7 @@
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
 use std::{
-    os::raw::{c_char, c_int, c_void},
+    os::raw::{c_int, c_void},
     path::Path,
     ptr,
 };
@@ -40,10 +40,10 @@ impl<'a> CryptContextHandle<'a> {
         volume_key: Either<&[u8], usize>,
         params: Option<&mut T>,
     ) -> Result<(), LibcryptErr> {
-        let uuid_ptr = uuid
-            .as_ref()
-            .map(|u| u.as_bytes().as_ptr())
-            .unwrap_or(ptr::null()) as *const c_char;
+        let uuid_c_string = match uuid {
+            Some(u) => Some(to_cstring!(u.to_string())?),
+            None => None,
+        };
         let (volume_key_ptr, volume_key_len) = match volume_key {
             Either::Left(vk) => (to_byte_ptr!(vk), vk.len()),
             Either::Right(len) => (ptr::null(), len),
@@ -56,7 +56,10 @@ impl<'a> CryptContextHandle<'a> {
             type_.as_ptr(),
             cipher_cstring.as_ptr(),
             cipher_mode_cstring.as_ptr(),
-            uuid_ptr,
+            uuid_c_string
+                .as_ref()
+                .map(|cs| cs.as_ptr())
+                .unwrap_or_else(ptr::null),
             volume_key_ptr,
             volume_key_len,
             params
