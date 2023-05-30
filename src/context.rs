@@ -8,7 +8,9 @@ use std::{
     ptr,
 };
 
-use crate::{consts::vals::EncryptionFormat, device::CryptDevice, err::LibcryptErr};
+use crate::{
+    consts::vals::EncryptionFormat, device::CryptDevice, err::LibcryptErr, format::CryptParams,
+};
 
 use either::Either;
 use uuid::Uuid;
@@ -32,7 +34,7 @@ impl<'a> CryptContextHandle<'a> {
     /// For the `volume_key` parameter, the value in `Either::Right` must be in
     /// units of bytes. For a common key length such as 512 bits, the value passed
     /// to the `Either::Right` variant would be `512 / 8`.
-    pub fn format<T>(
+    pub fn format<T: CryptParams>(
         &mut self,
         type_: EncryptionFormat,
         cipher_and_mode: (&str, &str),
@@ -62,15 +64,13 @@ impl<'a> CryptContextHandle<'a> {
                 .unwrap_or_else(ptr::null),
             volume_key_ptr,
             volume_key_len,
-            params
-                .map(|p| p as *mut _ as *mut c_void)
-                .unwrap_or(ptr::null_mut()),
+            params.map(|p| p.as_ptr()).unwrap_or(ptr::null_mut()),
         )))?;
         Ok(())
     }
 
     /// Convert to new format type
-    pub fn convert<T>(
+    pub fn convert<T: CryptParams>(
         &mut self,
         type_: EncryptionFormat,
         params: &mut T,
@@ -78,7 +78,7 @@ impl<'a> CryptContextHandle<'a> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_convert(
             self.reference.as_ptr(),
             type_.as_ptr(),
-            params as *mut _ as *mut c_void,
+            params.as_ptr(),
         )))
     }
 
