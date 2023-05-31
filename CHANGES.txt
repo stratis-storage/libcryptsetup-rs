@@ -1,3 +1,19 @@
+libcryptsetup-rs 0.7.1
+======================
+Recommended Rust toolchain version: 1.69.0
+Lowest supported Rust toolchain version: 1.66.1
+Recommended development environment: Fedora 38
+
+- Bound format function type parameter to ensure inner field is read:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/292
+
+- Transform format function argument into CString representation:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/291
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/290
+
+
 libcryptsetup-rs 0.7.0
 ======================
 Recommended Rust toolchain version: 1.69.0
