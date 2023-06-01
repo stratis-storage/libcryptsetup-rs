@@ -390,14 +390,14 @@ mod test {
     #[test]
     fn test_c_confirm_callback() {
         let ret = confirm_callback(
-            "\0".as_ptr() as *const std::os::raw::c_char,
-            &mut 1u32 as *mut _ as *mut std::os::raw::c_void,
+            "\0".as_ptr().cast::<i8>(),
+            (&mut 1u32 as *mut u32).cast::<libc::c_void>(),
         );
         assert_eq!(1, ret);
 
         let ret = confirm_callback(
-            "\0".as_ptr() as *const std::os::raw::c_char,
-            &mut 0u32 as *mut _ as *mut std::os::raw::c_void,
+            "\0".as_ptr().cast::<i8>(),
+            (&mut 0u32 as *mut u32).cast::<libc::c_void>(),
         );
         assert_eq!(0, ret);
     }
@@ -406,23 +406,23 @@ mod test {
     fn test_c_logging_callback() {
         logging_callback(
             libcryptsetup_rs_sys::CRYPT_LOG_ERROR as i32,
-            "\0".as_ptr() as *const std::os::raw::c_char,
-            &mut 1u32 as *mut _ as *mut std::os::raw::c_void,
+            "\0".as_ptr().cast::<i8>(),
+            (&mut 1u32 as *mut u32).cast::<libc::c_void>(),
         );
 
         logging_callback(
             libcryptsetup_rs_sys::CRYPT_LOG_DEBUG,
-            "\0".as_ptr() as *const std::os::raw::c_char,
-            &mut 0u32 as *mut _ as *mut std::os::raw::c_void,
+            "\0".as_ptr().cast::<i8>(),
+            (&mut 0u32 as *mut u32).cast::<libc::c_void>(),
         );
     }
 
     #[test]
     fn test_c_progress_callback() {
-        let ret = progress_callback(0, 0, &mut 1u32 as *mut _ as *mut std::os::raw::c_void);
+        let ret = progress_callback(0, 0, (&mut 1u32 as *mut u32).cast::<libc::c_void>());
         assert_eq!(1, ret);
 
-        let ret = progress_callback(0, 0, &mut 0u32 as *mut _ as *mut std::os::raw::c_void);
+        let ret = progress_callback(0, 0, (&mut 0u32 as *mut u32).cast::<libc::c_void>());
         assert_eq!(0, ret);
     }
 

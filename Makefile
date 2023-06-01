@@ -49,7 +49,7 @@ clippy:
         -D clippy::cargo -D clippy::all)
 	RUSTFLAGS="${DENY}" \
         cargo clippy --all-targets --all-features -- \
-        -D clippy::cargo -D clippy::all
+        -D clippy::cargo -D clippy::all -D clippy::ptr-as-ptr
 
 docs-rust:
 	cargo doc --no-deps --package libcryptsetup-rs --package libcryptsetup-rs-sys

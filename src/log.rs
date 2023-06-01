@@ -28,7 +28,7 @@ pub fn set_log_callback<T>(callback: Option<LoggingCallback>, usrdata: Option<&m
         ptr::null_mut(),
         callback,
         match usrdata {
-            Some(ud) => ud as *mut _ as *mut c_void,
+            Some(ud) => (ud as *mut T).cast::<libc::c_void>(),
             None => ptr::null_mut(),
         },
     ))

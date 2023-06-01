@@ -168,7 +168,7 @@ mod test {
     fn test_memzero_borrowed() {
         let mut slice = [0u8; 32];
         let mut borrowed_handle =
-            unsafe { SafeBorrowedMemZero::from_ptr(slice.as_mut_ptr() as *mut _, slice.len()) };
+            unsafe { SafeBorrowedMemZero::from_ptr(slice.as_mut_ptr().cast(), slice.len()) };
         borrowed_handle.as_mut().write_all(&[33; 32]).unwrap();
         assert_eq!(&[33; 32], borrowed_handle.as_ref());
         std::mem::drop(borrowed_handle);

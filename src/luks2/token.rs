@@ -6,7 +6,7 @@ use std::ptr;
 
 use crate::{consts::flags::CryptActivate, device::CryptDevice, err::LibcryptErr};
 
-use libc::{c_char, c_int, c_uint, c_void};
+use libc::{c_char, c_int, c_uint};
 
 /// Type representing the token status. This type wraps the `CRYPT_TOKEN_*` values and the optional corresponding token type as a string.
 pub enum CryptTokenInfo {
@@ -241,7 +241,7 @@ impl<'a> CryptLuks2TokenHandle<'a> {
             return Err(LibcryptErr::NoNull(name));
         }
         let handler = libcryptsetup_rs_sys::crypt_token_handler {
-            name: name.as_ptr() as *const c_char,
+            name: name.as_ptr().cast::<i8>(),
             open,
             buffer_free,
             validate,
@@ -265,7 +265,7 @@ impl<'a> CryptLuks2TokenHandle<'a> {
             None => None,
         };
         let usrdata_ptr = match usrdata {
-            Some(reference) => reference as *mut _ as *mut c_void,
+            Some(reference) => (reference as *mut T).cast::<libc::c_void>(),
             None => ptr::null_mut(),
         };
         errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_activate_by_token(

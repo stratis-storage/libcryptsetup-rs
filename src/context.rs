@@ -2,11 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{
-    os::raw::{c_int, c_void},
-    path::Path,
-    ptr,
-};
+use std::{os::raw::c_int, path::Path, ptr};
 
 use crate::{
     consts::vals::EncryptionFormat, device::CryptDevice, err::LibcryptErr, format::CryptParams,
@@ -140,7 +136,7 @@ impl<'a> CryptContextHandle<'a> {
             self.reference.as_ptr(),
             type_.map(|t| t.as_ptr()).unwrap_or(ptr::null()),
             params
-                .map(|p| p as *mut _ as *mut c_void)
+                .map(|p| (p as *mut T).cast::<libc::c_void>())
                 .unwrap_or(ptr::null_mut()),
         )))?;
         Ok(())
@@ -155,7 +151,7 @@ impl<'a> CryptContextHandle<'a> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_repair(
             self.reference.as_ptr(),
             type_.as_ptr(),
-            params as *mut _ as *mut c_void,
+            (params as *mut T).cast::<libc::c_void>(),
         )))
     }
 

@@ -50,7 +50,7 @@ impl<'a> CryptWipeHandle<'a> {
             flags.bits(),
             callback,
             match usrptr {
-                Some(up) => up as *mut _ as *mut c_void,
+                Some(up) => (up as *mut T).cast::<libc::c_void>(),
                 None => std::ptr::null_mut(),
             },
         )))

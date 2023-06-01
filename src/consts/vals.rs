@@ -39,20 +39,14 @@ impl EncryptionFormat {
     /// Get `EncryptionFormat` as a char pointer
     pub(crate) fn as_ptr(&self) -> *const c_char {
         match *self {
-            EncryptionFormat::Plain => libcryptsetup_rs_sys::CRYPT_PLAIN.as_ptr() as *const c_char,
-            EncryptionFormat::Luks1 => libcryptsetup_rs_sys::CRYPT_LUKS1.as_ptr() as *const c_char,
-            EncryptionFormat::Luks2 => libcryptsetup_rs_sys::CRYPT_LUKS2.as_ptr() as *const c_char,
-            EncryptionFormat::Loopaes => {
-                libcryptsetup_rs_sys::CRYPT_LOOPAES.as_ptr() as *const c_char
-            }
-            EncryptionFormat::Verity => {
-                libcryptsetup_rs_sys::CRYPT_VERITY.as_ptr() as *const c_char
-            }
-            EncryptionFormat::Tcrypt => {
-                libcryptsetup_rs_sys::CRYPT_TCRYPT.as_ptr() as *const c_char
-            }
+            EncryptionFormat::Plain => libcryptsetup_rs_sys::CRYPT_PLAIN.as_ptr().cast::<i8>(),
+            EncryptionFormat::Luks1 => libcryptsetup_rs_sys::CRYPT_LUKS1.as_ptr().cast::<i8>(),
+            EncryptionFormat::Luks2 => libcryptsetup_rs_sys::CRYPT_LUKS2.as_ptr().cast::<i8>(),
+            EncryptionFormat::Loopaes => libcryptsetup_rs_sys::CRYPT_LOOPAES.as_ptr().cast::<i8>(),
+            EncryptionFormat::Verity => libcryptsetup_rs_sys::CRYPT_VERITY.as_ptr().cast::<i8>(),
+            EncryptionFormat::Tcrypt => libcryptsetup_rs_sys::CRYPT_TCRYPT.as_ptr().cast::<i8>(),
             EncryptionFormat::Integrity => {
-                libcryptsetup_rs_sys::CRYPT_INTEGRITY.as_ptr() as *const c_char
+                libcryptsetup_rs_sys::CRYPT_INTEGRITY.as_ptr().cast::<i8>()
             }
         }
     }
@@ -179,11 +173,13 @@ impl CryptKdf {
     /// Convert to a `char *` for C
     pub(crate) fn as_ptr(&self) -> *const c_char {
         match *self {
-            CryptKdf::Pbkdf2 => libcryptsetup_rs_sys::CRYPT_KDF_PBKDF2.as_ptr() as *const c_char,
-            CryptKdf::Argon2I => libcryptsetup_rs_sys::CRYPT_KDF_ARGON2I.as_ptr() as *const c_char,
-            CryptKdf::Argon2Id => {
-                libcryptsetup_rs_sys::CRYPT_KDF_ARGON2ID.as_ptr() as *const c_char
-            }
+            CryptKdf::Pbkdf2 => libcryptsetup_rs_sys::CRYPT_KDF_PBKDF2.as_ptr().cast::<i8>(),
+            CryptKdf::Argon2I => libcryptsetup_rs_sys::CRYPT_KDF_ARGON2I
+                .as_ptr()
+                .cast::<i8>(),
+            CryptKdf::Argon2Id => libcryptsetup_rs_sys::CRYPT_KDF_ARGON2ID
+                .as_ptr()
+                .cast::<i8>(),
         }
     }
 
@@ -226,8 +222,8 @@ impl LuksType {
     /// Convert Rust expression to an equivalent C pointer
     pub(crate) fn as_ptr(&self) -> *const c_char {
         match *self {
-            LuksType::Luks1 => libcryptsetup_rs_sys::CRYPT_LUKS1.as_ptr() as *const c_char,
-            LuksType::Luks2 => libcryptsetup_rs_sys::CRYPT_LUKS2.as_ptr() as *const c_char,
+            LuksType::Luks1 => libcryptsetup_rs_sys::CRYPT_LUKS1.as_ptr().cast::<i8>(),
+            LuksType::Luks2 => libcryptsetup_rs_sys::CRYPT_LUKS2.as_ptr().cast::<i8>(),
         }
     }
 }

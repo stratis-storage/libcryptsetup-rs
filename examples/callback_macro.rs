@@ -13,8 +13,10 @@ c_confirm_callback!(confirm_callback, u32, safe_confirm_callback);
 fn main() {
     assert!(
         confirm_callback(
-            "Would you like to proceed?\0".as_ptr() as *const libc::c_char,
-            &mut 0 as *mut _ as *mut libc::c_void,
+            "Would you like to proceed?\0"
+                .as_ptr()
+                .cast::<libc::c_char>(),
+            (&mut 0 as *mut i32).cast::<libc::c_void>(),
         ) == 0
     )
 }
