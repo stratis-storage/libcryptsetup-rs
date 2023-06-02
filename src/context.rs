@@ -69,12 +69,12 @@ impl<'a> CryptContextHandle<'a> {
     pub fn convert<T: CryptParams>(
         &mut self,
         type_: EncryptionFormat,
-        params: &mut T,
+        params: Option<&mut T>,
     ) -> Result<(), LibcryptErr> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_convert(
             self.reference.as_ptr(),
             type_.as_ptr(),
-            params.as_ptr(),
+            params.map(|p| p.as_ptr()).unwrap_or(ptr::null_mut()),
         )))
     }
 
@@ -144,12 +144,12 @@ impl<'a> CryptContextHandle<'a> {
     pub fn repair<T: CryptParams>(
         &mut self,
         type_: EncryptionFormat,
-        params: &mut T,
+        params: Option<&mut T>,
     ) -> Result<(), LibcryptErr> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_repair(
             self.reference.as_ptr(),
             type_.as_ptr(),
-            params.as_ptr(),
+            params.map(|p| p.as_ptr()).unwrap_or(ptr::null_mut()),
         )))
     }
 

@@ -33,7 +33,7 @@ impl CryptParams for () {
 pub struct CryptParamsLuks1Ref<'a> {
     /// The struct containing data referenced from the corresponding
     /// `CryptParamsLuks1`.
-    pub inner: libcryptsetup_rs_sys::crypt_params_luks1,
+    inner: libcryptsetup_rs_sys::crypt_params_luks1,
     #[allow(dead_code)]
     reference: &'a CryptParamsLuks1,
     #[allow(dead_code)]
@@ -104,7 +104,7 @@ impl<'a> CryptParams for CryptParamsLuks1Ref<'a> {
 /// struct
 pub struct CryptParamsLuks2Ref<'a> {
     #[allow(missing_docs)]
-    pub inner: libcryptsetup_rs_sys::crypt_params_luks2,
+    inner: libcryptsetup_rs_sys::crypt_params_luks2,
     #[allow(dead_code)]
     reference: &'a CryptParamsLuks2,
     #[allow(dead_code)]
@@ -256,7 +256,7 @@ impl<'a> CryptParams for CryptParamsLuks2Ref<'a> {
 /// Reference to parameters specific to Verity
 pub struct CryptParamsVerityRef<'a> {
     /// C representation of the struct to use with FFI
-    pub inner: libcryptsetup_rs_sys::crypt_params_verity,
+    inner: libcryptsetup_rs_sys::crypt_params_verity,
     #[allow(dead_code)]
     reference: &'a CryptParamsVerity,
     #[allow(dead_code)]
@@ -366,7 +366,7 @@ impl<'a> CryptParams for CryptParamsVerityRef<'a> {
 /// C-compatible reference to a `CryptParamsLoopaes` struct
 pub struct CryptParamsLoopaesRef<'a> {
     /// C representation of the struct to use with FFI
-    pub inner: libcryptsetup_rs_sys::crypt_params_loopaes,
+    inner: libcryptsetup_rs_sys::crypt_params_loopaes,
     #[allow(dead_code)]
     reference: &'a CryptParamsLoopaes,
     #[allow(dead_code)]
@@ -422,7 +422,7 @@ impl<'a> CryptParams for CryptParamsLoopaesRef<'a> {
 /// struct
 pub struct CryptParamsIntegrityRef<'a> {
     #[allow(missing_docs)]
-    pub inner: libcryptsetup_rs_sys::crypt_params_integrity,
+    inner: libcryptsetup_rs_sys::crypt_params_integrity,
     #[allow(dead_code)]
     reference: &'a CryptParamsIntegrity,
     #[allow(dead_code)]
@@ -538,7 +538,7 @@ impl<'a> CryptParams for CryptParamsIntegrityRef<'a> {
 /// Represents a reference to a `CryptParamsPlain` struct
 pub struct CryptParamsPlainRef<'a> {
     /// C FFI-compatible field
-    pub inner: libcryptsetup_rs_sys::crypt_params_plain,
+    inner: libcryptsetup_rs_sys::crypt_params_plain,
     #[allow(dead_code)]
     reference: &'a CryptParamsPlain,
     #[allow(dead_code)]
@@ -601,7 +601,7 @@ impl<'a> CryptParams for CryptParamsPlainRef<'a> {
 /// Reference to a `CryptParamsTcrypt` struct
 pub struct CryptParamsTcryptRef<'a> {
     /// FFI compatible representation of `CryptParamsTcrypt`
-    pub inner: libcryptsetup_rs_sys::crypt_params_tcrypt,
+    inner: libcryptsetup_rs_sys::crypt_params_tcrypt,
     #[allow(dead_code)]
     reference: &'a CryptParamsTcrypt,
     #[allow(dead_code)]
