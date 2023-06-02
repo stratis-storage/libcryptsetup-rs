@@ -2,11 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{
-    os::raw::{c_int, c_void},
-    path::Path,
-    ptr,
-};
+use std::{os::raw::c_int, path::Path, ptr};
 
 use crate::{
     consts::vals::EncryptionFormat, device::CryptDevice, err::LibcryptErr, format::CryptParams,
@@ -131,7 +127,7 @@ impl<'a> CryptContextHandle<'a> {
     }
 
     /// Load on-disk header parameters based on provided type
-    pub fn load<T>(
+    pub fn load<T: CryptParams>(
         &mut self,
         type_: Option<EncryptionFormat>,
         params: Option<&mut T>,
@@ -139,15 +135,13 @@ impl<'a> CryptContextHandle<'a> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_load(
             self.reference.as_ptr(),
             type_.map(|t| t.as_ptr()).unwrap_or(ptr::null()),
-            params
-                .map(|p| p as *mut _ as *mut c_void)
-                .unwrap_or(ptr::null_mut()),
+            params.map(|p| p.as_ptr()).unwrap_or(ptr::null_mut()),
         )))?;
         Ok(())
     }
 
     /// Repair crypt device header if invalid
-    pub fn repair<T>(
+    pub fn repair<T: CryptParams>(
         &mut self,
         type_: EncryptionFormat,
         params: &mut T,
@@ -155,7 +149,7 @@ impl<'a> CryptContextHandle<'a> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_repair(
             self.reference.as_ptr(),
             type_.as_ptr(),
-            params as *mut _ as *mut c_void,
+            params.as_ptr(),
         )))
     }
 
