@@ -191,6 +191,8 @@ jobs:
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
+      - name: cat config file
+        run: cat /etc/dnf/dnf.conf
       - name: Install dependencies
         run: dnf install -y make gcc clang-devel ${{ matrix.dependencies }}
       - name: Test ${{ matrix.task }} on ${{ env.TOOLCHAIN }} toolchain
