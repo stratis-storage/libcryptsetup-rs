@@ -8,6 +8,8 @@ use std::{
     ptr,
 };
 
+use libcryptsetup_rs_sys::crypt_params_reencrypt;
+
 use crate::{
     consts::{
         flags::CryptReencrypt,
@@ -15,7 +17,7 @@ use crate::{
     },
     device::CryptDevice,
     err::LibcryptErr,
-    format::{CryptParamsLuks2, CryptParamsLuks2Ref},
+    format::{CryptParams, CryptParamsLuks2, CryptParamsLuks2Ref},
 };
 
 type ReencryptProgress = unsafe extern "C" fn(size: u64, offset: u64, *mut c_void) -> c_int;
@@ -24,15 +26,21 @@ type ReencryptProgress = unsafe extern "C" fn(size: u64, offset: u64, *mut c_voi
 /// struct
 pub struct CryptParamsReencryptRef<'a> {
     #[allow(missing_docs)]
-    pub inner: libcryptsetup_rs_sys::crypt_params_reencrypt,
+    inner: libcryptsetup_rs_sys::crypt_params_reencrypt,
     #[allow(dead_code)]
     reference: &'a CryptParamsReencrypt,
     #[allow(dead_code)]
-    luks2_params: CryptParamsLuks2Ref<'a>,
+    luks2_params: Box<CryptParamsLuks2Ref<'a>>,
     #[allow(dead_code)]
     resilience_cstring: CString,
     #[allow(dead_code)]
     hash_cstring: CString,
+}
+
+impl<'a> CryptParamsReencryptRef<'a> {
+    fn as_ptr(&self) -> *const crypt_params_reencrypt {
+        &self.inner as *const _ as *const crypt_params_reencrypt
+    }
 }
 
 /// Parameters for reencryption operations
@@ -61,7 +69,7 @@ impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<CryptParamsReencryptRef<'a>, Self::Error> {
-        let luks2_params: CryptParamsLuks2Ref<'a> = (&self.luks2).try_into()?;
+        let mut luks2_params: Box<CryptParamsLuks2Ref<'a>> = Box::new((&self.luks2).try_into()?);
 
         let resilience_cstring = to_cstring!(self.resilience)?;
         let hash_cstring = to_cstring!(self.hash)?;
@@ -74,7 +82,7 @@ impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
             data_shift: self.data_shift,
             max_hotzone_size: self.max_hotzone_size,
             device_size: self.device_size,
-            luks2: &luks2_params.inner as *const _,
+            luks2: luks2_params.as_ptr().cast(),
             flags: self.flags.bits(),
         };
         Ok(CryptParamsReencryptRef {
@@ -126,7 +134,7 @@ impl<'a> CryptLuks2ReencryptHandle<'a> {
                 keyslot_new,
                 cipher_cstring.as_ptr(),
                 cipher_mode_cstring.as_ptr(),
-                &params_reencrypt.inner as *const _,
+                params_reencrypt.as_ptr()
             )
         ))
     }
@@ -160,7 +168,7 @@ impl<'a> CryptLuks2ReencryptHandle<'a> {
                 keyslot_new,
                 cipher_cstring.as_ptr(),
                 cipher_mode_cstring.as_ptr(),
-                &params_reencrypt.inner as *const _,
+                params_reencrypt.as_ptr(),
             )
         ))
     }
