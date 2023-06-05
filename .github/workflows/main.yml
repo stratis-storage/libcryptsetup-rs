@@ -159,28 +159,28 @@ jobs:
             dependencies: cryptsetup-devel
             container: 34
 
-          # Fedora rawhide
+          # Fedora 38
           - task: make -f Makefile build
             dependencies: cryptsetup-devel
-            container: rawhide
+            container: 38
           - task: make -f Makefile docs-ci
             dependencies: cryptsetup-devel
-            container: rawhide
+            container: 38
           - task: make -f Makefile test
             dependencies: cryptsetup-devel keyutils-libs-devel
-            container: rawhide
+            container: 38
           - task: make -f Makefile test-mutex
             dependencies: cryptsetup-devel keyutils-libs-devel
-            container: rawhide
+            container: 38
           - task: make -f Makefile test-mutex-guard
             dependencies: cryptsetup-devel keyutils-libs-devel
-            container: rawhide
+            container: 38
           - task: make -f Makefile test-loopback
             dependencies: cryptsetup-devel keyutils-libs-devel
-            container: rawhide
+            container: 38
           - task: make -f Makefile release
             dependencies: cryptsetup-devel
-            container: rawhide
+            container: 38
 
     runs-on: ubuntu-20.04
     container:
