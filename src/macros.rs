@@ -136,14 +136,14 @@ macro_rules! to_cstring {
 /// Convert a byte slice into `*const c_char`
 macro_rules! to_byte_ptr {
     ( $bytes:expr ) => {
-        $bytes.as_ptr() as *const std::os::raw::c_char
+        $bytes.as_ptr().cast::<std::os::raw::c_char>()
     };
 }
 
 /// Convert a byte slice into `*mut c_char`
 macro_rules! to_mut_byte_ptr {
     ( $bytes:expr ) => {
-        $bytes.as_mut_ptr() as *mut std::os::raw::c_char
+        $bytes.as_mut_ptr().cast::<std::os::raw::c_char>()
     };
 }
 
@@ -223,7 +223,7 @@ macro_rules! c_confirm_callback {
         ) -> std::os::raw::c_int {
             let msg_str =
                 $crate::from_str_ptr!(msg).expect("Invalid message string passed to cryptsetup-rs");
-            let generic_ptr = usrptr as *mut $type;
+            let generic_ptr = usrptr.cast::<$type>();
             let generic_ref = unsafe { generic_ptr.as_mut() };
 
             $safe_fn_name(msg_str, generic_ref) as std::os::raw::c_int
@@ -247,7 +247,7 @@ macro_rules! c_logging_callback {
             let msg_str = $crate::from_str_ptr!(msg)
                 .expect("Invalid message string passed to cryptsetup-rs")
                 .trim();
-            let generic_ptr = usrptr as *mut $type;
+            let generic_ptr = usrptr.cast::<$type>();
             let generic_ref = unsafe { generic_ptr.as_mut() };
 
             $safe_fn_name(level, msg_str, generic_ref);
@@ -264,7 +264,7 @@ macro_rules! c_progress_callback {
             offset: u64,
             usrptr: *mut std::os::raw::c_void,
         ) -> std::os::raw::c_int {
-            let generic_ptr = usrptr as *mut $type;
+            let generic_ptr = usrptr.cast::<$type>();
             let generic_ref = unsafe { generic_ptr.as_mut() };
 
             $safe_fn_name(size, offset, generic_ref) as std::os::raw::c_int
@@ -390,14 +390,14 @@ mod test {
     #[test]
     fn test_c_confirm_callback() {
         let ret = confirm_callback(
-            "\0".as_ptr() as *const std::os::raw::c_char,
-            &mut 1u32 as *mut _ as *mut std::os::raw::c_void,
+            "\0".as_ptr().cast::<std::os::raw::c_char>(),
+            (&mut 1u32 as *mut u32).cast::<std::os::raw::c_void>(),
         );
         assert_eq!(1, ret);
 
         let ret = confirm_callback(
-            "\0".as_ptr() as *const std::os::raw::c_char,
-            &mut 0u32 as *mut _ as *mut std::os::raw::c_void,
+            "\0".as_ptr().cast::<std::os::raw::c_char>(),
+            (&mut 0u32 as *mut u32).cast::<std::os::raw::c_void>(),
         );
         assert_eq!(0, ret);
     }
@@ -406,23 +406,23 @@ mod test {
     fn test_c_logging_callback() {
         logging_callback(
             libcryptsetup_rs_sys::CRYPT_LOG_ERROR as i32,
-            "\0".as_ptr() as *const std::os::raw::c_char,
-            &mut 1u32 as *mut _ as *mut std::os::raw::c_void,
+            "\0".as_ptr().cast::<std::os::raw::c_char>(),
+            (&mut 1u32 as *mut u32).cast::<std::os::raw::c_void>(),
         );
 
         logging_callback(
             libcryptsetup_rs_sys::CRYPT_LOG_DEBUG,
-            "\0".as_ptr() as *const std::os::raw::c_char,
-            &mut 0u32 as *mut _ as *mut std::os::raw::c_void,
+            "\0".as_ptr().cast::<std::os::raw::c_char>(),
+            (&mut 0u32 as *mut u32).cast::<std::os::raw::c_void>(),
         );
     }
 
     #[test]
     fn test_c_progress_callback() {
-        let ret = progress_callback(0, 0, &mut 1u32 as *mut _ as *mut std::os::raw::c_void);
+        let ret = progress_callback(0, 0, (&mut 1u32 as *mut u32).cast::<std::os::raw::c_void>());
         assert_eq!(1, ret);
 
-        let ret = progress_callback(0, 0, &mut 0u32 as *mut _ as *mut std::os::raw::c_void);
+        let ret = progress_callback(0, 0, (&mut 0u32 as *mut u32).cast::<std::os::raw::c_void>());
         assert_eq!(0, ret);
     }
 

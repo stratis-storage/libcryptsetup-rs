@@ -32,7 +32,7 @@ pub fn test_keyfile_cleanup() {
             };
 
             let dangling_buffer =
-                unsafe { std::slice::from_raw_parts(keyfile_ptr as *const u8, keyfile_len) };
+                unsafe { std::slice::from_raw_parts(keyfile_ptr.cast::<u8>(), keyfile_len) };
             if dangling_buffer == b"this is a test password" {
                 panic!("Key was not cleaned up!");
             }

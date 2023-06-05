@@ -39,7 +39,7 @@ pub struct CryptParamsReencryptRef<'a> {
 
 impl<'a> CryptParamsReencryptRef<'a> {
     fn as_ptr(&self) -> *const crypt_params_reencrypt {
-        &self.inner as *const _ as *const crypt_params_reencrypt
+        (&self.inner as *const crypt_params_reencrypt).cast::<crypt_params_reencrypt>()
     }
 }
 
@@ -191,7 +191,7 @@ impl<'a> CryptLuks2ReencryptHandle<'a> {
         usrdata: Option<&mut T>,
     ) -> Result<(), LibcryptErr> {
         let usrptr = usrdata
-            .map(|data| data as *mut _ as *mut c_void)
+            .map(|data| (data as *mut T).cast::<c_void>())
             .unwrap_or_else(ptr::null_mut);
         errno!(mutex!(libcryptsetup_rs_sys::crypt_reencrypt_run(
             self.reference.as_ptr(),

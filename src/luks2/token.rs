@@ -241,7 +241,7 @@ impl<'a> CryptLuks2TokenHandle<'a> {
             return Err(LibcryptErr::NoNull(name));
         }
         let handler = libcryptsetup_rs_sys::crypt_token_handler {
-            name: name.as_ptr() as *const c_char,
+            name: name.as_ptr().cast::<c_char>(),
             open,
             buffer_free,
             validate,
@@ -265,7 +265,7 @@ impl<'a> CryptLuks2TokenHandle<'a> {
             None => None,
         };
         let usrdata_ptr = match usrdata {
-            Some(reference) => reference as *mut _ as *mut c_void,
+            Some(reference) => (reference as *mut T).cast::<c_void>(),
             None => ptr::null_mut(),
         };
         errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_activate_by_token(
