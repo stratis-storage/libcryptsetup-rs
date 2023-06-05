@@ -16,7 +16,7 @@ fn main() {
             "Would you like to proceed?\0"
                 .as_ptr()
                 .cast::<libc::c_char>(),
-            (&mut 0 as *mut i32).cast::<libc::c_void>(),
+            (&mut 0u32 as *mut u32).cast::<libc::c_void>(),
         ) == 0
     )
 }
