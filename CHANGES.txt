@@ -1,3 +1,16 @@
+libcryptsetup-rs 0.8.0
+======================
+Recommended Rust toolchain version: 1.69.0
+Lowest supported Rust toolchain version: 1.66.1
+Recommended development environment: Fedora 38
+
+- Use CryptParams::as_ptr() in load() and repair():
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/296
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/299
+
+
 libcryptsetup-rs 0.7.1
 ======================
 Recommended Rust toolchain version: 1.69.0
