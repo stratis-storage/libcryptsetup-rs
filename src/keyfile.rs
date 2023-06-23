@@ -61,7 +61,7 @@ impl<'a> CryptKeyfileHandle<'a> {
             flags.bits(),
         )))?;
         Ok(CryptKeyfileContents {
-            key_mem: unsafe { SafeMemHandle::from_ptr(key as *mut c_void, size) },
+            key_mem: unsafe { SafeMemHandle::from_ptr(key.cast::<c_void>(), size) },
         })
     }
 }

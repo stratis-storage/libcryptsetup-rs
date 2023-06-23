@@ -50,13 +50,13 @@ macro_rules! as_ref {
     ($name:ident) => {
         impl AsRef<[u8]> for $name {
             fn as_ref(&self) -> &[u8] {
-                unsafe { slice::from_raw_parts(self.0 as *const _ as *const u8, self.1) }
+                unsafe { slice::from_raw_parts(self.0.cast::<u8>(), self.1) }
             }
         }
 
         impl AsMut<[u8]> for $name {
             fn as_mut(&mut self) -> &mut [u8] {
-                unsafe { slice::from_raw_parts_mut(self.0 as *mut u8, self.1) }
+                unsafe { slice::from_raw_parts_mut(self.0.cast::<u8>(), self.1) }
             }
         }
     };
@@ -168,7 +168,7 @@ mod test {
     fn test_memzero_borrowed() {
         let mut slice = [0u8; 32];
         let mut borrowed_handle =
-            unsafe { SafeBorrowedMemZero::from_ptr(slice.as_mut_ptr() as *mut _, slice.len()) };
+            unsafe { SafeBorrowedMemZero::from_ptr(slice.as_mut_ptr().cast(), slice.len()) };
         borrowed_handle.as_mut().write_all(&[33; 32]).unwrap();
         assert_eq!(&[33; 32], borrowed_handle.as_ref());
         std::mem::drop(borrowed_handle);

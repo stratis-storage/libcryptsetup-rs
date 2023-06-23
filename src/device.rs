@@ -186,7 +186,7 @@ impl CryptDevice {
             self.ptr,
             confirm,
             match usrdata {
-                Some(ud) => ud as *mut _ as *mut c_void,
+                Some(ud) => (ud as *mut T).cast::<c_void>(),
                 None => ptr::null_mut(),
             },
         ))

@@ -9,6 +9,11 @@ use std::{
     ptr, slice,
 };
 
+use libcryptsetup_rs_sys::{
+    crypt_params_integrity, crypt_params_loopaes, crypt_params_luks1, crypt_params_luks2,
+    crypt_params_plain, crypt_params_tcrypt, crypt_params_verity,
+};
+
 use crate::{
     consts::{
         flags::{CryptTcrypt, CryptVerity},
@@ -96,7 +101,7 @@ impl<'a> TryInto<CryptParamsLuks1Ref<'a>> for &'a CryptParamsLuks1 {
 
 impl<'a> CryptParams for CryptParamsLuks1Ref<'a> {
     fn as_ptr(&mut self) -> *mut c_void {
-        &mut self.inner as *mut _ as *mut c_void
+        (&mut self.inner as *mut crypt_params_luks1).cast::<c_void>()
     }
 }
 
@@ -249,7 +254,7 @@ impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
 
 impl<'a> CryptParams for CryptParamsLuks2Ref<'a> {
     fn as_ptr(&mut self) -> *mut c_void {
-        &mut self.inner as *mut _ as *mut c_void
+        (&mut self.inner as *mut crypt_params_luks2).cast::<c_void>()
     }
 }
 
@@ -309,7 +314,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_verity> for CryptParamsV
             hash_device: PathBuf::from(from_str_ptr_to_owned!(v.hash_device)?),
             fec_device: PathBuf::from(from_str_ptr_to_owned!(v.fec_device)?),
             salt: Vec::from(unsafe {
-                std::slice::from_raw_parts(v.salt as *const u8, v.salt_size as usize)
+                std::slice::from_raw_parts(v.salt.cast::<u8>(), v.salt_size as usize)
             }),
             hash_type: v.hash_type,
             data_block_size: v.data_block_size,
@@ -337,7 +342,7 @@ impl<'a> TryInto<CryptParamsVerityRef<'a>> for &'a CryptParamsVerity {
                 data_device: data_device_cstring.as_ptr(),
                 hash_device: hash_device_cstring.as_ptr(),
                 fec_device: fec_device_cstring.as_ptr(),
-                salt: self.salt.as_ptr() as *const libc::c_char,
+                salt: self.salt.as_ptr().cast::<libc::c_char>(),
                 salt_size: self.salt.len() as u32,
                 hash_type: self.hash_type,
                 data_block_size: self.data_block_size,
@@ -359,7 +364,7 @@ impl<'a> TryInto<CryptParamsVerityRef<'a>> for &'a CryptParamsVerity {
 
 impl<'a> CryptParams for CryptParamsVerityRef<'a> {
     fn as_ptr(&mut self) -> *mut c_void {
-        &mut self.inner as *mut _ as *mut c_void
+        (&mut self.inner as *mut crypt_params_verity).cast::<c_void>()
     }
 }
 
@@ -414,7 +419,7 @@ impl<'a> TryInto<CryptParamsLoopaesRef<'a>> for &'a CryptParamsLoopaes {
 
 impl<'a> CryptParams for CryptParamsLoopaesRef<'a> {
     fn as_ptr(&mut self) -> *mut c_void {
-        &mut self.inner as *mut _ as *mut c_void
+        (&mut self.inner as *mut crypt_params_loopaes).cast::<c_void>()
     }
 }
 
@@ -514,14 +519,14 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_integrity> for CryptPara
             journal_integrity: from_str_ptr_to_owned!(v.journal_integrity)?,
             journal_integrity_key: Vec::from(unsafe {
                 std::slice::from_raw_parts(
-                    v.journal_integrity_key as *const u8,
+                    v.journal_integrity_key.cast::<u8>(),
                     v.journal_integrity_key_size as usize,
                 )
             }),
             journal_crypt: from_str_ptr_to_owned!(v.journal_crypt)?,
             journal_crypt_key: Vec::from(unsafe {
                 std::slice::from_raw_parts(
-                    v.journal_crypt_key as *const u8,
+                    v.journal_crypt_key.cast::<u8>(),
                     v.journal_crypt_key_size as usize,
                 )
             }),
@@ -531,7 +536,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_integrity> for CryptPara
 
 impl<'a> CryptParams for CryptParamsIntegrityRef<'a> {
     fn as_ptr(&mut self) -> *mut c_void {
-        &mut self.inner as *mut _ as *mut c_void
+        (&mut self.inner as *mut crypt_params_integrity).cast::<c_void>()
     }
 }
 
@@ -594,7 +599,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_plain> for CryptParamsPl
 
 impl<'a> CryptParams for CryptParamsPlainRef<'a> {
     fn as_ptr(&mut self) -> *mut c_void {
-        &mut self.inner as *mut _ as *mut c_void
+        (&mut self.inner as *mut crypt_params_plain).cast::<c_void>()
     }
 }
 
@@ -654,7 +659,7 @@ impl<'a> TryInto<CryptParamsTcryptRef<'a>> for &'a CryptParamsTcrypt {
         Ok(CryptParamsTcryptRef {
             inner: libcryptsetup_rs_sys::crypt_params_tcrypt {
                 passphrase: match self.passphrase {
-                    Some(ref pass) => pass.as_ptr() as *const libc::c_char,
+                    Some(ref pass) => pass.as_ptr().cast::<libc::c_char>(),
                     None => std::ptr::null(),
                 },
                 passphrase_size: match self.passphrase {
@@ -691,7 +696,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_tcrypt> for CryptParamsT
         }
         Ok(CryptParamsTcrypt {
             passphrase: ptr_to_option!(v.passphrase).map(|p| {
-                unsafe { slice::from_raw_parts(p as *const u8, v.passphrase_size) }.to_vec()
+                unsafe { slice::from_raw_parts(p.cast::<u8>(), v.passphrase_size) }.to_vec()
             }),
             keyfiles: if keyfiles.is_empty() {
                 None
@@ -710,7 +715,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_tcrypt> for CryptParamsT
 
 impl<'a> CryptParams for CryptParamsTcryptRef<'a> {
     fn as_ptr(&mut self) -> *mut c_void {
-        &mut self.inner as *mut _ as *mut c_void
+        (&mut self.inner as *mut crypt_params_tcrypt).cast::<c_void>()
     }
 }
 
