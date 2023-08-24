@@ -28,6 +28,7 @@ macro_rules! define_handle {
             fn drop(&mut self) {
                 self.safe_memzero();
                 $(
+                    #[allow(clippy::redundant_closure_call)]
                     unsafe { $drop(self) };
                 )?
             }
