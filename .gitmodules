@@ -1,0 +1,3 @@
+[submodule "per-thread-mutex"]
+	path = per-thread-mutex
+	url = https://github.com/jbaublitz/per-thread-mutex

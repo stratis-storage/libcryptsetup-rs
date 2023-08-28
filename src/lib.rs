@@ -31,6 +31,8 @@ mod keyslot;
 mod log;
 mod luks2;
 mod mem;
+#[cfg(feature = "mutex")]
+mod mutex;
 mod runtime;
 mod settings;
 mod status;
@@ -60,7 +62,7 @@ pub use crate::{
     luks2::{
         flags::CryptLuks2FlagsHandle,
         reencrypt::{CryptLuks2ReencryptHandle, CryptParamsReencrypt, CryptParamsReencryptRef},
-        token::{CryptLuks2TokenHandle, CryptTokenInfo, TokenInput},
+        token::{register, CryptLuks2TokenHandle, CryptTokenInfo, TokenInput},
     },
     mem::SafeMemHandle,
     runtime::{ActiveDevice, CryptRuntimeHandle},
@@ -77,7 +79,7 @@ pub type Result<T> = std::result::Result<T, LibcryptErr>;
 
 #[cfg(feature = "mutex")]
 lazy_static::lazy_static! {
-    static ref MUTEX: std::sync::Mutex<()> = std::sync::Mutex::new(());
+    static ref MUTEX: crate::mutex::PerThreadMutex = crate::mutex::PerThreadMutex::default();
 }
 
 #[cfg(not(feature = "mutex"))]

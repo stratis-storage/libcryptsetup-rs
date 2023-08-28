@@ -25,7 +25,11 @@ jobs:
       TOOLCHAIN: 1.72.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-20.04
     steps:
+      - name: Install git
+        run: sudo apt-get install git
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@master
         with:
           components: rustfmt
@@ -38,7 +42,11 @@ jobs:
       TOOLCHAIN: 1.72.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-20.04
     steps:
+      - name: Install git
+        run: sudo apt-get install git
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@master
         with:
           components: clippy
@@ -70,7 +78,11 @@ jobs:
             dependencies: libcryptsetup-dev
     runs-on: ubuntu-20.04
     steps:
+      - name: Install git
+        run: sudo apt-get install git
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -95,7 +107,11 @@ jobs:
             dependencies: libcryptsetup-dev libkeyutils-dev
     runs-on: ubuntu-20.04
     steps:
+      - name: Install git
+        run: sudo apt-get install git
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -187,7 +203,11 @@ jobs:
       image: fedora:${{ matrix.container }}
       options: --privileged -v /dev:/dev
     steps:
+      - name: Install git
+        run: dnf install -y git
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -201,7 +221,11 @@ jobs:
     runs-on: ubuntu-20.04
     container: fedora:38  # CURRENT DEVELOPMENT ENVIRONMENT
     steps:
+      - name: Install git
+        run: dnf install -y git
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: Install dependencies
         run: dnf install -y make yamllint
       - name: Run yamllint
