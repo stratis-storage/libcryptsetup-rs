@@ -23,7 +23,11 @@ jobs:
             task: make -f Makefile clippy
     runs-on: ubuntu-20.04
     steps:
+      - name: Install git
+        run: sudo apt-get install git
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - uses: dtolnay/rust-toolchain@master
         with:
           components: ${{ matrix.component }}
@@ -38,7 +42,11 @@ jobs:
     container:
       image: fedora:38  # CURRENT DEVELOPMENT ENVIRONMENT
     steps:
+      - name: Install git
+        run: dnf install -y git
       - uses: actions/checkout@v3
+        with:
+          submodules: true
       - name: Install dependencies for Fedora
         run: >
           dnf install -y

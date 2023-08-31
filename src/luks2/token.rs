@@ -229,29 +229,6 @@ impl<'a> CryptLuks2TokenHandle<'a> {
         }
     }
 
-    /// Register token handler
-    pub fn register(
-        name: &'static str,
-        open: libcryptsetup_rs_sys::crypt_token_open_func,
-        buffer_free: libcryptsetup_rs_sys::crypt_token_buffer_free_func,
-        validate: libcryptsetup_rs_sys::crypt_token_validate_func,
-        dump: libcryptsetup_rs_sys::crypt_token_dump_func,
-    ) -> Result<(), LibcryptErr> {
-        if name.get(name.len() - 1..) != Some("\0") {
-            return Err(LibcryptErr::NoNull(name));
-        }
-        let handler = libcryptsetup_rs_sys::crypt_token_handler {
-            name: name.as_ptr().cast::<c_char>(),
-            open,
-            buffer_free,
-            validate,
-            dump,
-        };
-        errno!(mutex!(libcryptsetup_rs_sys::crypt_token_register(
-            &handler as *const libcryptsetup_rs_sys::crypt_token_handler,
-        )))
-    }
-
     /// Activate device or check key using a token
     pub fn activate_by_token<T>(
         &mut self,
@@ -282,4 +259,27 @@ impl<'a> CryptLuks2TokenHandle<'a> {
         )))
         .map(|rc| rc as c_uint)
     }
+}
+
+/// Register token handler
+pub fn register(
+    name: &'static str,
+    open: libcryptsetup_rs_sys::crypt_token_open_func,
+    buffer_free: libcryptsetup_rs_sys::crypt_token_buffer_free_func,
+    validate: libcryptsetup_rs_sys::crypt_token_validate_func,
+    dump: libcryptsetup_rs_sys::crypt_token_dump_func,
+) -> Result<(), LibcryptErr> {
+    if name.get(name.len() - 1..) != Some("\0") {
+        return Err(LibcryptErr::NoNull(name));
+    }
+    let handler = libcryptsetup_rs_sys::crypt_token_handler {
+        name: name.as_ptr().cast::<c_char>(),
+        open,
+        buffer_free,
+        validate,
+        dump,
+    };
+    errno!(mutex!(libcryptsetup_rs_sys::crypt_token_register(
+        &handler as *const libcryptsetup_rs_sys::crypt_token_handler,
+    )))
 }
