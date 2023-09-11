@@ -1,3 +1,34 @@
+libcryptsetup-rs 0.9.0
+======================
+Recommended Rust toolchain version: 1.72.0
+Lowest supported Rust toolchain version: 1.71.1
+Recommended development environment: Fedora 38
+
+- Add submodule and use per-thread-mutex for synchronization:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/313
+
+- Increase bitflags dependency lower bound to 2.3.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/316
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/318
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/317
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/316
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/315
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/314
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/312
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/311
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/310
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/309
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/308
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/307
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/306
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/305
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/304
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/303
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/301
+
+
 libcryptsetup-rs 0.8.0
 ======================
 Recommended Rust toolchain version: 1.69.0
