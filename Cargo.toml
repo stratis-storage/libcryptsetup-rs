@@ -46,4 +46,4 @@ mutex = []
 
 [patch.crates-io.loopdev]
 git = "https://github.com/mulkieran/loopdev"
-branch = "bump-bindgen-reduce-version"
+branch = "bump-bindgen-reduce-version-0.68.1"
