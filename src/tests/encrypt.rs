@@ -163,7 +163,7 @@ fn write_random(device_name: &str) -> Result<Box<[u8]>, io::Error> {
     Ok(random_buffer)
 }
 
-fn test_existance(file_path: &Path, buffer: &[u8]) -> Result<bool, io::Error> {
+fn test_existence(file_path: &Path, buffer: &[u8]) -> Result<bool, io::Error> {
     let file_path_cstring =
         CString::new(file_path.to_str().ok_or_else(|| {
             io::Error::new(io::ErrorKind::Other, "Failed to convert path to string")
@@ -226,7 +226,7 @@ fn run_plaintext_test(dev_path: &Path, device_name: &str) -> Result<bool, Libcry
 
     let buffer = write_result.map_err(|e| LibcryptErr::Other(e.to_string()))?;
 
-    test_existance(dev_path, &buffer).map_err(|e| LibcryptErr::Other(e.to_string()))
+    test_existence(dev_path, &buffer).map_err(|e| LibcryptErr::Other(e.to_string()))
 }
 
 pub fn test_encrypt_by_password() {
