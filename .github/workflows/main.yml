@@ -56,6 +56,23 @@ jobs:
           sudo apt-get install libcryptsetup-dev
       - name: Test linting on ${{ env.TOOLCHAIN }} toolchain
         run: make -f Makefile $TASK
+  typos:
+    env:
+      TASK: check-typos
+      TOOLCHAIN: 1.72.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
+    runs-on: ubuntu-20.04
+    steps:
+      - name: Install git
+        run: sudo apt-get install git
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+      - uses: baptiste0928/cargo-install@v2
+        with:
+          crate: typos-cli
+      - name: Test typos on ${{ env.TOOLCHAIN }} toolchain
+        run: make -f Makefile $TASK
+
 
   # MANDATORY TESTING ON STABLE
   stable:

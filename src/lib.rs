@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-//! This is a wrapper library for libcryptsetup. The intension is to provide as much safety as
+//! This is a wrapper library for libcryptsetup. The intention is to provide as much safety as
 //! possible when crossing FFI boundaries to the cryptsetup C library.
 
 // Keyfile reading functions are supported through a workaround in these bindings due
