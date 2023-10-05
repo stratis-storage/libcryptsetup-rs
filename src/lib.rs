@@ -112,7 +112,7 @@ mod test {
     #[ignore]
     #[test]
     fn test_unencrypted() {
-        tests::encrypt::test_unecrypted();
+        tests::encrypt::test_unencrypted();
     }
 
     #[ignore]

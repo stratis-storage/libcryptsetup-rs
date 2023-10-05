@@ -292,7 +292,7 @@ pub fn test_encrypt_by_password_without_explicit_format() {
     .expect("Should succeed");
 }
 
-pub fn test_unecrypted() {
+pub fn test_unencrypted() {
     loopback::use_loopback(
         1024 * 1024 * 1024,
         super::format_with_zeros(),
