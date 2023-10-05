@@ -15,7 +15,7 @@ categories = ["cryptography", "api-bindings", "os::linux-apis"]
 exclude = [".clippy.toml", ".githooks/*", ".gitignore", ".github/*", "Makefile"]
 
 [dependencies.libcryptsetup-rs-sys]
-version = "0.2.4"
+version = "0.3.0"
 path = "./libcryptsetup-rs-sys"
 
 [dependencies]
