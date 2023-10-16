@@ -189,11 +189,11 @@ impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
             Some(ref pbkdf) => Some(Box::new(pbkdf.try_into()?)),
             None => None,
         };
-        let integrity_params: Option<Box<CryptParamsIntegrityRef<'a>>> =
-            match self.integrity_params {
-                Some(ref integrity) => Some(Box::new(integrity.try_into()?)),
-                None => None,
-            };
+        let integrity_params: Option<Box<CryptParamsIntegrityRef<'a>>> = match self.integrity_params
+        {
+            Some(ref integrity) => Some(Box::new(integrity.try_into()?)),
+            None => None,
+        };
 
         let integrity_cstring_opt = match self.integrity {
             Some(ref intg) => Some(to_cstring!(intg)?),
