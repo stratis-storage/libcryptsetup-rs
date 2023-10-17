@@ -5,6 +5,6 @@ make fmt-ci && \
 	make test && \
 	make test-mutex && \
 	make test-mutex-guard && \
-	make clippy \
+	make clippy && \
 	make check-typos \
 	|| exit 1
