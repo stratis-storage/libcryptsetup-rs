@@ -113,9 +113,9 @@ pub struct CryptParamsLuks2Ref<'a> {
     #[allow(dead_code)]
     reference: &'a CryptParamsLuks2,
     #[allow(dead_code)]
-    pbkdf_type: Option<CryptPbkdfTypeRef<'a>>,
+    pbkdf_type: Option<Box<CryptPbkdfTypeRef<'a>>>,
     #[allow(dead_code)]
-    integrity_params: Option<CryptParamsIntegrityRef<'a>>,
+    integrity_params: Option<Box<CryptParamsIntegrityRef<'a>>>,
     #[allow(dead_code)]
     integrity_cstring_opt: Option<CString>,
     #[allow(dead_code)]
@@ -185,12 +185,13 @@ impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<CryptParamsLuks2Ref<'a>, Self::Error> {
-        let pbkdf_type: Option<CryptPbkdfTypeRef<'a>> = match self.pbkdf {
-            Some(ref pbkdf) => Some(pbkdf.try_into()?),
+        let pbkdf_type: Option<Box<CryptPbkdfTypeRef<'a>>> = match self.pbkdf {
+            Some(ref pbkdf) => Some(Box::new(pbkdf.try_into()?)),
             None => None,
         };
-        let integrity_params: Option<CryptParamsIntegrityRef<'a>> = match self.integrity_params {
-            Some(ref integrity) => Some(integrity.try_into()?),
+        let integrity_params: Option<Box<CryptParamsIntegrityRef<'a>>> = match self.integrity_params
+        {
+            Some(ref integrity) => Some(Box::new(integrity.try_into()?)),
             None => None,
         };
 
