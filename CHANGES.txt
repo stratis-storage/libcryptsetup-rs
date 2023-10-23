@@ -1,3 +1,29 @@
+libcryptsetup-rs 0.9.1
+======================
+Recommended Rust toolchain version: 1.72.0
+Recommended development environment: Fedora 38
+
+- libcryptsetup-rs-sys: Increase bindgen dependency lower bound to 0.68.1:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/320
+
+- libcryptsetup-rs-sys: Fix libcrypsetup.h path while cross-compiling:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/328
+
+- Use after free fix for CryptParamsIntegrityRef and CryptPbkidfTypeRef:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/324
+
+- Update per-thread-mutex submodule version to 0.1.2:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/330
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/329
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/327
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/326
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/323
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/322
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/321
+
+
 libcryptsetup-rs 0.9.0
 ======================
 Recommended Rust toolchain version: 1.72.0
