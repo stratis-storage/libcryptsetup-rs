@@ -1,3 +1,8 @@
+ifeq ($(origin PROFILE), undefined)
+else
+  PROFILE_FLAGS = -C instrument-coverage
+endif
+
 ifeq ($(origin FEDORA_RELEASE), undefined)
 else
   FEDORA_RELEASE_ARGS = --release=${FEDORA_RELEASE}
@@ -22,7 +27,7 @@ check-typos:
 	typos
 
 build:
-	RUSTFLAGS="${DENY}" cargo build
+	RUSTFLAGS="${DENY} ${PROFILE_FLAGS}" cargo build
 
 test-compare-fedora-versions:
 	echo "Testing that COMPARE_FEDORA_VERSIONS environment variable is set to a valid path"
@@ -61,21 +66,21 @@ fmt-ci:
 	cargo fmt -- --check
 
 release:
-	RUSTFLAGS="${DENY}" cargo build --release
+	RUSTFLAGS="${DENY} ${PROFILE_FLAGS}" cargo build --release
 
 test:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test -- --skip test_mutex_poisoning_panic
+	RUSTFLAGS="${DENY} ${PROFILE_FLAGS}" RUST_BACKTRACE=1 cargo test -- --skip test_mutex_poisoning_panic
 
 test-mutex:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test --features=mutex -- --skip test_mutex_poisoning_panic
+	RUSTFLAGS="${DENY} ${PROFILE_FLAGS}" RUST_BACKTRACE=1 cargo test --features=mutex -- --skip test_mutex_poisoning_panic
 
 test-mutex-guard:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex test_mutex_poisoning_panic
+	RUSTFLAGS="${DENY} ${PROFILE_FLAGS}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex test_mutex_poisoning_panic
 
 # Loopback tests must have the mutex feature enabled because Rust runs the tests
 # on multiple threads which will cause a panic if the mutex feature is not enabled.
 test-loopback:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER='sudo -E' cargo test --features=mutex -- --ignored --skip test_mutex_poisoning_panic
+	RUSTFLAGS="${DENY} ${PROFILE_FLAGS}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER='sudo -E' cargo test --features=mutex -- --ignored --skip test_mutex_poisoning_panic
 
 yamllint:
 	yamllint --strict .github/workflows/*.yml
