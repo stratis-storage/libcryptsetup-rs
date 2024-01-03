@@ -8,6 +8,12 @@ else
   MANIFEST_PATH_ARGS = --manifest-path=${MANIFEST_PATH}
 endif
 
+ifeq ($(origin CLIPPY_FIX), undefined)
+  CLIPPY_OPTS = --all-targets --no-deps
+else
+  CLIPPY_OPTS = --fix
+endif
+
 IGNORE_ARGS ?=
 
 DENY = -D warnings -D future-incompatible -D unused -D rust_2018_idioms -D nonstandard_style
@@ -43,10 +49,10 @@ verify-dependency-bounds: test-set-lower-bounds
 
 clippy:
 	(cd libcryptsetup-rs-sys && RUSTFLAGS="${DENY}" \
-        cargo clippy --all-targets --all-features -- \
+        cargo clippy --all-features ${CARGO_OPTS} -- \
         -D clippy::cargo -D clippy::all)
 	RUSTFLAGS="${DENY}" \
-        cargo clippy --all-targets --all-features -- \
+        cargo clippy --all-features ${CARGO_OPTS} -- \
         -D clippy::cargo -D clippy::all -D clippy::ptr-as-ptr
 
 docs-rust:
