@@ -37,13 +37,9 @@ semver = "1.0.0"
 [dev-dependencies]
 base64 = "0.21.0"
 env_logger = "0.10.0"
-loopdev = "0.4.0"
+loopdev-3 = "0.5.0"
 nix = {version="0.27.1", features=["user"]}
 rand = "0.8.0"
 
 [features]
 mutex = []
-
-[patch.crates-io.loopdev]
-git = "https://github.com/mulkieran/loopdev"
-branch = "bump-bindgen-reduce-version-0.68.1"
