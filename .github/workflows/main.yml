@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@master
@@ -44,7 +44,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@master
@@ -64,7 +64,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@master
@@ -100,7 +100,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@master
@@ -129,7 +129,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@master
@@ -225,7 +225,7 @@ jobs:
     steps:
       - name: Install git
         run: dnf install -y git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - uses: dtolnay/rust-toolchain@master
@@ -243,7 +243,7 @@ jobs:
     steps:
       - name: Install git
         run: dnf install -y git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
         with:
           submodules: true
       - name: Install dependencies

@@ -19,7 +19,7 @@ jobs:
     steps:
       - name: Install git
         run: dnf install -y git
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - name: Install dependencies
         run: >
           dnf install -y
