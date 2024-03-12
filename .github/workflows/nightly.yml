@@ -69,10 +69,10 @@ jobs:
         run: |
           # -sys
           COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../libcryptsetup-rs-sys/Cargo.toml FEDORA_RELEASE=rawhide make -f ../../Makefile check-fedora-versions
+          COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../libcryptsetup-rs-sys/Cargo.toml FEDORA_RELEASE=f40 make -f ../../Makefile check-fedora-versions
           COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../libcryptsetup-rs-sys/Cargo.toml FEDORA_RELEASE=f39 make -f ../../Makefile check-fedora-versions
-          COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../libcryptsetup-rs-sys/Cargo.toml FEDORA_RELEASE=f38 make -f ../../Makefile check-fedora-versions
           # main
           COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../Cargo.toml FEDORA_RELEASE=rawhide IGNORE_ARGS="--ignore-high=libcryptsetup-rs-sys --ignore-high=loopdev" make -f ../../Makefile check-fedora-versions
+          COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../Cargo.toml FEDORA_RELEASE=f40 IGNORE_ARGS="--ignore-high=libcryptsetup-rs-sys --ignore-high=loopdev" make -f ../../Makefile check-fedora-versions
           COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../Cargo.toml FEDORA_RELEASE=f39 IGNORE_ARGS="--ignore-high=libcryptsetup-rs-sys --ignore-high=loopdev" make -f ../../Makefile check-fedora-versions
-          COMPARE_FEDORA_VERSIONS=./compare_fedora_versions MANIFEST_PATH=../../Cargo.toml FEDORA_RELEASE=f38 IGNORE_ARGS="--ignore-high=libcryptsetup-rs-sys --ignore-high=loopdev" make -f ../../Makefile check-fedora-versions
         working-directory: ./ci/dependency_management
