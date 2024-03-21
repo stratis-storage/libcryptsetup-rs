@@ -127,7 +127,10 @@ impl<'a> CryptLuks2ReencryptHandle<'a> {
         errno_int_success!(mutex!(
             libcryptsetup_rs_sys::crypt_reencrypt_init_by_passphrase(
                 self.reference.as_ptr(),
-                name_cstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
+                name_cstring
+                    .as_ref()
+                    .map(|cs| cs.as_ptr())
+                    .unwrap_or(ptr::null()),
                 to_byte_ptr!(passphrase),
                 passphrase.len(),
                 keyslot_old,
@@ -162,7 +165,10 @@ impl<'a> CryptLuks2ReencryptHandle<'a> {
         errno_int_success!(mutex!(
             libcryptsetup_rs_sys::crypt_reencrypt_init_by_keyring(
                 self.reference.as_ptr(),
-                name_cstring.map(|cs| cs.as_ptr()).unwrap_or(ptr::null()),
+                name_cstring
+                    .as_ref()
+                    .map(|cs| cs.as_ptr())
+                    .unwrap_or(ptr::null()),
                 description_cstring.as_ptr(),
                 keyslot_old,
                 keyslot_new,
