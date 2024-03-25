@@ -1,3 +1,29 @@
+libcryptsetup-rs 0.9.3
+======================
+Recommended Rust toolchain version: 1.76.0
+Recommended development environment: Fedora 39
+
+- Fix bug in reencrypt API where CStrings were deallocated too soon:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/350
+
+- Increase nix dependency lower bound to 0.28.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/352
+
+- Increase env_logger dependency lower bound to 0.11.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/351
+
+- libcryptsetup-rs-sys: Release version 0.4.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/346
+
+- libcryptsetup-rs-sys: Increase bindgen dependency lower bound:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/345
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/349
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/344
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/343
+
+
 libcryptsetup-rs 0.9.2
 ======================
 Recommended Rust toolchain version: 1.75.0
