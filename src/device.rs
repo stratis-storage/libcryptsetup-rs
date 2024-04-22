@@ -201,11 +201,10 @@ impl CryptDevice {
         )))
     }
 
-    /// Set the offset in 4096-byte sectors for the data section on a device
+    /// Set the offset in 512-byte sectors for the data section on a device
     pub fn set_data_offset(&mut self, offset: u64) -> Result<(), LibcryptErr> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_set_data_offset(
-            self.ptr,
-            offset * 8
+            self.ptr, offset
         )))
     }
 
