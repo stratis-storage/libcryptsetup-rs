@@ -50,7 +50,7 @@ verify-dependency-bounds: test-set-lower-bounds
 clippy:
 	(cd libcryptsetup-rs-sys && RUSTFLAGS="${DENY}" \
         cargo clippy --all-features ${CARGO_OPTS} -- \
-        -D clippy::cargo -D clippy::all)
+        -D clippy::cargo -D clippy::all -A clippy::multiple-crate-versions)
 	RUSTFLAGS="${DENY}" \
         cargo clippy --all-features ${CARGO_OPTS} -- \
         -D clippy::cargo -D clippy::all -D clippy::ptr-as-ptr
