@@ -40,6 +40,8 @@ mod status;
 mod tests;
 mod wipe;
 
+use once_cell::sync::Lazy;
+
 #[cfg(cryptsetup23supported)]
 pub use crate::mem::{SafeBorrowedMemZero, SafeMemzero, SafeOwnedMemZero};
 pub use crate::{
@@ -78,14 +80,10 @@ pub use libc::{c_int, c_uint, size_t};
 pub type Result<T> = std::result::Result<T, LibcryptErr>;
 
 #[cfg(feature = "mutex")]
-lazy_static::lazy_static! {
-    static ref MUTEX: crate::mutex::PerThreadMutex = crate::mutex::PerThreadMutex::default();
-}
+static MUTEX: Lazy<crate::mutex::PerThreadMutex> = Lazy::new(crate::mutex::PerThreadMutex::default);
 
 #[cfg(not(feature = "mutex"))]
-lazy_static::lazy_static! {
-    static ref THREAD_ID: std::thread::ThreadId = std::thread::current().id();
-}
+static THREAD_ID: Lazy<std::thread::ThreadId> = Lazy::new(|| std::thread::current().id());
 
 #[cfg(test)]
 mod test {
