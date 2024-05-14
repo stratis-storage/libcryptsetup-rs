@@ -4,11 +4,11 @@
 
 use std::{
     ffi::CString,
-    os::raw::{c_int, c_void},
+    os::raw::{c_int, c_uint, c_void},
     ptr,
 };
 
-use libcryptsetup_rs_sys::crypt_params_reencrypt;
+use libcryptsetup_rs_sys::{crypt_params_reencrypt, CRYPT_ANY_SLOT};
 
 use crate::{
     consts::{
@@ -110,8 +110,8 @@ impl<'a> CryptLuks2ReencryptHandle<'a> {
         &mut self,
         name: Option<&str>,
         passphrase: &[u8],
-        keyslot_old: c_int,
-        keyslot_new: c_int,
+        keyslot_old: Option<c_uint>,
+        keyslot_new: c_uint,
         cipher_and_mode: (&str, &str),
         params: CryptParamsReencrypt,
     ) -> Result<c_int, LibcryptErr> {
@@ -133,8 +133,8 @@ impl<'a> CryptLuks2ReencryptHandle<'a> {
                     .unwrap_or(ptr::null()),
                 to_byte_ptr!(passphrase),
                 passphrase.len(),
-                keyslot_old,
-                keyslot_new,
+                keyslot_old.map(|k| k as c_int).unwrap_or(CRYPT_ANY_SLOT),
+                keyslot_new as c_int,
                 cipher_cstring.as_ptr(),
                 cipher_mode_cstring.as_ptr(),
                 params_reencrypt.as_ptr()
@@ -143,12 +143,12 @@ impl<'a> CryptLuks2ReencryptHandle<'a> {
     }
 
     /// Initialize reencryption metadata on a device by passphrase in a keyring
-    pub fn reecrypt_init_by_keyring(
+    pub fn reencrypt_init_by_keyring(
         &mut self,
         name: Option<&str>,
         key_description: &str,
-        keyslot_old: c_int,
-        keyslot_new: c_int,
+        keyslot_old: Option<c_uint>,
+        keyslot_new: c_uint,
         cipher_and_mode: (&str, &str),
         params: CryptParamsReencrypt,
     ) -> Result<c_int, LibcryptErr> {
@@ -170,8 +170,8 @@ impl<'a> CryptLuks2ReencryptHandle<'a> {
                     .map(|cs| cs.as_ptr())
                     .unwrap_or(ptr::null()),
                 description_cstring.as_ptr(),
-                keyslot_old,
-                keyslot_new,
+                keyslot_old.map(|k| k as c_int).unwrap_or(CRYPT_ANY_SLOT),
+                keyslot_new as c_int,
                 cipher_cstring.as_ptr(),
                 cipher_mode_cstring.as_ptr(),
                 params_reencrypt.as_ptr(),
