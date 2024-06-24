@@ -1,3 +1,37 @@
+libcryptsetup-rs 0.10.0
+=======================
+Recommended Rust toolchain version: 1.79.0
+Recommended development environment: Fedora 40
+
+- Fix for API for reencrypt:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/347
+
+- Fix issue where getter and setter used different units:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/356
+
+- Use once_cell rather than lazy_static for lazy statics:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/358
+
+- Increase nix dependency lower bound to 0.29.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/362
+
+- Increase libc dependency lower bound to 0.2.155:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/366
+
+- Increase pkg-config dependency lower bound to 0.3.15:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/365
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/364
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/363
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/361
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/360
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/359
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/357
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/355
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/354
+
+
 libcryptsetup-rs 0.9.3
 ======================
 Recommended Rust toolchain version: 1.76.0
