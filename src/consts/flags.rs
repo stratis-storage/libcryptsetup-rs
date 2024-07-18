@@ -7,116 +7,116 @@ use bitflags::bitflags;
 bitflags! {
     /// Crypt device activation flags.
     pub struct CryptActivate: u32 {
-        const READONLY = libcryptsetup_rs_sys::crypt_activate_readonly;
-        const NO_UUID = libcryptsetup_rs_sys::crypt_activate_no_uuid;
-        const SHARED = libcryptsetup_rs_sys::crypt_activate_shared;
-        const ALLOW_DISCARDS = libcryptsetup_rs_sys::crypt_activate_allow_discards;
-        const PRIVATE = libcryptsetup_rs_sys::crypt_activate_private;
-        const CORRUPTED = libcryptsetup_rs_sys::crypt_activate_corrupted;
-        const SAME_CPU_CRYPT = libcryptsetup_rs_sys::crypt_activate_same_cpu_crypt;
-        const SUBMIT_FROM_CRYPT_CPUS = libcryptsetup_rs_sys::crypt_activate_submit_from_crypt_cpus;
-        const IGNORE_CORRUPTION = libcryptsetup_rs_sys::crypt_activate_ignore_corruption;
-        const RESTART_ON_CORRUPTION = libcryptsetup_rs_sys::crypt_activate_restart_on_corruption;
-        const IGNORE_ZERO_BLOCKS = libcryptsetup_rs_sys::crypt_activate_ignore_zero_blocks;
-        const KEYRING_KEY = libcryptsetup_rs_sys::crypt_activate_keyring_key;
-        const NO_JOURNAL = libcryptsetup_rs_sys::crypt_activate_no_journal;
-        const RECOVERY = libcryptsetup_rs_sys::crypt_activate_recovery;
-        const IGNORE_PERSISTENT = libcryptsetup_rs_sys::crypt_activate_ignore_persistent;
-        const CHECK_AT_MOST_ONCE = libcryptsetup_rs_sys::crypt_activate_check_at_most_once;
-        const ALLOW_UNBOUND_KEY = libcryptsetup_rs_sys::crypt_activate_allow_unbound_key;
-        const RECALCULATE = libcryptsetup_rs_sys::crypt_activate_recalculate;
-        const REFRESH = libcryptsetup_rs_sys::crypt_activate_refresh;
-        const SERIALIZE_MEMORY_HARD_PBKDF = libcryptsetup_rs_sys::crypt_activate_serialize_memory_hard_pbkdf;
-        const NO_JOURNAL_BITMAP = libcryptsetup_rs_sys::crypt_activate_no_journal_bitmap;
+        const READONLY = libcryptsetup_rs_sys::CRYPT_ACTIVATE_READONLY;
+        const NO_UUID = libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_UUID;
+        const SHARED = libcryptsetup_rs_sys::CRYPT_ACTIVATE_SHARED;
+        const ALLOW_DISCARDS = libcryptsetup_rs_sys::CRYPT_ACTIVATE_ALLOW_DISCARDS;
+        const PRIVATE = libcryptsetup_rs_sys::CRYPT_ACTIVATE_PRIVATE;
+        const CORRUPTED = libcryptsetup_rs_sys::CRYPT_ACTIVATE_CORRUPTED;
+        const SAME_CPU_CRYPT = libcryptsetup_rs_sys::CRYPT_ACTIVATE_SAME_CPU_CRYPT;
+        const SUBMIT_FROM_CRYPT_CPUS = libcryptsetup_rs_sys::CRYPT_ACTIVATE_SUBMIT_FROM_CRYPT_CPUS;
+        const IGNORE_CORRUPTION = libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_CORRUPTION;
+        const RESTART_ON_CORRUPTION = libcryptsetup_rs_sys::CRYPT_ACTIVATE_RESTART_ON_CORRUPTION;
+        const IGNORE_ZERO_BLOCKS = libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_ZERO_BLOCKS;
+        const KEYRING_KEY = libcryptsetup_rs_sys::CRYPT_ACTIVATE_KEYRING_KEY;
+        const NO_JOURNAL = libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_JOURNAL;
+        const RECOVERY = libcryptsetup_rs_sys::CRYPT_ACTIVATE_RECOVERY;
+        const IGNORE_PERSISTENT = libcryptsetup_rs_sys::CRYPT_ACTIVATE_IGNORE_PERSISTENT;
+        const CHECK_AT_MOST_ONCE = libcryptsetup_rs_sys::CRYPT_ACTIVATE_CHECK_AT_MOST_ONCE;
+        const ALLOW_UNBOUND_KEY = libcryptsetup_rs_sys::CRYPT_ACTIVATE_ALLOW_UNBOUND_KEY;
+        const RECALCULATE = libcryptsetup_rs_sys::CRYPT_ACTIVATE_RECALCULATE;
+        const REFRESH = libcryptsetup_rs_sys::CRYPT_ACTIVATE_REFRESH;
+        const SERIALIZE_MEMORY_HARD_PBKDF = libcryptsetup_rs_sys::CRYPT_ACTIVATE_SERIALIZE_MEMORY_HARD_PBKDF;
+        const NO_JOURNAL_BITMAP = libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_JOURNAL_BITMAP;
         #[cfg(cryptsetup23supported)]
-        const SUSPENDED = libcryptsetup_rs_sys::crypt_activate_suspended;
+        const SUSPENDED = libcryptsetup_rs_sys::CRYPT_ACTIVATE_SUSPENDED;
         #[cfg(cryptsetup24supported)]
-        const IV_LARGE_SECTORS = libcryptsetup_rs_sys::crypt_activate_iv_large_sectors;
+        const IV_LARGE_SECTORS = libcryptsetup_rs_sys::CRYPT_ACTIVATE_IV_LARGE_SECTORS;
         #[cfg(cryptsetup24supported)]
-        const PANIC_ON_CORRUPTION = libcryptsetup_rs_sys::crypt_activate_panic_on_corruption;
+        const PANIC_ON_CORRUPTION = libcryptsetup_rs_sys::CRYPT_ACTIVATE_PANIC_ON_CORRUPTION;
         #[cfg(cryptsetup24supported)]
-        const NO_READ_WORKQUEUE = libcryptsetup_rs_sys::crypt_activate_no_read_workqueue;
+        const NO_READ_WORKQUEUE = libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_READ_WORKQUEUE;
         #[cfg(cryptsetup24supported)]
-        const NO_WRITE_WORKQUEUE = libcryptsetup_rs_sys::crypt_activate_no_write_workqueue;
+        const NO_WRITE_WORKQUEUE = libcryptsetup_rs_sys::CRYPT_ACTIVATE_NO_WRITE_WORKQUEUE;
         #[cfg(cryptsetup24supported)]
-        const RECALCULATE_RESET = libcryptsetup_rs_sys::crypt_activate_recalculate_reset;
+        const RECALCULATE_RESET = libcryptsetup_rs_sys::CRYPT_ACTIVATE_RECALCULATE_RESET;
     }
 }
 
 bitflags! {
     /// Flags for crypt deactivate operations
     pub struct CryptDeactivate: u32 {
-        const DEFERRED = libcryptsetup_rs_sys::crypt_deactivate_deferred;
-        const FORCE = libcryptsetup_rs_sys::crypt_deactivate_force;
+        const DEFERRED = libcryptsetup_rs_sys::CRYPT_DEACTIVATE_DEFERRED;
+        const FORCE = libcryptsetup_rs_sys::CRYPT_DEACTIVATE_FORCE;
     }
 }
 
 bitflags! {
     /// Verity format flags
     pub struct CryptVerity: u32 {
-        const NO_HEADER = libcryptsetup_rs_sys::crypt_verity_no_header;
-        const CHECK_HASH = libcryptsetup_rs_sys::crypt_verity_check_hash;
-        const CREATE_HASH = libcryptsetup_rs_sys::crypt_verity_create_hash;
+        const NO_HEADER = libcryptsetup_rs_sys::CRYPT_VERITY_NO_HEADER;
+        const CHECK_HASH = libcryptsetup_rs_sys::CRYPT_VERITY_CHECK_HASH;
+        const CREATE_HASH = libcryptsetup_rs_sys::CRYPT_VERITY_CREATE_HASH;
     }
 }
 
 bitflags! {
     /// tcrypt format flags
     pub struct CryptTcrypt: u32 {
-        const LEGACY_MODES = libcryptsetup_rs_sys::crypt_tcrypt_legacy_modes;
-        const HIDDEN_HEADER = libcryptsetup_rs_sys::crypt_tcrypt_hidden_header;
-        const BACKUP_HEADER = libcryptsetup_rs_sys::crypt_tcrypt_backup_header;
-        const SYSTEM_HEADER = libcryptsetup_rs_sys::crypt_tcrypt_system_header;
-        const VERA_MODES = libcryptsetup_rs_sys::crypt_tcrypt_vera_modes;
+        const LEGACY_MODES = libcryptsetup_rs_sys::CRYPT_TCRYPT_LEGACY_MODES;
+        const HIDDEN_HEADER = libcryptsetup_rs_sys::CRYPT_TCRYPT_HIDDEN_HEADER;
+        const BACKUP_HEADER = libcryptsetup_rs_sys::CRYPT_TCRYPT_BACKUP_HEADER;
+        const SYSTEM_HEADER = libcryptsetup_rs_sys::CRYPT_TCRYPT_SYSTEM_HEADER;
+        const VERA_MODES = libcryptsetup_rs_sys::CRYPT_TCRYPT_VERA_MODES;
     }
 }
 
 bitflags! {
     /// Flags for reading keyfiles
     pub struct CryptKeyfile: u32 {
-        const STOP_EOL = libcryptsetup_rs_sys::crypt_keyfile_stop_eol;
+        const STOP_EOL = libcryptsetup_rs_sys::CRYPT_KEYFILE_STOP_EOL;
     }
 }
 
 bitflags! {
     /// Flags for tunable options when operating with volume keys
     pub struct CryptVolumeKey: u32 {
-        const NO_SEGMENT = libcryptsetup_rs_sys::crypt_volume_key_no_segment;
-        const SET = libcryptsetup_rs_sys::crypt_volume_key_set;
-        const DIGEST_REUSE = libcryptsetup_rs_sys::crypt_volume_key_digest_reuse;
+        const NO_SEGMENT = libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_NO_SEGMENT;
+        const SET = libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_SET;
+        const DIGEST_REUSE = libcryptsetup_rs_sys::CRYPT_VOLUME_KEY_DIGEST_REUSE;
     }
 }
 
 bitflags! {
     /// Requirement flags
     pub struct CryptRequirement: u32 {
-        const OFFLINE_REENCRYPT = libcryptsetup_rs_sys::crypt_requirement_offline_reencrypt;
-        const ONLINE_REENCRYPT = libcryptsetup_rs_sys::crypt_requirement_online_reencrypt;
-        const UNKNOWN = libcryptsetup_rs_sys::crypt_requirement_unknown;
+        const OFFLINE_REENCRYPT = libcryptsetup_rs_sys::CRYPT_REQUIREMENT_OFFLINE_REENCRYPT;
+        const ONLINE_REENCRYPT = libcryptsetup_rs_sys::CRYPT_REQUIREMENT_ONLINE_REENCRYPT;
+        const UNKNOWN = libcryptsetup_rs_sys::CRYPT_REQUIREMENT_UNKNOWN;
     }
 }
 
 bitflags! {
     /// Reencryption flags
     pub struct CryptReencrypt: u32 {
-        const INITIALIZE_ONLY = libcryptsetup_rs_sys::crypt_reencrypt_initialize_only;
-        const MOVE_FIRST_SEGMENT = libcryptsetup_rs_sys::crypt_reencrypt_move_first_segment;
-        const RESUME_ONLY = libcryptsetup_rs_sys::crypt_reencrypt_resume_only;
-        const RECOVERY = libcryptsetup_rs_sys::crypt_reencrypt_recovery;
+        const INITIALIZE_ONLY = libcryptsetup_rs_sys::CRYPT_REENCRYPT_INITIALIZE_ONLY;
+        const MOVE_FIRST_SEGMENT = libcryptsetup_rs_sys::CRYPT_REENCRYPT_MOVE_FIRST_SEGMENT;
+        const RESUME_ONLY = libcryptsetup_rs_sys::CRYPT_REENCRYPT_RESUME_ONLY;
+        const RECOVERY = libcryptsetup_rs_sys::CRYPT_REENCRYPT_RECOVERY;
     }
 }
 
 bitflags! {
     /// PBKDF flags
     pub struct CryptPbkdf: u32 {
-        const ITER_TIME_SET = libcryptsetup_rs_sys::crypt_pbkdf_iter_time_set;
-        const NO_BENCHMARK = libcryptsetup_rs_sys::crypt_pbkdf_no_benchmark;
+        const ITER_TIME_SET = libcryptsetup_rs_sys::CRYPT_PBKDF_ITER_TIME_SET;
+        const NO_BENCHMARK = libcryptsetup_rs_sys::CRYPT_PBKDF_NO_BENCHMARK;
     }
 }
 
 bitflags! {
     /// Flags for crypt wipe operations
     pub struct CryptWipe: u32 {
-        const NO_DIRECT_IO = libcryptsetup_rs_sys::crypt_wipe_no_direct_io;
+        const NO_DIRECT_IO = libcryptsetup_rs_sys::CRYPT_WIPE_NO_DIRECT_IO;
     }
 }
