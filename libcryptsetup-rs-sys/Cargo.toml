@@ -18,6 +18,6 @@ pkg-config = "0.3.7"
 semver = "1.0.0"
 
 [build-dependencies.bindgen]
-default_features = false
+default-features = false
 features = ["runtime"]
 version = "0.69.0"
