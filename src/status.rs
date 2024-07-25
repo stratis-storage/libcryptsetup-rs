@@ -46,17 +46,15 @@ impl<'a> CryptDeviceStatusHandle<'a> {
 
     /// Get device UUID
     pub fn get_uuid(&mut self) -> Result<Uuid, LibcryptErr> {
-        from_str_ptr!(libcryptsetup_rs_sys::crypt_get_uuid(
-            self.reference.as_ptr()
-        ))
-        .and_then(|e| Uuid::from_str(e).map_err(LibcryptErr::UuidError))
+        from_str_ptr!(unsafe { libcryptsetup_rs_sys::crypt_get_uuid(self.reference.as_ptr()) })
+            .and_then(|e| Uuid::from_str(e).map_err(LibcryptErr::UuidError))
     }
 
     /// Get path to underlying device
     pub fn get_device_path(&mut self) -> Result<&Path, LibcryptErr> {
-        from_str_ptr!(libcryptsetup_rs_sys::crypt_get_device_name(
-            self.reference.as_ptr()
-        ))
+        from_str_ptr!(unsafe {
+            libcryptsetup_rs_sys::crypt_get_device_name(self.reference.as_ptr())
+        })
         .map(Path::new)
     }
 
