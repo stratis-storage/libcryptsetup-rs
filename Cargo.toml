@@ -43,3 +43,8 @@ rand = "0.8.0"
 
 [features]
 mutex = []
+
+[lints.rust]
+unexpected_cfgs = { level = "warn", check-cfg = [
+  'cfg(cryptsetup23supported)', 'cfg(cryptsetup24supported)'
+] }
