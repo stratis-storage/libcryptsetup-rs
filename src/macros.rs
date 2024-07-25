@@ -139,11 +139,12 @@ macro_rules! to_mut_byte_ptr {
 /// Convert a `*const c_char` into a `&str` type
 #[macro_export]
 macro_rules! from_str_ptr {
-    ( $str_ptr:expr ) => {
-        unsafe { ::std::ffi::CStr::from_ptr($str_ptr) }
+    ( $str_ptr:expr ) => {{
+        let str_ptr = $str_ptr;
+        unsafe { ::std::ffi::CStr::from_ptr(str_ptr) }
             .to_str()
             .map_err($crate::LibcryptErr::Utf8Error)
-    };
+    }};
 }
 
 /// Convert a `*const c_char` into a `String` type
