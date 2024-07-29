@@ -21,3 +21,15 @@ semver = "1.0.0"
 default-features = false
 features = ["runtime"]
 version = "0.69.0"
+
+[lints.rust]
+warnings = { level = "deny" }
+future_incompatible = { level = "deny", priority = 1 }
+unused = { level = "deny", priority = 2}
+rust_2018_idioms = { level = "deny", priority = 3 }
+nonstandard_style = { level = "deny", priority = 4 }
+
+[lints.clippy]
+all = { level = "deny" }
+cargo = { level = "deny", priority = 1 }
+multiple-crate-versions = { level = "allow", priority = 2 }

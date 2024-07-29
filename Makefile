@@ -16,8 +16,6 @@ endif
 
 IGNORE_ARGS ?=
 
-DENY = -D warnings -D future-incompatible -D unused -D rust_2018_idioms -D nonstandard_style
-
 ${HOME}/.cargo/bin/cargo-audit:
 	cargo install cargo-audit
 
@@ -28,7 +26,7 @@ check-typos:
 	typos
 
 build:
-	RUSTFLAGS="${DENY}" cargo build
+	cargo build
 
 test-compare-fedora-versions:
 	echo "Testing that COMPARE_FEDORA_VERSIONS environment variable is set to a valid path"
@@ -43,17 +41,13 @@ test-set-lower-bounds:
 	test -e "${SET_LOWER_BOUNDS}"
 
 verify-dependency-bounds: test-set-lower-bounds
-	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
+	cargo build ${MANIFEST_PATH_ARGS} --all-features
 	${SET_LOWER_BOUNDS} ${MANIFEST_PATH_ARGS}
-	RUSTFLAGS="${DENY}" cargo build ${MANIFEST_PATH_ARGS} --all-features
+	cargo build ${MANIFEST_PATH_ARGS} --all-features
 
 clippy:
-	(cd libcryptsetup-rs-sys && RUSTFLAGS="${DENY}" \
-        cargo clippy --all-features ${CARGO_OPTS} -- \
-        -D clippy::cargo -D clippy::all -A clippy::multiple-crate-versions)
-	RUSTFLAGS="${DENY}" \
-        cargo clippy --all-features ${CARGO_OPTS} -- \
-        -D clippy::cargo -D clippy::all -D clippy::ptr-as-ptr
+	(cd libcryptsetup-rs-sys && cargo clippy --all-features ${CARGO_OPTS})
+	cargo clippy --all-features ${CARGO_OPTS}
 
 docs-rust:
 	cargo doc --no-deps --package libcryptsetup-rs --package libcryptsetup-rs-sys
@@ -67,21 +61,21 @@ fmt-ci:
 	cargo fmt -- --check
 
 release:
-	RUSTFLAGS="${DENY}" cargo build --release
+	cargo build --release
 
 test:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test -- --skip test_mutex_poisoning_panic
+	RUST_BACKTRACE=1 cargo test -- --skip test_mutex_poisoning_panic
 
 test-mutex:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 cargo test --features=mutex -- --skip test_mutex_poisoning_panic
+	RUST_BACKTRACE=1 cargo test --features=mutex -- --skip test_mutex_poisoning_panic
 
 test-mutex-guard:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex test_mutex_poisoning_panic
+	RUST_BACKTRACE=1 RUST_TEST_THREADS=1 cargo test --features=mutex test_mutex_poisoning_panic
 
 # Loopback tests must have the mutex feature enabled because Rust runs the tests
 # on multiple threads which will cause a panic if the mutex feature is not enabled.
 test-loopback:
-	RUSTFLAGS="${DENY}" RUST_BACKTRACE=1 RUST_TEST_THREADS=1 CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER='sudo -E' cargo test --features=mutex -- --ignored --skip test_mutex_poisoning_panic
+	RUST_BACKTRACE=1 RUST_TEST_THREADS=1 CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER='sudo -E' cargo test --features=mutex -- --ignored --skip test_mutex_poisoning_panic
 
 yamllint:
 	yamllint --strict .github/workflows/*.yml
