@@ -28,6 +28,9 @@ check-typos:
 build:
 	cargo build
 
+build-examples:
+	cargo build --examples
+
 test-compare-fedora-versions:
 	echo "Testing that COMPARE_FEDORA_VERSIONS environment variable is set to a valid path"
 	test -e "${COMPARE_FEDORA_VERSIONS}"
