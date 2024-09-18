@@ -7,6 +7,7 @@ use std::{
     ptr,
 };
 
+use either::Either;
 use libc::{c_int, c_uint};
 
 use crate::{
@@ -111,12 +112,13 @@ impl<'a> CryptKeyslotHandle<'a> {
     pub fn add_by_key(
         &mut self,
         keyslot: Option<c_uint>,
-        volume_key: Option<&[u8]>,
+        volume_key: Option<Either<&[u8], usize>>,
         passphrase: &[u8],
         flags: CryptVolumeKey,
     ) -> Result<c_uint, LibcryptErr> {
         let (vk_ptr, vk_len) = match volume_key {
-            Some(vk) => (to_byte_ptr!(vk), vk.len()),
+            Some(Either::Left(vk)) => (to_byte_ptr!(vk), vk.len()),
+            Some(Either::Right(s)) => (std::ptr::null(), s),
             None => (std::ptr::null(), 0),
         };
         errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_keyslot_add_by_key(
