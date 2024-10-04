@@ -1,3 +1,24 @@
+libcryptsetup-rs 0.11.0
+=======================
+Recommended Rust toolchain version: 1.81.0
+Recommended development environment: Fedora 40
+
+- Update to per-thread-mutex v0.1.3:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/374
+
+- Allow specifying key length in add_by_key:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/376
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/377
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/375
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/373
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/372
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/371
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/370
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/369
+
+
 libcryptsetup-rs 0.10.0
 =======================
 Recommended Rust toolchain version: 1.79.0
