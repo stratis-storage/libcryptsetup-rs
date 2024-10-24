@@ -2,6 +2,8 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
+#[cfg(cryptsetup24supported)]
+use std::ffi::CStr;
 use std::{os::raw::c_int, path::Path, ptr, str::FromStr};
 
 use crate::{
@@ -11,6 +13,8 @@ use crate::{
     format::{CryptParamsIntegrity, CryptParamsVerity},
 };
 
+#[cfg(cryptsetup24supported)]
+use serde_json::Value;
 use uuid::Uuid;
 
 /// Handle for crypt device status operations
@@ -28,6 +32,30 @@ impl<'a> CryptDeviceStatusHandle<'a> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_dump(
             self.reference.as_ptr()
         )))
+    }
+
+    /// Dump text info about device to JSON output
+    #[cfg(cryptsetup24supported)]
+    pub fn dump_json(&mut self) -> Result<Value, LibcryptErr> {
+        let mut buffer: *const i8 = ptr::null();
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_dump_json(
+            self.reference.as_ptr(),
+            &mut buffer as *mut _,
+            0,
+        )))?;
+        let json = serde_json::from_str(
+            unsafe { CStr::from_ptr(buffer) }
+                .to_str()
+                .map_err(LibcryptErr::Utf8Error)?,
+        )
+        .map_err(LibcryptErr::JsonError)?;
+        // Here one would probably expect a free call because we are receiving an allocated buffer
+        // into a pointer. Adding a free call here results in a double free error. Furthermore
+        // json-c references reference counting in its documentation. Just to ensure that we are
+        // not causing a memory leak, I ran valgrind on a test program without the free and no
+        // memory appears to be lost. This leads me to believe that we are doing the right thing
+        // here.
+        Ok(json)
     }
 
     /// Get cipher used by device
