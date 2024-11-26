@@ -1,3 +1,30 @@
+libcryptsetup-rs 0.11.1
+=======================
+Recommended Rust toolchain version: 1.83.0
+Recommended development environment: Fedora 40
+
+- Add wrapper for crypt_dump_json:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/379
+
+- Increase base64 dependency lower bound to 0.22.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/390
+
+- Increase per-thread-mutex dependency lower bound to 0.1.4:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/385
+
+- Increase pkg-config dependency lower bound to 0.3.17:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/388
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/389
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/386
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/384
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/383
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/382
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/381
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/380
+
+
 libcryptsetup-rs 0.11.0
 =======================
 Recommended Rust toolchain version: 1.81.0
