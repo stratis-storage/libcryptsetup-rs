@@ -15,7 +15,7 @@ jobs:
           - dependencies: yamllint
             task: yamllint
     runs-on: ubuntu-latest
-    container: fedora:40  # NEXT DEVELOPMENT ENVIRONMENT
+    container: fedora:41  # NEXT DEVELOPMENT ENVIRONMENT
     steps:
       - name: Install git
         run: dnf install -y git
