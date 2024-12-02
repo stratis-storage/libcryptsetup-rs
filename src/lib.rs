@@ -31,6 +31,7 @@ mod keyslot;
 mod log;
 mod luks2;
 mod mem;
+#[allow(clippy::all)]
 #[cfg(feature = "mutex")]
 mod mutex;
 mod runtime;

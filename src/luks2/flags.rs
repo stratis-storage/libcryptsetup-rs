@@ -28,7 +28,7 @@ impl<'a, T> CryptLuks2FlagsHandle<'a, T> {
     }
 }
 
-impl<'a> CryptLuks2FlagsHandle<'a, CryptActivate> {
+impl CryptLuks2FlagsHandle<'_, CryptActivate> {
     /// Implementation for setting persistent flags for activation
     pub fn persistent_flags_set(&mut self, flags: CryptActivate) -> Result<(), LibcryptErr> {
         errno!(mutex!(libcryptsetup_rs_sys::crypt_persistent_flags_set(
@@ -52,7 +52,7 @@ impl<'a> CryptLuks2FlagsHandle<'a, CryptActivate> {
     }
 }
 
-impl<'a> CryptLuks2FlagsHandle<'a, CryptRequirement> {
+impl CryptLuks2FlagsHandle<'_, CryptRequirement> {
     /// Implementation for setting persistent flags for requirements
     pub fn persistent_flags_set(&mut self, flags: CryptRequirement) -> Result<(), LibcryptErr> {
         errno!(unsafe {
