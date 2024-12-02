@@ -99,7 +99,7 @@ impl<'a> TryInto<CryptParamsLuks1Ref<'a>> for &'a CryptParamsLuks1 {
     }
 }
 
-impl<'a> CryptParams for CryptParamsLuks1Ref<'a> {
+impl CryptParams for CryptParamsLuks1Ref<'_> {
     fn as_ptr(&mut self) -> *mut c_void {
         (&mut self.inner as *mut crypt_params_luks1).cast::<c_void>()
     }
@@ -253,7 +253,7 @@ impl<'a> TryInto<CryptParamsLuks2Ref<'a>> for &'a CryptParamsLuks2 {
     }
 }
 
-impl<'a> CryptParams for CryptParamsLuks2Ref<'a> {
+impl CryptParams for CryptParamsLuks2Ref<'_> {
     fn as_ptr(&mut self) -> *mut c_void {
         (&mut self.inner as *mut crypt_params_luks2).cast::<c_void>()
     }
@@ -363,7 +363,7 @@ impl<'a> TryInto<CryptParamsVerityRef<'a>> for &'a CryptParamsVerity {
     }
 }
 
-impl<'a> CryptParams for CryptParamsVerityRef<'a> {
+impl CryptParams for CryptParamsVerityRef<'_> {
     fn as_ptr(&mut self) -> *mut c_void {
         (&mut self.inner as *mut crypt_params_verity).cast::<c_void>()
     }
@@ -418,7 +418,7 @@ impl<'a> TryInto<CryptParamsLoopaesRef<'a>> for &'a CryptParamsLoopaes {
     }
 }
 
-impl<'a> CryptParams for CryptParamsLoopaesRef<'a> {
+impl CryptParams for CryptParamsLoopaesRef<'_> {
     fn as_ptr(&mut self) -> *mut c_void {
         (&mut self.inner as *mut crypt_params_loopaes).cast::<c_void>()
     }
@@ -535,7 +535,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_integrity> for CryptPara
     }
 }
 
-impl<'a> CryptParams for CryptParamsIntegrityRef<'a> {
+impl CryptParams for CryptParamsIntegrityRef<'_> {
     fn as_ptr(&mut self) -> *mut c_void {
         (&mut self.inner as *mut crypt_params_integrity).cast::<c_void>()
     }
@@ -598,7 +598,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_plain> for CryptParamsPl
     }
 }
 
-impl<'a> CryptParams for CryptParamsPlainRef<'a> {
+impl CryptParams for CryptParamsPlainRef<'_> {
     fn as_ptr(&mut self) -> *mut c_void {
         (&mut self.inner as *mut crypt_params_plain).cast::<c_void>()
     }
@@ -714,7 +714,7 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_tcrypt> for CryptParamsT
     }
 }
 
-impl<'a> CryptParams for CryptParamsTcryptRef<'a> {
+impl CryptParams for CryptParamsTcryptRef<'_> {
     fn as_ptr(&mut self) -> *mut c_void {
         (&mut self.inner as *mut crypt_params_tcrypt).cast::<c_void>()
     }

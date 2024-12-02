@@ -37,7 +37,7 @@ pub struct CryptParamsReencryptRef<'a> {
     hash_cstring: CString,
 }
 
-impl<'a> CryptParamsReencryptRef<'a> {
+impl CryptParamsReencryptRef<'_> {
     fn as_ptr(&self) -> *const crypt_params_reencrypt {
         (&self.inner as *const crypt_params_reencrypt).cast::<crypt_params_reencrypt>()
     }
