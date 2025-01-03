@@ -6,6 +6,9 @@ Recommended development environment: Fedora 40
 - Add wrapper for crypt_dump_json:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/379
 
+- Increase base64 dependency lower bound to 0.22.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/390
+
 - Increase per-thread-mutex dependency lower bound to 0.1.4:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/385
 
