@@ -1,3 +1,12 @@
+libcryptsetup-rs 0.11.2
+=======================
+Recommended Rust toolchain version: 1.83.0
+Recommended development environment: Fedora 40
+
+- Do not specify the type of ptr::null() result:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/392
+
+
 libcryptsetup-rs 0.11.1
 =======================
 Recommended Rust toolchain version: 1.83.0
