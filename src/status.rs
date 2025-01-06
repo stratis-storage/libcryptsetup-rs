@@ -37,7 +37,7 @@ impl<'a> CryptDeviceStatusHandle<'a> {
     /// Dump text info about device to JSON output
     #[cfg(cryptsetup24supported)]
     pub fn dump_json(&mut self) -> Result<Value, LibcryptErr> {
-        let mut buffer: *const i8 = ptr::null();
+        let mut buffer = ptr::null();
         errno!(mutex!(libcryptsetup_rs_sys::crypt_dump_json(
             self.reference.as_ptr(),
             &mut buffer as *mut _,
