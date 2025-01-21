@@ -112,31 +112,46 @@ impl<'a> CryptLuks2ReencryptHandle<'a> {
         passphrase: &[u8],
         keyslot_old: Option<c_uint>,
         keyslot_new: c_uint,
-        cipher_and_mode: (&str, &str),
+        cipher_and_mode: Option<(&str, &str)>,
         params: CryptParamsReencrypt,
     ) -> Result<c_int, LibcryptErr> {
         let name_cstring = match name {
             Some(n) => Some(to_cstring!(n)?),
             None => None,
         };
-        let (cipher, cipher_mode) = cipher_and_mode;
+        let (cipher_cstring_err, cipher_mode_cstring_err) = cipher_and_mode
+            .map(|(c, cm)| {
+                (
+                    Some(to_cstring!(c)).transpose(),
+                    Some(to_cstring!(cm)).transpose(),
+                )
+            })
+            .unwrap_or_else(|| (Ok(None), Ok(None)));
+        let cipher_cstring = cipher_cstring_err?;
+        let cipher_mode_cstring = cipher_mode_cstring_err?;
         let params_reencrypt: CryptParamsReencryptRef<'_> = (&params).try_into()?;
 
-        let cipher_cstring = to_cstring!(cipher)?;
-        let cipher_mode_cstring = to_cstring!(cipher_mode)?;
         errno_int_success!(mutex!(
             libcryptsetup_rs_sys::crypt_reencrypt_init_by_passphrase(
                 self.reference.as_ptr(),
                 name_cstring
                     .as_ref()
                     .map(|cs| cs.as_ptr())
-                    .unwrap_or(ptr::null()),
+                    .unwrap_or_else(ptr::null),
                 to_byte_ptr!(passphrase),
                 passphrase.len(),
                 keyslot_old.map(|k| k as c_int).unwrap_or(CRYPT_ANY_SLOT),
                 keyslot_new as c_int,
-                cipher_cstring.as_ptr(),
-                cipher_mode_cstring.as_ptr(),
+                // NOTE: Must keep as_ref to avoid use after free error.
+                cipher_cstring
+                    .as_ref()
+                    .map(|s| s.as_ptr())
+                    .unwrap_or_else(ptr::null),
+                // NOTE: Must keep as_ref to avoid use after free error.
+                cipher_mode_cstring
+                    .as_ref()
+                    .map(|s| s.as_ptr())
+                    .unwrap_or_else(ptr::null),
                 params_reencrypt.as_ptr()
             )
         ))
