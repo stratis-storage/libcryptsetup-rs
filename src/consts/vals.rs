@@ -258,6 +258,8 @@ consts_to_from_enum!(
 #[derive(Debug, PartialEq, Eq, Copy, Clone)]
 pub enum MetadataSize {
     #[allow(missing_docs)]
+    Default,
+    #[allow(missing_docs)]
     Kb16,
     #[allow(missing_docs)]
     Kb32,
@@ -282,6 +284,7 @@ impl TryFrom<u64> for MetadataSize {
 
     fn try_from(v: u64) -> Result<Self, Self::Error> {
         let size = match v {
+            i if i == *MetadataSize::Default => MetadataSize::Default,
             i if i == *MetadataSize::Kb16 => MetadataSize::Kb16,
             i if i == *MetadataSize::Kb32 => MetadataSize::Kb32,
             i if i == *MetadataSize::Kb64 => MetadataSize::Kb64,
@@ -302,6 +305,7 @@ impl Deref for MetadataSize {
 
     fn deref(&self) -> &u64 {
         match *self {
+            MetadataSize::Default => &0,
             MetadataSize::Kb16 => &0x4000,
             MetadataSize::Kb32 => &0x8000,
             MetadataSize::Kb64 => &0x10000,
@@ -374,6 +378,7 @@ mod test {
 
     #[test]
     fn test_metadata_size() {
+        assert_eq!(MetadataSize::try_from(0).unwrap(), MetadataSize::Default);
         assert_eq!(MetadataSize::try_from(0x4000).unwrap(), MetadataSize::Kb16);
         assert_eq!(MetadataSize::try_from(0x10000).unwrap(), MetadataSize::Kb64);
         assert!(MetadataSize::try_from(0x10001).is_err());
@@ -381,6 +386,8 @@ mod test {
 
     #[test]
     fn test_keyslots_size() {
+        // Default
+        assert!(KeyslotsSize::try_from(0).is_ok());
         // Exactly 128MB
         assert!(KeyslotsSize::try_from(1 << 27).is_ok());
         // Greater than 128MB
