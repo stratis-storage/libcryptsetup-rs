@@ -7,6 +7,8 @@ use std::env::var;
 pub mod encrypt;
 pub mod keyfile;
 pub mod loopback;
+#[cfg(cryptsetup24supported)]
+pub mod reencrypt;
 
 fn format_with_zeros() -> bool {
     var("FORMAT_WITH_ZEROS")
