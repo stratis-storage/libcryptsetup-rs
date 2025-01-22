@@ -4,6 +4,7 @@ Recommended Rust toolchain version: 1.84.0
 Recommended development environment: Fedora 40
 
 - API changes for re-encrypt methods:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/397
   https://github.com/stratis-storage/libcryptsetup-rs/pull/395
 
 - Add Default variant to MetadataSize enum:
