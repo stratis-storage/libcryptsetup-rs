@@ -29,53 +29,66 @@ use rand::random;
 /// and unencrypted devices.
 const WINDOW_SIZE: usize = 1024 * 1024;
 
-fn init(dev_path: &Path, passphrase: &str) -> Result<c_uint, LibcryptErr> {
-    let mut dev = CryptInit::init(dev_path)?;
-    dev.context_handle().format::<()>(
-        EncryptionFormat::Luks2,
-        ("aes", "xts-plain"),
-        None,
-        Either::Right(512 / 8),
-        None,
-    )?;
+fn init(dev_path: &Path, passphrase: &str) -> c_uint {
+    let mut dev = CryptInit::init(dev_path).unwrap();
+    dev.context_handle()
+        .format::<()>(
+            EncryptionFormat::Luks2,
+            ("aes", "xts-plain"),
+            None,
+            Either::Right(512 / 8),
+            None,
+        )
+        .unwrap();
     dev.keyslot_handle()
         .add_by_key(None, None, passphrase.as_bytes(), CryptVolumeKey::empty())
+        .unwrap()
 }
 
 /// This method initializes the device with no encryption as a way to test
 /// that the plaintext can be read vs. the plaintext not being found due to
 /// proper encryption in the other tests.
-fn init_null_cipher(dev_path: &Path) -> Result<c_uint, LibcryptErr> {
-    let mut dev = CryptInit::init(dev_path)?;
-    dev.context_handle().format::<()>(
-        EncryptionFormat::Luks1,
-        ("cipher_null", "ecb"),
-        None,
-        Either::Right(32),
-        None,
-    )?;
-    dev.keyslot_handle().add_by_passphrase(None, b"", b"")
+fn init_null_cipher(dev_path: &Path) -> c_uint {
+    let mut dev = CryptInit::init(dev_path).unwrap();
+    dev.context_handle()
+        .format::<()>(
+            EncryptionFormat::Luks1,
+            ("cipher_null", "ecb"),
+            None,
+            Either::Right(32),
+            None,
+        )
+        .unwrap();
+    dev.keyslot_handle()
+        .add_by_passphrase(None, b"", b"")
+        .unwrap()
 }
 
-fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> Result<c_uint, LibcryptErr> {
-    let mut dev = CryptInit::init(dev_path)?;
-    dev.context_handle().format::<()>(
-        EncryptionFormat::Luks2,
-        ("aes", "xts-plain"),
-        None,
-        Either::Right(512 / 8),
-        None,
-    )?;
+fn init_by_keyfile(dev_path: &Path, keyfile_path: &Path) -> c_uint {
+    let mut dev = CryptInit::init(dev_path).unwrap();
+    dev.context_handle()
+        .format::<()>(
+            EncryptionFormat::Luks2,
+            ("aes", "xts-plain"),
+            None,
+            Either::Right(512 / 8),
+            None,
+        )
+        .unwrap();
     let keyfile_contents = {
         let mut kf_handle = dev.keyfile_handle();
-        kf_handle.device_read(keyfile_path, 0, None, CryptKeyfile::empty())?
+        kf_handle
+            .device_read(keyfile_path, 0, None, CryptKeyfile::empty())
+            .unwrap()
     };
-    dev.keyslot_handle().add_by_key(
-        None,
-        None,
-        keyfile_contents.as_ref(),
-        CryptVolumeKey::empty(),
-    )
+    dev.keyslot_handle()
+        .add_by_key(
+            None,
+            None,
+            keyfile_contents.as_ref(),
+            CryptVolumeKey::empty(),
+        )
+        .unwrap()
 }
 
 fn activate_without_explicit_format(
@@ -83,16 +96,17 @@ fn activate_without_explicit_format(
     device_name: &'static str,
     keyslot: c_uint,
     passphrase: &'static str,
-) -> Result<(), LibcryptErr> {
-    let mut dev = CryptInit::init(dev_path)?;
-    dev.context_handle().load::<()>(None, None)?;
-    dev.activate_handle().activate_by_passphrase(
-        Some(device_name),
-        Some(keyslot),
-        passphrase.as_bytes(),
-        CryptActivate::empty(),
-    )?;
-    Ok(())
+) {
+    let mut dev = CryptInit::init(dev_path).unwrap();
+    dev.context_handle().load::<()>(None, None).unwrap();
+    dev.activate_handle()
+        .activate_by_passphrase(
+            Some(device_name),
+            Some(keyslot),
+            passphrase.as_bytes(),
+            CryptActivate::empty(),
+        )
+        .unwrap();
 }
 
 fn activate_by_passphrase(
@@ -100,25 +114,27 @@ fn activate_by_passphrase(
     device_name: &'static str,
     keyslot: c_uint,
     passphrase: &'static str,
-) -> Result<(), LibcryptErr> {
-    let mut dev = CryptInit::init(dev_path)?;
+) {
+    let mut dev = CryptInit::init(dev_path).unwrap();
     dev.context_handle()
-        .load::<()>(Some(EncryptionFormat::Luks2), None)?;
-    dev.activate_handle().activate_by_passphrase(
-        Some(device_name),
-        Some(keyslot),
-        passphrase.as_bytes(),
-        CryptActivate::empty(),
-    )?;
-    Ok(())
+        .load::<()>(Some(EncryptionFormat::Luks2), None)
+        .unwrap();
+    dev.activate_handle()
+        .activate_by_passphrase(
+            Some(device_name),
+            Some(keyslot),
+            passphrase.as_bytes(),
+            CryptActivate::empty(),
+        )
+        .unwrap();
 }
 
-fn create_keyfile(loopback_file_path: &Path) -> Result<PathBuf, LibcryptErr> {
+fn create_keyfile(loopback_file_path: &Path) -> PathBuf {
     let path = PathBuf::from(format!("{}-key", loopback_file_path.display()));
-    let mut f = File::create(&path).map_err(LibcryptErr::IOError)?;
+    let mut f = File::create(&path).unwrap();
     let random: Vec<_> = (0..4096).map(|_| random::<u8>()).collect();
-    f.write(&random).map_err(LibcryptErr::IOError)?;
-    Ok(path)
+    f.write(&random).unwrap();
+    path
 }
 
 fn activate_by_keyfile(
@@ -127,31 +143,29 @@ fn activate_by_keyfile(
     keyslot: c_uint,
     keyfile_path: &Path,
     keyfile_size: Option<crate::size_t>,
-) -> Result<(), LibcryptErr> {
-    let mut dev = CryptInit::init(dev_path)?;
+) {
+    let mut dev = CryptInit::init(dev_path).unwrap();
     dev.context_handle()
-        .load::<()>(Some(EncryptionFormat::Luks2), None)?;
-    dev.activate_handle().activate_by_keyfile_device_offset(
-        Some(device_name),
-        Some(keyslot),
-        keyfile_path,
-        keyfile_size,
-        0,
-        CryptActivate::empty(),
-    )?;
-    Ok(())
+        .load::<()>(Some(EncryptionFormat::Luks2), None)
+        .unwrap();
+    dev.activate_handle()
+        .activate_by_keyfile_device_offset(
+            Some(device_name),
+            Some(keyslot),
+            keyfile_path,
+            keyfile_size,
+            0,
+            CryptActivate::empty(),
+        )
+        .unwrap();
 }
 
-fn activate_null_cipher(dev_path: &Path, device_name: &'static str) -> Result<(), LibcryptErr> {
-    let mut dev = CryptInit::init(dev_path)?;
-    dev.context_handle().load::<()>(None, None)?;
-    dev.activate_handle().activate_by_passphrase(
-        Some(device_name),
-        None,
-        b"",
-        CryptActivate::empty(),
-    )?;
-    Ok(())
+fn activate_null_cipher(dev_path: &Path, device_name: &'static str) {
+    let mut dev = CryptInit::init(dev_path).unwrap();
+    dev.context_handle().load::<()>(None, None).unwrap();
+    dev.activate_handle()
+        .activate_by_passphrase(Some(device_name), None, b"", CryptActivate::empty())
+        .unwrap();
 }
 
 fn write_random(device_name: &str) -> Result<Box<[u8]>, io::Error> {
@@ -238,16 +252,13 @@ pub fn test_encrypt_by_password() {
             let device_name = "test-device";
             let passphrase = "abadpassphrase";
 
-            let keyslot = init(dev_path, passphrase)?;
-            activate_by_passphrase(dev_path, device_name, keyslot, passphrase)?;
-            if run_plaintext_test(file_path, device_name)? {
-                return Err(LibcryptErr::Other("Should not find plaintext".to_string()));
+            let keyslot = init(dev_path, passphrase);
+            activate_by_passphrase(dev_path, device_name, keyslot, passphrase);
+            if run_plaintext_test(file_path, device_name).unwrap() {
+                panic!("Should not find plaintext");
             }
-
-            Ok(())
         },
     )
-    .expect("Should succeed");
 }
 
 pub fn test_encrypt_by_keyfile() {
@@ -258,17 +269,14 @@ pub fn test_encrypt_by_keyfile() {
         |dev_path, file_path| {
             let device_name = "test-device";
 
-            let keyfile_path = create_keyfile(file_path)?;
-            let keyslot = init_by_keyfile(dev_path, keyfile_path.as_path())?;
-            activate_by_keyfile(dev_path, device_name, keyslot, keyfile_path.as_path(), None)?;
-            if run_plaintext_test(file_path, device_name)? {
-                return Err(LibcryptErr::Other("Should not find plaintext".to_string()));
+            let keyfile_path = create_keyfile(file_path);
+            let keyslot = init_by_keyfile(dev_path, keyfile_path.as_path());
+            activate_by_keyfile(dev_path, device_name, keyslot, keyfile_path.as_path(), None);
+            if run_plaintext_test(file_path, device_name).unwrap() {
+                panic!("Should not find plaintext");
             }
-
-            Ok(())
         },
     )
-    .expect("Should succeed");
 }
 
 pub fn test_encrypt_by_password_without_explicit_format() {
@@ -280,16 +288,13 @@ pub fn test_encrypt_by_password_without_explicit_format() {
             let device_name = "test-device";
             let passphrase = "abadpassphrase";
 
-            let keyslot = init(dev_path, passphrase)?;
-            activate_without_explicit_format(dev_path, device_name, keyslot, passphrase)?;
-            if run_plaintext_test(file_path, device_name)? {
-                return Err(LibcryptErr::Other("Should not find plaintext".to_string()));
+            let keyslot = init(dev_path, passphrase);
+            activate_without_explicit_format(dev_path, device_name, keyslot, passphrase);
+            if run_plaintext_test(file_path, device_name).unwrap() {
+                panic!("Should not find plaintext");
             }
-
-            Ok(())
         },
     )
-    .expect("Should succeed");
 }
 
 pub fn test_unencrypted() {
@@ -300,14 +305,11 @@ pub fn test_unencrypted() {
         |dev_path, file_path| {
             let device_name = "test-device";
 
-            init_null_cipher(dev_path)?;
-            activate_null_cipher(dev_path, device_name)?;
-            if !run_plaintext_test(file_path, device_name)? {
-                return Err(LibcryptErr::Other("Should find plaintext".to_string()));
+            init_null_cipher(dev_path);
+            activate_null_cipher(dev_path, device_name);
+            if !run_plaintext_test(file_path, device_name).unwrap() {
+                panic!("Should find plaintext");
             }
-
-            Ok(())
         },
     )
-    .expect("Should succeed");
 }

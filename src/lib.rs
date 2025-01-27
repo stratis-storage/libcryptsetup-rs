@@ -98,6 +98,13 @@ mod test {
 
     #[ignore]
     #[test]
+    #[cfg(cryptsetup24supported)]
+    fn test_reencrypt_by_password() {
+        tests::reencrypt::test_reencrypt_by_password();
+    }
+
+    #[ignore]
+    #[test]
     fn test_encrypt_by_keyfile() {
         tests::encrypt::test_encrypt_by_keyfile();
     }
