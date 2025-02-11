@@ -23,7 +23,7 @@ jobs:
     env:
       TASK: fmt-ci
       TOOLCHAIN: 1.84.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Install git
         run: sudo apt-get install git
@@ -40,7 +40,7 @@ jobs:
     env:
       TASK: clippy
       TOOLCHAIN: 1.84.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Install git
         run: sudo apt-get install git
@@ -60,7 +60,7 @@ jobs:
     env:
       TASK: check-typos
       TOOLCHAIN: 1.84.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Install git
         run: sudo apt-get install git
@@ -98,7 +98,7 @@ jobs:
             dependencies: libcryptsetup-dev libkeyutils-dev
           - task: make -f Makefile release
             dependencies: libcryptsetup-dev
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Install git
         run: sudo apt-get install git
@@ -127,7 +127,7 @@ jobs:
             dependencies: libcryptsetup-dev libkeyutils-dev
           - task: make -f Makefile test-mutex-guard
             dependencies: libcryptsetup-dev libkeyutils-dev
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     steps:
       - name: Install git
         run: sudo apt-get install git
@@ -229,7 +229,7 @@ jobs:
             dependencies: cryptsetup-devel
             container: 38
 
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container:
       image: fedora:${{ matrix.container }}
       options: --privileged -v /dev:/dev
@@ -249,7 +249,7 @@ jobs:
 
   # VERIFICATION OF TEST INFRASTRUCTURE
   yamllint:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     container: fedora:40  # CURRENT DEVELOPMENT ENVIRONMENT
     steps:
       - name: Install git
