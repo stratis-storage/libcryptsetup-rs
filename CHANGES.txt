@@ -1,5 +1,5 @@
-libcryptsetup-rs 0.12.0 (UNRELEASED)
-====================================
+libcryptsetup-rs 0.12.0
+=======================
 Recommended Rust toolchain version: 1.84.0
 Recommended development environment: Fedora 40
 
