@@ -14,6 +14,12 @@ else
   CLIPPY_OPTS = --fix
 endif
 
+ifeq ($(origin MINIMAL), undefined)
+  BUILD = build
+else
+  BUILD = minimal-versions build --direct
+endif
+
 IGNORE_ARGS ?=
 
 ${HOME}/.cargo/bin/cargo-audit:
@@ -26,10 +32,10 @@ check-typos:
 	typos
 
 build:
-	cargo build
+	cargo ${BUILD}
 
 build-examples:
-	cargo build --examples
+	cargo ${BUILD} --examples
 
 test-compare-fedora-versions:
 	echo "Testing that COMPARE_FEDORA_VERSIONS environment variable is set to a valid path"
@@ -37,16 +43,6 @@ test-compare-fedora-versions:
 
 check-fedora-versions: test-compare-fedora-versions
 	${COMPARE_FEDORA_VERSIONS} ${MANIFEST_PATH_ARGS} ${FEDORA_RELEASE_ARGS} ${IGNORE_ARGS}
-
-SET_LOWER_BOUNDS ?=
-test-set-lower-bounds:
-	echo "Testing that SET_LOWER_BOUNDS environment variable is set to a valid path"
-	test -e "${SET_LOWER_BOUNDS}"
-
-verify-dependency-bounds: test-set-lower-bounds
-	cargo build ${MANIFEST_PATH_ARGS} --all-features
-	${SET_LOWER_BOUNDS} ${MANIFEST_PATH_ARGS}
-	cargo build ${MANIFEST_PATH_ARGS} --all-features
 
 clippy:
 	(cd libcryptsetup-rs-sys && cargo clippy --all-features ${CARGO_OPTS})
@@ -99,7 +95,4 @@ yamllint:
 	test-compare-fedora-versions
 	test-loopback
 	test-loopback-mutex
-	test-set-lower-bounds
-	verify-dependency-bounds
-	verify-dependency-bounds-sys
 	yamllint
