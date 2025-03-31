@@ -8,6 +8,7 @@ use std::path::PathBuf;
 fn probe() -> Library {
     match Config::new()
         .atleast_version("2.2.0")
+        .cargo_metadata(false)
         .probe("libcryptsetup")
     {
         Ok(l) => l,
@@ -23,11 +24,12 @@ fn build_safe_free() {
 
 fn generate_bindings(library: &Library, safe_free_is_needed: bool) {
     let builder = bindgen::Builder::default()
-        .clang_args(library.include_paths.iter().map(|path| {
-            let r = format!("-I{}", path.to_string_lossy());
-            eprintln!("{}", r);
-            r
-        }))
+        .clang_args(
+            library
+                .include_paths
+                .iter()
+                .map(|path| format!("-I{}", path.display())),
+        )
         .header("header.h")
         .size_t_is_usize(true);
     #[cfg(target_arch = "x86")]
