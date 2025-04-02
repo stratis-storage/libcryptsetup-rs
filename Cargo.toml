@@ -43,6 +43,7 @@ rand = "0.9.0"
 
 [features]
 mutex = []
+static = ["libcryptsetup-rs-sys/static"]
 
 [lints.rust]
 warnings = { level = "deny" }
