@@ -3,6 +3,9 @@ libcryptsetup-rs 0.12.1
 Recommended Rust toolchain version: 1.85.0
 Recommended development environment: Fedora 40
 
+- Disable cargo metadata in pkg-config probe:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/406
+
 - Tidies and Maintenance:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/405
   https://github.com/stratis-storage/libcryptsetup-rs/pull/404
