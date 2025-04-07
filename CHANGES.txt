@@ -1,3 +1,56 @@
+libcryptsetup-rs 0.12.1
+=======================
+Recommended Rust toolchain version: 1.86.0
+Recommended development environment: Fedora 41
+
+- Use bindgen enhancement for function-like macros:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/348
+
+- libcryptsetup-rs-sys: Release version 0.5.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/424
+
+- Remove git submodule and depend on per-thread-mutex crate:
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/401
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/415
+
+- libcryptsetup-rs-sys: Increase bindgen dependency lower bound to 0.71.0;
+  pin bindgen rust target to rust-version:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/421
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/418
+
+- libcryptsetup-rs-sys: Release version 0.4.1:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/415
+
+- Add static feature:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/407
+
+- Increase log dependency lower bound to 0.4.20:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/425
+
+- Increase rand dependency lower bound to 0.9.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/410
+
+- Disable cargo metadata in pkg-config probe, then re-enable:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/413
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/406
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/422
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/419
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/417
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/416
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/412
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/411
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/409
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/405
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/404
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/403
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/402
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/400
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/398
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/387
+
+
 libcryptsetup-rs 0.12.0
 =======================
 Recommended Rust toolchain version: 1.84.0
