@@ -6,7 +6,10 @@ use semver::Version;
 use std::path::PathBuf;
 
 fn probe() -> Library {
-    match Config::new()
+    let mut config = Config::new();
+    #[cfg(feature = "static")]
+    config.statik(true);
+    match config
         .atleast_version("2.2.0")
         .cargo_metadata(false)
         .probe("libcryptsetup")
