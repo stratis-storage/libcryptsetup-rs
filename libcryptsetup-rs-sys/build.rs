@@ -9,11 +9,7 @@ fn probe() -> Library {
     let mut config = Config::new();
     #[cfg(feature = "static")]
     config.statik(true);
-    match config
-        .atleast_version("2.2.0")
-        .cargo_metadata(false)
-        .probe("libcryptsetup")
-    {
+    match config.atleast_version("2.2.0").probe("libcryptsetup") {
         Ok(l) => l,
         Err(e) => panic!("Bindings require at least cryptsetup-2.2.0: {e}"),
     }
