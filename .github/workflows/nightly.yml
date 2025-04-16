@@ -26,8 +26,6 @@ jobs:
       - name: Install git
         run: sudo apt-get install git
       - uses: actions/checkout@v4
-        with:
-          submodules: true
       - uses: dtolnay/rust-toolchain@master
         with:
           components: ${{ matrix.component }}
@@ -47,7 +45,6 @@ jobs:
       - uses: actions/checkout@v4
         with:
           path: libcryptsetup-rs
-          submodules: true
       - name: Install dependencies for Fedora
         run: >
           dnf install -y
@@ -88,8 +85,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          submodules: true
       - name: Install dependencies
         run: |
           sudo apt-get -q update

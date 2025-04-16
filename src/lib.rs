@@ -31,9 +31,6 @@ mod keyslot;
 mod log;
 mod luks2;
 mod mem;
-#[allow(clippy::all)]
-#[cfg(feature = "mutex")]
-mod mutex;
 mod runtime;
 mod settings;
 mod status;
@@ -81,7 +78,8 @@ pub use libc::{c_int, c_uint, size_t};
 pub type Result<T> = std::result::Result<T, LibcryptErr>;
 
 #[cfg(feature = "mutex")]
-static MUTEX: Lazy<crate::mutex::PerThreadMutex> = Lazy::new(crate::mutex::PerThreadMutex::default);
+static MUTEX: Lazy<per_thread_mutex::PerThreadMutex> =
+    Lazy::new(per_thread_mutex::PerThreadMutex::default);
 
 #[cfg(not(feature = "mutex"))]
 static THREAD_ID: Lazy<std::thread::ThreadId> = Lazy::new(|| std::thread::current().id());
