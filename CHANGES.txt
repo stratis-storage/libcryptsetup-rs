@@ -3,6 +3,9 @@ libcryptsetup-rs 0.12.1
 Recommended Rust toolchain version: 1.86.0
 Recommended development environment: Fedora 40
 
+- libcryptsetup-rs-sys: Release version 0.4.1:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/415
+
 - Add static feature:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/407
 
