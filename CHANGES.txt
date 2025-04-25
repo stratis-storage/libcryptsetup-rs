@@ -3,11 +3,18 @@ libcryptsetup-rs 0.12.1
 Recommended Rust toolchain version: 1.86.0
 Recommended development environment: Fedora 40
 
+- Remove git submodule and depend on per-thread-mutex crate:
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/401
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/415
+
 - libcryptsetup-rs-sys: Release version 0.4.1:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/415
 
 - Add static feature:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/407
+
+- Increase lowest supported Rust to 1.77.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/417
 
 - Increase rand dependency lower bound to 0.9.0:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/410
@@ -17,6 +24,7 @@ Recommended development environment: Fedora 40
   https://github.com/stratis-storage/libcryptsetup-rs/pull/406
 
 - Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/416
   https://github.com/stratis-storage/libcryptsetup-rs/pull/412
   https://github.com/stratis-storage/libcryptsetup-rs/pull/411
   https://github.com/stratis-storage/libcryptsetup-rs/pull/409
@@ -26,6 +34,7 @@ Recommended development environment: Fedora 40
   https://github.com/stratis-storage/libcryptsetup-rs/pull/402
   https://github.com/stratis-storage/libcryptsetup-rs/pull/400
   https://github.com/stratis-storage/libcryptsetup-rs/pull/398
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/387
 
 
 libcryptsetup-rs 0.12.0
