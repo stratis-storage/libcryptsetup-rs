@@ -20,7 +20,7 @@ semver = "1.0.0"
 [build-dependencies.bindgen]
 default-features = false
 features = ["runtime"]
-version = "0.69.0"
+version = "0.71.0"
 
 [lints.rust]
 warnings = { level = "deny" }
