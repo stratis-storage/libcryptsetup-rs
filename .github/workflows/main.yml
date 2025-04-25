@@ -109,7 +109,7 @@ jobs:
   # MANDATORY TESTING USING LOWEST SUPPORTED TOOLCHAIN
   lowest_supported:
     env:
-      TOOLCHAIN: 1.77.0  # LOWEST SUPPORTED RUST TOOLCHAIN
+      TOOLCHAIN: 1.74.0  # LOWEST SUPPORTED RUST TOOLCHAIN
     strategy:
       matrix:
         include:
@@ -137,7 +137,7 @@ jobs:
   fedora:
     env:
       # Lowest supported
-      TOOLCHAIN: 1.77.0  # LOWEST SUPPORTED RUST TOOLCHAIN
+      TOOLCHAIN: 1.74.0  # LOWEST SUPPORTED RUST TOOLCHAIN
     strategy:
       matrix:
         include:
