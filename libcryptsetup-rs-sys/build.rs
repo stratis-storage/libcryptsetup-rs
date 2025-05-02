@@ -23,7 +23,7 @@ fn build_safe_free() {
 
 fn generate_bindings(library: &Library, safe_free_is_needed: bool) {
     let builder = bindgen::Builder::default()
-        .rust_target(bindgen::RustTarget::Stable_1_73)
+        .rust_target(env!("CARGO_PKG_RUST_VERSION").parse().expect("valid rust version"))
         .clang_args(
             library
                 .include_paths
