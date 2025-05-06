@@ -7,6 +7,11 @@ Recommended development environment: Fedora 40
   https://github.com/stratis-storage/libcryptsetup-rs/issues/401
   https://github.com/stratis-storage/libcryptsetup-rs/pull/415
 
+- libcryptsetup-rs-sys: Increase bindgen dependency lower bound to 0.71.0;
+  pin bindgen rust target to rust-version:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/421
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/418
+
 - libcryptsetup-rs-sys: Release version 0.4.1:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/415
 
@@ -21,6 +26,7 @@ Recommended development environment: Fedora 40
   https://github.com/stratis-storage/libcryptsetup-rs/pull/406
 
 - Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/422
   https://github.com/stratis-storage/libcryptsetup-rs/pull/419
   https://github.com/stratis-storage/libcryptsetup-rs/pull/417
   https://github.com/stratis-storage/libcryptsetup-rs/pull/416
