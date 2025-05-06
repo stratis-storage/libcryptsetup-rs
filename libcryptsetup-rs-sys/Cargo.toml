@@ -1,6 +1,6 @@
 [package]
 name = "libcryptsetup-rs-sys"
-version = "0.4.1"
+version = "0.5.0"
 authors = ["John Baublitz <jbaublitz@redhat.com>"]
 edition = "2021"
 rust-version = "1.74.0"  # LOWEST SUPPORTED RUST TOOLCHAIN
