@@ -6,6 +6,9 @@ Recommended development environment: Fedora 40
 - Use bindgen enhancement for function-like macros:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/348
 
+- libcryptsetup-rs-sys: Release version 0.5.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/424
+
 - Remove git submodule and depend on per-thread-mutex crate:
   https://github.com/stratis-storage/libcryptsetup-rs/issues/401
   https://github.com/stratis-storage/libcryptsetup-rs/pull/415
@@ -20,6 +23,9 @@ Recommended development environment: Fedora 40
 
 - Add static feature:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/407
+
+- Increase log dependency lower bound to 0.4.20:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/425
 
 - Increase rand dependency lower bound to 0.9.0:
   https://github.com/stratis-storage/libcryptsetup-rs/pull/410
