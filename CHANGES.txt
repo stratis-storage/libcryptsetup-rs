@@ -3,6 +3,9 @@ libcryptsetup-rs 0.12.1
 Recommended Rust toolchain version: 1.86.0
 Recommended development environment: Fedora 40
 
+- Use bindgen enhancement for function-like macros:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/348
+
 - Remove git submodule and depend on per-thread-mutex crate:
   https://github.com/stratis-storage/libcryptsetup-rs/issues/401
   https://github.com/stratis-storage/libcryptsetup-rs/pull/415
