@@ -18,8 +18,6 @@ pkg-config = "0.3.17"
 semver = "1.0.0"
 
 [build-dependencies.bindgen]
-default-features = false
-features = ["runtime"]
 version = "0.71.0"
 
 [lints.rust]
