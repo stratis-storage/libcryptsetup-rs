@@ -53,7 +53,7 @@ unused = { level = "deny", priority = 2}
 rust_2018_idioms = { level = "deny", priority = 3 }
 nonstandard_style = { level = "deny", priority = 4 }
 unexpected_cfgs = { level = "deny", check-cfg = [
-  'cfg(cryptsetup23supported)', 'cfg(cryptsetup24supported)'
+  'cfg(cryptsetup23supported)', 'cfg(cryptsetup24supported)', 'cfg(cryptsetup27supported)'
 ] }
 
 [lints.clippy]

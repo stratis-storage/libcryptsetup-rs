@@ -156,4 +156,46 @@ impl<'a> CryptActivationHandle<'a> {
             flags.bits(),
         )))
     }
+
+    /// Set the keyring to link the volume key to on activation.
+    ///
+    /// If `keyring` is None, linking will be disabled.
+    #[cfg(cryptsetup27supported)]
+    pub fn set_keyring_to_link(
+        &mut self,
+        key_description: &str,
+        old_key_description: Option<&str>,
+        key_desc_type: Option<&str>,
+        keyring: Option<&str>,
+    ) -> Result<(), LibcryptErr> {
+        let kd_cstring = to_cstring!(key_description)?;
+        let old_kd_cstring = match old_key_description.as_ref() {
+            Some(s) => Some(to_cstring!(s)?),
+            None => None,
+        };
+        let kd_type_cstring = match key_desc_type.as_ref() {
+            Some(s) => Some(to_cstring!(s)?),
+            None => None,
+        };
+        let kr_cstring = match keyring.as_ref() {
+            Some(s) => Some(to_cstring!(s)?),
+            None => None,
+        };
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_set_keyring_to_link(
+            self.reference.as_ptr(),
+            kd_cstring.as_ptr(),
+            old_kd_cstring
+                .as_ref()
+                .map(|s| s.as_ptr())
+                .unwrap_or(ptr::null()),
+            kd_type_cstring
+                .as_ref()
+                .map(|s| s.as_ptr())
+                .unwrap_or(ptr::null()),
+            kr_cstring
+                .as_ref()
+                .map(|s| s.as_ptr())
+                .unwrap_or(ptr::null()),
+        )))
+    }
 }
