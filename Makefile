@@ -17,11 +17,8 @@ endif
 
 IGNORE_ARGS ?=
 
-${HOME}/.cargo/bin/cargo-audit:
-	cargo install cargo-audit
-
-audit: ${HOME}/.cargo/bin/cargo-audit
-	PATH=${HOME}/.cargo/bin:${PATH} cargo audit -D warnings
+audit:
+	cargo audit -D warnings
 
 check-typos:
 	typos
@@ -75,6 +72,7 @@ yamllint:
 	yamllint --strict .github/workflows/*.yml
 
 .PHONY:
+	audit
 	build
 	check-fedora-versions
 	check-typos
