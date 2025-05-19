@@ -10,17 +10,7 @@ on:
   workflow_dispatch:
 
 jobs:
-  allowed_failures:
-    continue-on-error: true
-    strategy:
-      matrix:
-        include:
-          - components: cargo
-            toolchain: 1.86.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
-            task: make -f Makefile audit
-          - components: clippy
-            toolchain: stable
-            task: make -f Makefile clippy
+  audit:
     runs-on: ubuntu-22.04
     steps:
       - name: Install git
@@ -28,12 +18,15 @@ jobs:
       - uses: actions/checkout@v4
       - uses: dtolnay/rust-toolchain@master
         with:
-          components: ${{ matrix.component }}
-          toolchain: ${{ matrix.toolchain }}
+          components: cargo
+          toolchain: 1.86.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
       - name: Install dependencies
         run: sudo apt-get install libcryptsetup-dev
-      - name: Run ${{ matrix.task }} on ${{ matrix.toolchain }} toolchain
-        run: ${{ matrix.task }}
+      - uses: baptiste0928/cargo-install@v3
+        with:
+          crate: cargo-audit
+      - name: Run audit check
+        run: make audit
 
   checks-with-ci-repo:
     runs-on: ubuntu-22.04
