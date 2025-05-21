@@ -1,3 +1,20 @@
+libcryptsetup-rs 0.13.0
+=======================
+Recommended Rust toolchain version: 1.86.0
+Recommended development environment: Fedora 41
+
+- Add additional valid options to CryptVolumeKeyHandle::get;
+  wrap API to link volume key to other keyring:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/428
+
+- libcryptsetup-rs-sys: Allow default features for bindgen dependency:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/427
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/430
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/429
+
+
 libcryptsetup-rs 0.12.1
 =======================
 Recommended Rust toolchain version: 1.86.0
