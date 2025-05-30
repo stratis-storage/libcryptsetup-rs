@@ -22,7 +22,7 @@ jobs:
   format:
     env:
       TASK: fmt-ci
-      TOOLCHAIN: 1.86.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
+      TOOLCHAIN: 1.87.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-22.04
     steps:
       - name: Install git
@@ -37,7 +37,7 @@ jobs:
   lint:
     env:
       TASK: clippy
-      TOOLCHAIN: 1.86.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
+      TOOLCHAIN: 1.87.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-22.04
     steps:
       - name: Install git
@@ -55,7 +55,7 @@ jobs:
   typos:
     env:
       TASK: check-typos
-      TOOLCHAIN: 1.86.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
+      TOOLCHAIN: 1.87.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-22.04
     steps:
       - name: Install git
