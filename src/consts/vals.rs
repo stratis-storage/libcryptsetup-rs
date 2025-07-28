@@ -193,15 +193,12 @@ impl CryptKdf {
 
     /// Convert from a C `char *`
     pub(crate) fn from_ptr(ptr: *const c_char) -> Result<Self, LibcryptErr> {
-        if libcryptsetup_rs_sys::CRYPT_KDF_PBKDF2 == unsafe { CStr::from_ptr(ptr) }.to_bytes() {
+        let p_bytes = unsafe { CStr::from_ptr(ptr) }.to_bytes_with_nul();
+        if libcryptsetup_rs_sys::CRYPT_KDF_PBKDF2 == p_bytes {
             Ok(CryptKdf::Pbkdf2)
-        } else if libcryptsetup_rs_sys::CRYPT_KDF_ARGON2I
-            == unsafe { CStr::from_ptr(ptr) }.to_bytes()
-        {
+        } else if libcryptsetup_rs_sys::CRYPT_KDF_ARGON2I == p_bytes {
             Ok(CryptKdf::Argon2I)
-        } else if libcryptsetup_rs_sys::CRYPT_KDF_ARGON2ID
-            == unsafe { CStr::from_ptr(ptr) }.to_bytes()
-        {
+        } else if libcryptsetup_rs_sys::CRYPT_KDF_ARGON2ID == p_bytes {
             Ok(CryptKdf::Argon2Id)
         } else {
             Err(LibcryptErr::InvalidConversion)
