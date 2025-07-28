@@ -1,3 +1,18 @@
+libcryptsetup-rs 0.13.2
+=======================
+Recommended Rust toolchain version: 1.88.0
+Recommended development environment: Fedora 41
+
+- Fix CryptKdf::from_ptr implementation:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/440
+
+- Increase nix dependency lower bound to 0.30.1:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/438
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/439
+
+
 libcryptsetup-rs 0.13.1
 =======================
 Recommended Rust toolchain version: 1.87.0
