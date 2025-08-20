@@ -28,6 +28,8 @@ jobs:
       - name: Install git
         run: sudo apt-get install git
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
         with:
           components: rustfmt
@@ -43,6 +45,8 @@ jobs:
       - name: Install git
         run: sudo apt-get install git
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
         with:
           components: clippy
@@ -61,6 +65,8 @@ jobs:
       - name: Install git
         run: sudo apt-get install git
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -97,6 +103,8 @@ jobs:
       - name: Install git
         run: sudo apt-get install git
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -124,6 +132,8 @@ jobs:
       - name: Install git
         run: sudo apt-get install git
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -227,6 +237,8 @@ jobs:
       - name: Install git
         run: dnf install -y git
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -243,6 +255,8 @@ jobs:
       - name: Install git
         run: dnf install -y git
       - uses: actions/checkout@v5
+        with:
+          persist-credentials: false
       - name: Install dependencies
         run: dnf install -y make yamllint
       - name: Run yamllint
