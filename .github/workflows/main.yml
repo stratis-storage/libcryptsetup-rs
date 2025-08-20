@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
           components: rustfmt
@@ -42,7 +42,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
           components: clippy
@@ -60,7 +60,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -96,7 +96,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -123,7 +123,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -226,7 +226,7 @@ jobs:
     steps:
       - name: Install git
         run: dnf install -y git
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - uses: dtolnay/rust-toolchain@master
         with:
           toolchain: ${{ env.TOOLCHAIN }}
@@ -242,7 +242,7 @@ jobs:
     steps:
       - name: Install git
         run: dnf install -y git
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Install dependencies
         run: dnf install -y make yamllint
       - name: Run yamllint
