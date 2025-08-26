@@ -30,7 +30,7 @@ pub struct CryptParamsReencryptRef<'a> {
     #[allow(dead_code)]
     reference: &'a CryptParamsReencrypt,
     #[allow(dead_code)]
-    luks2_params: Box<CryptParamsLuks2Ref<'a>>,
+    luks2_params: Option<Box<CryptParamsLuks2Ref<'a>>>,
     #[allow(dead_code)]
     resilience_cstring: CString,
     #[allow(dead_code)]
@@ -60,7 +60,7 @@ pub struct CryptParamsReencrypt {
     /// Size of the device
     pub device_size: u64,
     /// LUKS2-specific parameters
-    pub luks2: CryptParamsLuks2,
+    pub luks2: Option<CryptParamsLuks2>,
     /// Reencryption flags
     pub flags: CryptReencrypt,
 }
@@ -69,7 +69,10 @@ impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<CryptParamsReencryptRef<'a>, Self::Error> {
-        let mut luks2_params: Box<CryptParamsLuks2Ref<'a>> = Box::new((&self.luks2).try_into()?);
+        let mut luks2_params: Option<Box<CryptParamsLuks2Ref<'a>>> = match self.luks2.as_ref() {
+            Some(l) => Some(Box::new(l.try_into()?)),
+            None => None,
+        };
 
         let resilience_cstring = to_cstring!(self.resilience)?;
         let hash_cstring = to_cstring!(self.hash)?;
@@ -82,7 +85,10 @@ impl<'a> TryInto<CryptParamsReencryptRef<'a>> for &'a CryptParamsReencrypt {
             data_shift: self.data_shift,
             max_hotzone_size: self.max_hotzone_size,
             device_size: self.device_size,
-            luks2: luks2_params.as_ptr().cast(),
+            luks2: luks2_params
+                .as_mut()
+                .map(|l| l.as_ptr().cast())
+                .unwrap_or(ptr::null_mut()),
             flags: self.flags.bits(),
         };
         Ok(CryptParamsReencryptRef {
