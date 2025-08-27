@@ -80,7 +80,7 @@ pub fn test_reencrypt_by_password() {
                         data_shift: 0,
                         max_hotzone_size: 0,
                         device_size: 0,
-                        luks2: CryptParamsLuks2 {
+                        luks2: Some(CryptParamsLuks2 {
                             data_alignment: 0,
                             data_device: None,
                             integrity: None,
@@ -89,7 +89,7 @@ pub fn test_reencrypt_by_password() {
                             label: None,
                             sector_size: size,
                             subsystem: None,
-                        },
+                        }),
                         flags: CryptReencrypt::empty(),
                     },
                 )
