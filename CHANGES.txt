@@ -1,3 +1,34 @@
+libcryptsetup-rs 0.15.0
+=======================
+Recommended Rust toolchain version: 1.92.0
+Recommended development environment: Fedora 42
+
+- Allow passing None as FEC and hash device when formatting as VERITY:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/461
+
+- Add support for LUKS token activation via PIN:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/460
+
+- libcryptsetup-rs-sys: Release version 0.6.1:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/455
+
+- libcryptsetup-rs-sys: Increase bindgen dependency lower bound to 0.72.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/452
+
+- Increase lowest supported version of Rust to 1.82.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/457
+
+- Use std::sync::LazyLock instead of once_cell::Lazy:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/458
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/459
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/456
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/454
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/453
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/451
+
+
 libcryptsetup-rs 0.14.0
 =======================
 Recommended Rust toolchain version: 1.89.0
