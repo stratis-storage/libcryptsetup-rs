@@ -259,6 +259,52 @@ impl<'a> CryptLuks2TokenHandle<'a> {
         )))
         .map(|rc| rc as c_uint)
     }
+
+    /// Activate device or check key using a token and PIN
+    #[cfg(cryptsetup24supported)]
+    pub fn activate_by_token_pin<T>(
+        &mut self,
+        name: Option<&str>,
+        type_: Option<&str>,
+        token: Option<c_uint>,
+        pin: &[u8],
+        usrdata: Option<&mut T>,
+        flags: CryptActivate,
+    ) -> Result<c_uint, LibcryptErr> {
+        let name_cstring_option = match name {
+            Some(n) => Some(to_cstring!(n)?),
+            None => None,
+        };
+        let type_cstring_option = match type_ {
+            Some(t) => Some(to_cstring!(t)?),
+            None => None,
+        };
+        let usrdata_ptr = match usrdata {
+            Some(reference) => (reference as *mut T).cast::<c_void>(),
+            None => ptr::null_mut(),
+        };
+        errno_int_success!(mutex!(libcryptsetup_rs_sys::crypt_activate_by_token_pin(
+            self.reference.as_ptr(),
+            // NOTE: Must keep as_ref to avoid use after free error.
+            name_cstring_option
+                .as_ref()
+                .map(|s| s.as_ptr())
+                .unwrap_or_else(ptr::null),
+            // NOTE: Must keep as_ref to avoid use after free error.
+            type_cstring_option
+                .as_ref()
+                .map(|s| s.as_ptr())
+                .unwrap_or_else(ptr::null),
+            token
+                .map(|t| t as c_int)
+                .unwrap_or(libcryptsetup_rs_sys::CRYPT_ANY_TOKEN),
+            to_byte_ptr!(pin),
+            pin.len(),
+            usrdata_ptr,
+            flags.bits(),
+        )))
+        .map(|rc| rc as c_uint)
+    }
 }
 
 /// Register token handler
