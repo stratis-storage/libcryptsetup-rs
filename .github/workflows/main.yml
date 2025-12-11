@@ -27,7 +27,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
@@ -44,7 +44,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
@@ -64,7 +64,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
@@ -102,7 +102,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
@@ -131,7 +131,7 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
@@ -236,7 +236,7 @@ jobs:
     steps:
       - name: Install git
         run: dnf install -y git
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - uses: dtolnay/rust-toolchain@master
@@ -254,7 +254,7 @@ jobs:
     steps:
       - name: Install git
         run: dnf install -y git
-      - uses: actions/checkout@v5
+      - uses: actions/checkout@v6
         with:
           persist-credentials: false
       - name: Install dependencies
