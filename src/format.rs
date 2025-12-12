@@ -270,9 +270,9 @@ pub struct CryptParamsVerityRef<'a> {
     #[allow(dead_code)]
     data_device_cstring: CString,
     #[allow(dead_code)]
-    hash_device_cstring: CString,
+    hash_device_cstring: Option<CString>,
     #[allow(dead_code)]
-    fec_device_cstring: CString,
+    fec_device_cstring: Option<CString>,
 }
 
 /// Parameters specific to Verity
@@ -282,9 +282,9 @@ pub struct CryptParamsVerity {
     #[allow(missing_docs)]
     pub data_device: PathBuf,
     #[allow(missing_docs)]
-    pub hash_device: PathBuf,
+    pub hash_device: Option<PathBuf>,
     #[allow(missing_docs)]
-    pub fec_device: PathBuf,
+    pub fec_device: Option<PathBuf>,
     #[allow(missing_docs)]
     pub salt: Vec<u8>,
     #[allow(missing_docs)]
@@ -312,8 +312,14 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_params_verity> for CryptParamsV
         Ok(CryptParamsVerity {
             hash_name: from_str_ptr_to_owned!(v.hash_name)?,
             data_device: PathBuf::from(from_str_ptr_to_owned!(v.data_device)?),
-            hash_device: PathBuf::from(from_str_ptr_to_owned!(v.hash_device)?),
-            fec_device: PathBuf::from(from_str_ptr_to_owned!(v.fec_device)?),
+            hash_device: match ptr_to_option!(v.hash_device) {
+                Some(s) => Some(PathBuf::from(from_str_ptr_to_owned!(s)?)),
+                None => None,
+            },
+            fec_device: match ptr_to_option!(v.fec_device) {
+                Some(s) => Some(PathBuf::from(from_str_ptr_to_owned!(s)?)),
+                None => None,
+            },
             salt: Vec::from(unsafe {
                 std::slice::from_raw_parts(v.salt.cast::<u8>(), v.salt_size as usize)
             }),
@@ -335,14 +341,26 @@ impl<'a> TryInto<CryptParamsVerityRef<'a>> for &'a CryptParamsVerity {
     fn try_into(self) -> Result<CryptParamsVerityRef<'a>, Self::Error> {
         let hash_name_cstring = to_cstring!(self.hash_name)?;
         let data_device_cstring = path_to_cstring!(self.data_device)?;
-        let hash_device_cstring = path_to_cstring!(self.hash_device)?;
-        let fec_device_cstring = path_to_cstring!(self.fec_device)?;
+        let hash_device_cstring = match self.hash_device {
+            Some(ref hash_device) => Some(path_to_cstring!(hash_device)?),
+            None => None,
+        };
+        let fec_device_cstring = match self.fec_device {
+            Some(ref fec_device) => Some(path_to_cstring!(fec_device)?),
+            None => None,
+        };
         Ok(CryptParamsVerityRef {
             inner: libcryptsetup_rs_sys::crypt_params_verity {
                 hash_name: hash_name_cstring.as_ptr(),
                 data_device: data_device_cstring.as_ptr(),
-                hash_device: hash_device_cstring.as_ptr(),
-                fec_device: fec_device_cstring.as_ptr(),
+                hash_device: hash_device_cstring
+                    .as_ref()
+                    .map(|hd| hd.as_ptr())
+                    .unwrap_or(ptr::null()),
+                fec_device: fec_device_cstring
+                    .as_ref()
+                    .map(|fd| fd.as_ptr())
+                    .unwrap_or(ptr::null()),
                 salt: self.salt.as_ptr().cast::<libc::c_char>(),
                 salt_size: self.salt.len() as u32,
                 hash_type: self.hash_type,
