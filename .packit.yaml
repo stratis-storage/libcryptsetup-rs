@@ -42,12 +42,16 @@ jobs:
   - job: copr_build
     trigger: pull_request
     identifier: copr_pull
+    additional_repos:
+        - copr://packit/stratis-storage-libcryptsetup-rs-master
     targets:
       - fedora-all
 
   - job: copr_build
     trigger: commit
     identifier: copr_commit
+    additional_repos:
+        - copr://packit/stratis-storage-libcryptsetup-rs-master
     preserve_project: true
     targets:
       - fedora-all
