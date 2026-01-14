@@ -32,8 +32,7 @@ fn generate_bindings(library: &Library, safe_free_is_needed: bool) {
         )
         .header("header.h")
         .size_t_is_usize(true)
-        .clang_macro_fallback()
-        .clang_macro_fallback_build_dir(PathBuf::from(env::var("OUT_DIR").unwrap()));
+        .clang_macro_fallback();
     #[cfg(target_arch = "x86")]
     let builder = builder.blocklist_type("max_align_t");
     let builder_with_safe_free = if safe_free_is_needed {
