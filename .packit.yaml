@@ -1,3 +1,4 @@
+merge_pr_in_ci: false
 upstream_project_url: https://github.com/stratis-storage/libcryptsetup-rs
 
 packages:
