@@ -69,7 +69,7 @@ test-loopback:
 	RUST_BACKTRACE=1 RUST_TEST_THREADS=1 CARGO_TARGET_X86_64_UNKNOWN_LINUX_GNU_RUNNER='sudo -E' cargo test --features=mutex -- --ignored --skip test_mutex_poisoning_panic
 
 yamllint:
-	yamllint --strict .github/workflows/*.yml
+	yamllint --strict .github/workflows/*.yml .packit.yaml .yamllint.yaml
 
 .PHONY:
 	audit
