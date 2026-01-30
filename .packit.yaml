@@ -1,3 +1,5 @@
+---
+
 upstream_project_url: https://github.com/stratis-storage/libcryptsetup-rs
 
 packages:
@@ -43,7 +45,7 @@ jobs:
     trigger: pull_request
     identifier: copr_pull
     additional_repos:
-        - copr://packit/stratis-storage-libcryptsetup-rs-master
+      - copr://packit/stratis-storage-libcryptsetup-rs-master
     targets:
       - fedora-all
 
@@ -51,7 +53,7 @@ jobs:
     trigger: commit
     identifier: copr_commit
     additional_repos:
-        - copr://packit/stratis-storage-libcryptsetup-rs-master
+      - copr://packit/stratis-storage-libcryptsetup-rs-master
     preserve_project: true
     targets:
       - fedora-all
