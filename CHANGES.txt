@@ -1,3 +1,17 @@
+libcryptsetup-rs 0.15.1
+=======================
+Recommended Rust toolchain version: 1.93.0
+Recommended development environment: Fedora 42
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/468
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/467
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/466
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/465
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/464
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/449
+
+
 libcryptsetup-rs 0.15.0
 =======================
 Recommended Rust toolchain version: 1.92.0
