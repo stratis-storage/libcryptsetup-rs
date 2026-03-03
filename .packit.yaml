@@ -57,6 +57,7 @@ jobs:
     preserve_project: true
     targets:
       - fedora-all
+      - fedora-all-ppc64le
 
 notifications:
   pull_request:
