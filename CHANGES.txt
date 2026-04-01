@@ -1,9 +1,17 @@
 libcryptsetup-rs 0.15.1
 =======================
-Recommended Rust toolchain version: 1.93.0
+Recommended Rust toolchain version: 1.94.0
 Recommended development environment: Fedora 42
 
+- Increase rand dependency lower bound to 0.10.0:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/470
+
+- Increase nix dependency lower bound to 0.31.1:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/469
+
 - Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/472
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/471
   https://github.com/stratis-storage/libcryptsetup-rs/pull/468
   https://github.com/stratis-storage/libcryptsetup-rs/pull/467
   https://github.com/stratis-storage/libcryptsetup-rs/pull/466
