@@ -18,13 +18,16 @@ fn main() {
         Ok(l) => Version::parse(&l.version).unwrap(),
         Err(e) => panic!("Bindings require at least cryptsetup-2.2.0: {e}"),
     };
-    for ver in SUPPORTED_VERSIONS.iter().take_while(|ver_string| {
-        let iter_version = Version::parse(ver_string).expect("Could not parse version");
-        version >= iter_version
-    }) {
-        println!(
-            "cargo:rustc-cfg=cryptsetup{}supported",
-            ver.split('.').take(2).collect::<Vec<_>>().join("")
+    for ver_string in SUPPORTED_VERSIONS.iter() {
+        let version_cfg = format!(
+            "cryptsetup{}supported",
+            ver_string.split('.').take(2).collect::<Vec<_>>().join("")
         );
+        println!("cargo::rustc-check-cfg=cfg({version_cfg})");
+
+        let iter_version = Version::parse(ver_string).expect("Could not parse version");
+        if version >= iter_version {
+            println!("cargo:rustc-cfg={version_cfg}");
+        }
     }
 }
