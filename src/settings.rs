@@ -2,7 +2,7 @@
 // License, v. 2.0. If a copy of the MPL was not distributed with this
 // file, You can obtain one at http://mozilla.org/MPL/2.0/.
 
-use std::{ffi::CString, marker::PhantomData, os::raw::c_int};
+use std::{ffi::CString, marker::PhantomData, os::raw::c_int, ptr};
 
 use libcryptsetup_rs_sys::crypt_pbkdf_type;
 
@@ -20,7 +20,7 @@ pub struct CryptPbkdfType {
     #[allow(missing_docs)]
     pub type_: CryptKdf,
     #[allow(missing_docs)]
-    pub hash: String,
+    pub hash: Option<String>,
     #[allow(missing_docs)]
     pub time_ms: u32,
     #[allow(missing_docs)]
@@ -36,18 +36,8 @@ pub struct CryptPbkdfType {
 impl TryFrom<libcryptsetup_rs_sys::crypt_pbkdf_type> for CryptPbkdfType {
     type Error = LibcryptErr;
 
-    fn try_from(
-        type_: libcryptsetup_rs_sys::crypt_pbkdf_type,
-    ) -> Result<CryptPbkdfType, LibcryptErr> {
-        Ok(CryptPbkdfType {
-            type_: CryptKdf::from_ptr(type_.type_)?,
-            hash: String::from(from_str_ptr!(type_.hash)?),
-            time_ms: type_.time_ms,
-            iterations: type_.iterations,
-            max_memory_kb: type_.max_memory_kb,
-            parallel_threads: type_.parallel_threads,
-            flags: CryptPbkdf::from_bits(type_.flags).ok_or(LibcryptErr::InvalidConversion)?,
-        })
+    fn try_from(v: libcryptsetup_rs_sys::crypt_pbkdf_type) -> Result<Self, Self::Error> {
+        CryptPbkdfType::try_from(&v)
     }
 }
 
@@ -55,9 +45,12 @@ impl<'a> TryFrom<&'a libcryptsetup_rs_sys::crypt_pbkdf_type> for CryptPbkdfType 
     type Error = LibcryptErr;
 
     fn try_from(v: &'a libcryptsetup_rs_sys::crypt_pbkdf_type) -> Result<Self, Self::Error> {
+        let hash = ptr_to_option!(v.hash)
+            .map(|h| Ok(from_str_ptr!(h)?.to_string()))
+            .transpose()?;
         Ok(CryptPbkdfType {
             type_: CryptKdf::from_ptr(v.type_)?,
-            hash: from_str_ptr!(v.hash)?.to_string(),
+            hash,
             time_ms: v.time_ms,
             iterations: v.iterations,
             max_memory_kb: v.max_memory_kb,
@@ -73,7 +66,7 @@ pub struct CryptPbkdfTypeRef<'a> {
     /// Field containing a `crypt_pbkdf_type` that contains pointers valid for the supplied struct lifetime
     pub inner: crypt_pbkdf_type,
     #[allow(dead_code)]
-    hash_cstring: CString,
+    hash_cstring: Option<CString>,
     phantomdata: PhantomData<&'a ()>,
 }
 
@@ -81,10 +74,13 @@ impl<'a> TryInto<CryptPbkdfTypeRef<'a>> for &'a CryptPbkdfType {
     type Error = LibcryptErr;
 
     fn try_into(self) -> Result<CryptPbkdfTypeRef<'a>, Self::Error> {
-        let hash_cstring = CString::new(self.hash.as_bytes()).map_err(LibcryptErr::NullError)?;
+        let hash_cstring = self.hash.as_ref().map(|h| to_cstring!(h)).transpose()?;
         let inner = libcryptsetup_rs_sys::crypt_pbkdf_type {
             type_: self.type_.as_ptr(),
-            hash: hash_cstring.as_ptr(),
+            hash: hash_cstring
+                .as_ref()
+                .map(|c| c.as_ptr())
+                .unwrap_or(ptr::null()),
             time_ms: self.time_ms,
             iterations: self.iterations,
             max_memory_kb: self.max_memory_kb,
