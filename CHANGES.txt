@@ -10,6 +10,7 @@ Recommended development environment: Fedora 42
   https://github.com/stratis-storage/libcryptsetup-rs/pull/469
 
 - Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/474
   https://github.com/stratis-storage/libcryptsetup-rs/pull/472
   https://github.com/stratis-storage/libcryptsetup-rs/pull/471
   https://github.com/stratis-storage/libcryptsetup-rs/pull/468
