@@ -1,7 +1,6 @@
 ---
 name: libcryptsetup nightly
 
-# yamllint disable-line rule:truthy
 on:
   schedule:
     - cron: 10 3 * * *
