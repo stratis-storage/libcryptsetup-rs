@@ -147,6 +147,41 @@ impl<'a> CryptActivationHandle<'a> {
         .map(|k| k as c_uint)
     }
 
+    
+    /// Activate device by volume key
+    pub fn activate_by_signed_key(
+        &mut self,
+        name: Option<&str>,
+        volume_key: Option<&[u8]>,
+        signature: Option<&[u8]>,
+        flags: CryptActivate,
+    ) -> Result<(), LibcryptErr> {
+        let name_cstring_option = match name {
+            Some(n) => Some(to_cstring!(n)?),
+            None => None,
+        };
+        let (volume_key_ptr, volume_key_len) = match volume_key {
+            Some(vk) => (to_byte_ptr!(vk), vk.len()),
+            None => (ptr::null(), 0),
+        };
+        let (signature_ptr, signature_len) = match signature {
+            Some(sig) => (to_byte_ptr!(sig), sig.len()),
+            None => (ptr::null(), 0),
+        };
+        errno!(mutex!(libcryptsetup_rs_sys::crypt_activate_by_signed_key(
+            self.reference.as_ptr(),
+            match name_cstring_option {
+                Some(ref cs) => cs.as_ptr(),
+                None => ptr::null_mut(),
+            },
+            volume_key_ptr,
+            volume_key_len,
+            signature_ptr,
+            signature_len,
+            flags.bits(),
+        )))
+    }
+
     /// Deactivate crypt device
     pub fn deactivate(&mut self, name: &str, flags: CryptDeactivate) -> Result<(), LibcryptErr> {
         let name_cstring = to_cstring!(name)?;
