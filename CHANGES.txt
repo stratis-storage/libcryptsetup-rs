@@ -1,3 +1,18 @@
+libcryptsetup-rs 0.16.0
+=======================
+Recommended Rust toolchain version: 1.95.0
+Recommended development environment: Fedora 43
+
+- Make PBKDF hash field optional:
+  https://github.com/stratis-storage/libcryptsetup-rs/issues/473
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/477
+
+- Tidies and Maintenance:
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/479
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/478
+  https://github.com/stratis-storage/libcryptsetup-rs/pull/476
+
+
 libcryptsetup-rs 0.15.1
 =======================
 Recommended Rust toolchain version: 1.94.0
