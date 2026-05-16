@@ -147,7 +147,6 @@ impl<'a> CryptActivationHandle<'a> {
         .map(|k| k as c_uint)
     }
 
-    
     /// Activate device by volume key
     pub fn activate_by_signed_key(
         &mut self,
