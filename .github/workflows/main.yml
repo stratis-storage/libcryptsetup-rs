@@ -21,7 +21,6 @@ jobs:
   format:
     env:
       TASK: fmt-ci
-      TOOLCHAIN: 1.95.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-22.04
     steps:
       - name: Install git
@@ -29,16 +28,14 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@master
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: rustfmt
-          toolchain: ${{ env.TOOLCHAIN }}
-      - name: Test format on ${{ env.TOOLCHAIN }} toolchain
+      - name: Test format on CURRENT DEVELOPMENT RUST TOOLCHAIN
         run: make -f Makefile $TASK
   lint:
     env:
       TASK: clippy
-      TOOLCHAIN: 1.95.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-22.04
     steps:
       - name: Install git
@@ -46,10 +43,9 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@master
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           components: clippy
-          toolchain: ${{ env.TOOLCHAIN }}
       - name: Install dependencies
         run: >
           sudo apt-get install libcryptsetup-dev
@@ -58,7 +54,6 @@ jobs:
   typos:
     env:
       TASK: check-typos
-      TOOLCHAIN: 1.95.0  # CURRENT DEVELOPMENT RUST TOOLCHAIN
     runs-on: ubuntu-22.04
     steps:
       - name: Install git
@@ -66,9 +61,7 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ env.TOOLCHAIN }}
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
       - uses: baptiste0928/cargo-install@v3
         with:
           crate: typos-cli
@@ -76,10 +69,7 @@ jobs:
         run: make -f Makefile $TASK
 
 
-  # MANDATORY TESTING ON STABLE
   stable:
-    env:
-      TOOLCHAIN: stable
     strategy:
       matrix:
         include:
@@ -104,19 +94,14 @@ jobs:
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@master
-        with:
-          toolchain: ${{ env.TOOLCHAIN }}
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Install dependencies
         run: >
           sudo apt-get install ${{ matrix.dependencies }}
       - name: Test ${{ matrix.task }} on ${{ env.TOOLCHAIN }} toolchain
         run: ${{ matrix.task }}
 
-  # MANDATORY TESTING USING LOWEST SUPPORTED TOOLCHAIN
   lowest_supported:
-    env:
-      TOOLCHAIN: 1.85.0  # LOWEST SUPPORTED RUST TOOLCHAIN
     strategy:
       matrix:
         include:
@@ -130,23 +115,27 @@ jobs:
     steps:
       - name: Install git
         run: sudo apt-get install git
+      - name: Install toml-cli
+        run: pip install --user toml-cli
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@master
+      - name: Get package MSRV
+        id: msrv
+        run: |
+          PATH=${PATH}:/github/home/.local/bin MSRV=$(toml get --toml-path Cargo.toml "workspace.package.rust-version")
+          echo "MSRV=$MSRV" >> "$GITHUB_OUTPUT"
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: ${{ env.TOOLCHAIN }}
+          toolchain: ${{ steps.msrv.outputs.MSRV }}
       - name: Install dependencies
         run: >
           sudo apt-get install ${{ matrix.dependencies }}
-      - name: Test ${{ matrix.task }} on ${{ env.TOOLCHAIN }} toolchain
+      - name: Test ${{ matrix.task }} on LOWEST SUPPORTED RUST TOOLCHAIN
         run: ${{ matrix.task }}
 
   # MANDATORY TESTING ON FEDORA
   fedora:
-    env:
-      # Lowest supported
-      TOOLCHAIN: 1.85.0  # LOWEST SUPPORTED RUST TOOLCHAIN
     strategy:
       matrix:
         include:
@@ -233,14 +222,19 @@ jobs:
       image: fedora:${{ matrix.container }}
       options: --privileged -v /dev:/dev
     steps:
-      - name: Install git
+      - name: Install git toml-cli
         run: dnf install -y git
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
-      - uses: dtolnay/rust-toolchain@master
+      - name: Get package MSRV
+        id: msrv
+        run: |
+          MSRV=$(toml get --toml-path Cargo.toml "workspace.package.rust-version")
+          echo "MSRV=$MSRV" >> "$GITHUB_OUTPUT"
+      - uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: ${{ env.TOOLCHAIN }}
+          toolchain: ${{ steps.msrv.outputs.MSRV }}
       - name: Install dependencies
         run: dnf install -y make gcc clang-devel ${{ matrix.dependencies }}
       - name: Test ${{ matrix.task }} on ${{ env.TOOLCHAIN }} toolchain
