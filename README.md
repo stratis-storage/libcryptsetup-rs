@@ -20,6 +20,11 @@ contains a pointer is *not* safe to send across threads. Providing an `unsafe
 impl Send {}` for any data structure provided by libcryptsetup-rs that is not `Send`
 may result in undefined behavior.
 
+There is an active effort as of 2026 to make crypsetup and libdevmapper (the
+thread-unsafe dependency) thread-safe. Once this is merged and released, we will
+be able to remove this workaround for newer versions. However on older versions,
+this restriction will remain in place.
+
 ### Building
 
 The libcryptsetup bindings require some dependencies outside of cargo to build
