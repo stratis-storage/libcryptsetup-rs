@@ -196,6 +196,27 @@ jobs:
       image: fedora:${{ matrix.container }}
       options: --privileged -v /dev:/dev
     steps:
+      - name: Set up Fedora Legacy Repos for very old releases
+        if: matrix.container == 33
+        run: |
+          rm -rf /etc/yum.repos.d/*
+
+          cat << 'EOF' > /etc/yum.repos.d/fedora-archive.repo
+          [fedora-archive]
+          name=Fedora ${{ matrix.container }} Archive - Base
+          baseurl=https://archives.fedoraproject.org/pub/archive/fedora/linux/releases/33/Everything/$basearch/os/
+          enabled=1
+          gpgcheck=0
+
+          [fedora-updates-archive]
+          name=Fedora ${{ matrix.container }} Archive - Updates
+          baseurl=https://archives.fedoraproject.org/pub/archive/fedora/linux/updates/33/Everything/$basearch/
+          enabled=1
+          gpgcheck=0
+          EOF
+
+          dnf clean all
+          dnf makecache
       - name: Install git
         run: dnf install -y git jq
       - uses: actions/checkout@v6
