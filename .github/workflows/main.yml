@@ -197,7 +197,7 @@ jobs:
       options: --privileged -v /dev:/dev
     steps:
       - name: Install git
-        run: dnf install -y git jq
+        run: dnf install -y --disablerepo=*modular* git jq
       - uses: actions/checkout@v6
         with:
           persist-credentials: false
